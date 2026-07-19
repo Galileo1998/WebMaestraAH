@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organigrama Institucional V5 (PDF Carta) - Acción Honduras</title>
+    <style>
+        /* Tipografía y Resets basados en Manual de Marca AH */
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-blue: #466094;
+            --secondary-teal: #34859b;
+            --tertiary-light: #b4d6e0;
+            --bg-color: #f8f9fc;
+            --font-family: 'Rubik', 'Arial', sans-serif;
+        }
+
+        body {
+            margin: 0; padding: 0; font-family: var(--font-family);
+            display: flex; height: 100vh; overflow: hidden;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#b4d6e0 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        #sidebar {
+            width: 340px; background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px); box-shadow: 4px 0 20px rgba(70, 96, 148, 0.15);
+            display: flex; flex-direction: column; z-index: 10; border-right: 1px solid #e1e8f0;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-teal));
+            color: white; padding: 25px 20px; text-align: center;
+        }
+
+        .sidebar-header h2 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; }
+        .sidebar-header p { font-size: 0.85rem; margin: 8px 0 0 0; color: #e0f0f5; }
+
+        .panel { padding: 25px; display: none; overflow-y: auto; flex: 1; }
+        .panel.active { display: block; }
+        .panel-title { font-weight: 700; margin-bottom: 20px; color: var(--primary-blue); font-size: 1.1rem; border-bottom: 2px solid var(--tertiary-light); padding-bottom: 10px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 8px; color: #555; font-weight: 500; }
+        .form-group input[type="text"], .form-group select {
+            width: 100%; padding: 10px 12px; border: 1px solid #cdd6e5; border-radius: 6px; box-sizing: border-box;
+            font-family: var(--font-family); font-size: 0.9rem; transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--secondary-teal); box-shadow: 0 0 0 3px rgba(52, 133, 155, 0.1); }
+
+        .btn {
+            display: block; width: 100%; padding: 12px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: 500; text-align: center; margin-bottom: 12px; transition: all 0.3s ease; font-size: 0.95rem;
+        }
+        .btn-primary { background-color: var(--primary-blue); color: white; box-shadow: 0 4px 10px rgba(70, 96, 148, 0.3); }
+        .btn-primary:hover { background-color: #354a75; transform: translateY(-1px); }
+        .btn-secondary { background-color: var(--secondary-teal); color: white; box-shadow: 0 4px 10px rgba(52, 133, 155, 0.3); }
+        .btn-secondary:hover { background-color: #276778; transform: translateY(-1px); }
+        .btn-danger { background-color: #fff; color: #e74c3c; border: 1px solid #e74c3c; }
+        .btn-danger:hover { background-color: #e74c3c; color: #fff; }
+        .btn-ghost { background-color: #f1f5f9; color: #475569; }
+        .btn-ghost:hover { background-color: #e2e8f0; }
+        .btn-success { background-color: #2e8b57; color: white; margin-top: 10px; }
+        .btn-success:hover { background-color: #236b43; }
+        .btn-pdf { background-color: #8e44ad; color: white; margin-top: 10px; box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3); }
+        .btn-pdf:hover { background-color: #732d91; transform: translateY(-1px); }
+
+        .help-box { background: #e0f0f5; padding: 12px; border-radius: 6px; font-size: 0.8rem; color: #276778; margin-bottom: 20px; line-height: 1.4; border-left: 4px solid var(--secondary-teal); }
+
+        #workspace { flex: 1; position: relative; overflow: hidden; cursor: grab; }
+        #workspace:active { cursor: grabbing; }
+        
+        #nodes-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; transform-origin: 0 0; }
+        
+        /* Estilos de Nodo */
+        .node {
+            position: absolute; color: white; border-radius: 8px; box-sizing: border-box;
+            font-size: 0.95rem; font-weight: 500; text-align: center; 
+            cursor: grab; pointer-events: auto; user-select: none; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s, outline 0.2s; white-space: pre-wrap; line-height: 1.4;
+            border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center; padding: 10px;
+            overflow: hidden;
+        }
+        .node:hover { box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.2); z-index: 50; }
+        .node.selected { outline: 3px solid #ffb300; outline-offset: 3px; z-index: 100; }
+
+        .node.voluntario { background-color: #ffffff !important; color: var(--secondary-teal) !important; border: 2px dashed var(--secondary-teal) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .node.barra-h { min-width: 20px; height: 12px !important; padding: 0; color: transparent !important; border-radius: 6px; box-shadow: none; border: none; }
+        .node.barra-v { width: 12px !important; min-width: 12px !important; padding: 0; color: transparent !important; border-radius: 6px; box-shadow: none; border: none; }
+        .node.barra-h span, .node.barra-v span { display: none; }
+
+        .resizer {
+            position: absolute; right: 0; bottom: 0; width: 15px; height: 15px;
+            cursor: se-resize; pointer-events: auto;
+            background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.6) 50%);
+            border-bottom-right-radius: 6px; opacity: 0; transition: opacity 0.2s;
+        }
+        .node.voluntario .resizer { background: linear-gradient(135deg, transparent 50%, var(--secondary-teal) 50%); }
+        .node:hover .resizer, .node.selected .resizer { opacity: 1; }
+
+        #svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; transform-origin: 0 0; }
+        .link-path { pointer-events: auto; cursor: pointer; fill: none; transition: stroke 0.2s, stroke-width 0.2s; stroke-linejoin: round; }
+        .link-path:hover { stroke: #ffb300 !important; stroke-width: 4px; }
+        .link-hitbox { pointer-events: auto; cursor: pointer; fill: none; stroke: transparent; stroke-width: 20px; }
+
+        .curve-handle { pointer-events: auto; stroke: #fff; stroke-width: 2px; transition: r 0.2s; }
+        .curve-handle:hover { r: 8; }
+        .curve-handle.center { fill: #ffb300; cursor: move; }
+        .curve-handle.anchor { fill: var(--primary-blue); cursor: crosshair; }
+
+        .ghost-line { pointer-events: none; fill: none; stroke: var(--secondary-teal); stroke-width: 3px; stroke-dasharray: 5,5; opacity: 0.6; }
+        .selection-box { position: absolute; border: 2px dashed var(--primary-blue); background: rgba(70, 96, 148, 0.1); pointer-events: none; z-index: 9999; display: none; }
+
+        body.linking-mode #workspace { cursor: crosshair; }
+        body.linking-mode .node { cursor: crosshair; outline: 2px dashed var(--secondary-teal); outline-offset: 4px; }
+        body.linking-mode .node:hover { outline: 3px solid var(--secondary-teal); }
+
+        /* --- ESTILOS DE IMPRESIÓN (PDF CARTA) --- */
+        @media print {
+            @page { size: letter landscape; margin: 5mm; }
+            body { 
+                background: white !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            #sidebar { display: none !important; }
+            #workspace { 
+                background: white !important; 
+                width: 100vw !important; 
+                height: 100vh !important; 
+                overflow: hidden !important; 
+                position: absolute; left: 0; top: 0; 
+            }
+            .resizer, .curve-handle, .selection-box, .ghost-line { display: none !important; }
+            .node { box-shadow: none !important; border: 1px solid rgba(0,0,0,0.1) !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h2>Acción Honduras</h2>
+            <p>Editor Estructural V5</p>
+        </div>
+
+        <div class="panel active" id="panel-general">
+            <div class="panel-title">Herramientas</div>
+            <button class="btn btn-primary" onclick="addNode()">+ Nuevo Departamento</button>
+            <button class="btn btn-pdf" onclick="preparePDF()">🖨️ Exportar a PDF (Carta)</button>
+            
+            <div style="border-top: 1px solid #ccc; margin: 20px 0; padding-top: 15px;">
+                <label style="font-size:0.85rem; color:#555; font-weight:bold;">Respaldos Seguros:</label>
+                <button class="btn btn-success" onclick="exportJSON()">💾 Guardar en mi PC</button>
+                <input type="file" id="file-import" style="display: none;" accept=".json" onchange="importJSON(event)">
+                <button class="btn btn-ghost" onclick="document.getElementById('file-import').click()">📂 Cargar desde mi PC</button>
+            </div>
+            <div style="border-top: 1px solid #ccc; margin: 20px 0; padding-top: 15px;">
+                <button class="btn btn-secondary" onclick="resetToTemplate()">Recargar Plantilla Original</button>
+                <button class="btn btn-danger" onclick="clearAll()">Vaciar Lienzo</button>
+            </div>
+        </div>
+
+        <div class="panel" id="panel-node">
+            <div class="panel-title" id="node-panel-title">Edición de Cargo</div>
+            <div id="single-node-editor">
+                <div class="form-group">
+                    <label>Tipo de Caja:</label>
+                    <select id="node-type" onchange="updateNode()">
+                        <option value="standard">Rectángulo con Texto</option>
+                        <option value="barra-h">Barra de Conexión (Horizontal)</option>
+                        <option value="barra-v">Barra de Conexión (Vertical)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="fg-text">
+                    <label>Nombre del Cargo / Área:</label>
+                    <input type="text" id="node-text" oninput="updateNode()">
+                </div>
+                <div class="form-group">
+                    <label>Nivel Jerárquico (Color):</label>
+                    <select id="node-color" onchange="updateNode()">
+                        <option value="#466094">Directivo (Azul Principal)</option>
+                        <option value="#34859b">Coordinación (Verde Azulado)</option>
+                        <option value="#b4d6e0">Técnico/Operativo (Celeste)</option>
+                        <option value="voluntario">Voluntariado (Blanco/Punteado)</option>
+                    </select>
+                </div>
+                <button class="btn btn-secondary" onclick="startLinking()">Conectar (Arrastrar Línea)</button>
+            </div>
+            <div id="multi-node-editor" style="display: none; text-align: center; margin-bottom: 20px;">
+                <b style="color: var(--primary-blue);" id="multi-count">Varios seleccionados</b>
+                <p style="font-size: 0.85rem; color: #666;">Se moverán en bloque.</p>
+            </div>
+            <button class="btn btn-danger" onclick="deleteSelectedNodes()">Eliminar Selección</button>
+            <button class="btn btn-ghost" onclick="deselectAll()">Volver al menú</button>
+        </div>
+
+        <div class="panel" id="panel-line">
+            <div class="panel-title">Edición de Conexión</div>
+            <div class="help-box">
+                💡 <b>Puntos de Conexión Libres:</b> Arrastra los <b>cuadros azules</b> en los extremos de la línea seleccionada para anclarla a cualquier lado de la caja.
+            </div>
+            <div class="form-group">
+                <label>Estilo de Línea:</label>
+                <select id="line-style" onchange="updateLine()">
+                    <option value="solid">Línea Continua (Dependencia)</option>
+                    <option value="dashed">Línea Discontinua (Coordinación)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Flujo (Flechas):</label>
+                <select id="line-arrow" onchange="updateLine()">
+                    <option value="end">Unidireccional (Abajo/Destino)</option>
+                    <option value="both">Bidireccional</option>
+                    <option value="none">Sin flechas</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" onclick="resetLineCurve()">Centrar líneas y anclajes</button>
+            <button class="btn btn-danger" onclick="deleteSelectedLine()">Eliminar conexión</button>
+            <button class="btn btn-ghost" onclick="deselectAll()">Volver al menú</button>
+        </div>
+    </div>
+
+    <div id="workspace" onmousedown="startAction(event)" onmousemove="handleMouseMove(event)" onmouseup="handleMouseUp()" onmouseleave="handleMouseUp()" onwheel="zoom(event)">
+        <svg id="svg-layer">
+            <defs>
+                <marker id="arrow-end" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="5" markerHeight="5" orient="auto">
+                    <path d="M0,-5 L10,0 L0,5" fill="#466094"></path>
+                </marker>
+                <marker id="arrow-start" viewBox="0 -5 10 10" refX="2" refY="0" markerWidth="5" markerHeight="5" orient="auto">
+                    <path d="M10,-5 L0,0 L10,5" fill="#466094"></path>
+                </marker>
+                <marker id="arrow-ghost" viewBox="0 -5 10 10" refX="8" refY="0" markerWidth="5" markerHeight="5" orient="auto">
+                    <path d="M0,-5 L10,0 L0,5" fill="#34859b"></path>
+                </marker>
+            </defs>
+            <g id="links-group"></g>
+            <path id="ghost-link" class="ghost-line" marker-end="url(#arrow-ghost)" style="display: none;"></path>
+        </svg>
+        <div id="nodes-layer"></div>
+        <div id="selection-box" class="selection-box"></div>
+    </div>
+
+    <script>
+        const templateData = {
+            nodes: [
+                { id: 'n1', text: "Asamblea\nJunta Directiva", type: 'standard', x: 450, y: 50, w: 200, h: 60, color: "#466094" },
+                { id: 'n2', text: "Director Ejecutivo", type: 'standard', x: 450, y: 150, w: 200, h: 50, color: "#466094" },
+                { id: 'n3', text: "Coordinador de\nProgramas", type: 'standard', x: 100, y: 280, w: 180, h: 60, color: "#34859b" },
+                { id: 'n4', text: "Oficial de\nMonitoreo", type: 'standard', x: 310, y: 280, w: 160, h: 60, color: "#34859b" },
+                { id: 'n5', text: "Oficial de\nPatrocinio", type: 'standard', x: 500, y: 280, w: 160, h: 60, color: "#34859b" },
+                { id: 'n6', text: "Oficial Administrativo\n/ RR.HH", type: 'standard', x: 690, y: 280, w: 190, h: 60, color: "#34859b" },
+                { id: 'n7', text: "Contadora", type: 'standard', x: 950, y: 240, w: 160, h: 40, color: "#b4d6e0" },
+                { id: 'n8', text: "Asistente\nadministrativo", type: 'standard', x: 950, y: 310, w: 160, h: 50, color: "#b4d6e0" },
+                { id: 'b_prog', text: "", type: 'barra-h', x: 190, y: 380, w: 550, h: 12, color: "#34859b" },
+                { id: 'p1', text: "CRECER", type: 'standard', x: 100, y: 430, w: 180, h: 50, color: "#34859b" },
+                { id: 'p2', text: "REDES", type: 'standard', x: 420, y: 430, w: 180, h: 50, color: "#34859b" },
+                { id: 'p3', text: "Tejiendo mi Futuro", type: 'standard', x: 740, y: 430, w: 180, h: 50, color: "#34859b" },
+                { id: 'l1', text: "Líder de CRECER", type: 'standard', x: 100, y: 530, w: 180, h: 50, color: "#b4d6e0" },
+                { id: 'l2', text: "Líder de REDES", type: 'standard', x: 420, y: 530, w: 180, h: 50, color: "#b4d6e0" },
+                { id: 'l3', text: "Líder de Tejiendo mi\nFuturo", type: 'standard', x: 740, y: 530, w: 180, h: 60, color: "#b4d6e0" },
+                { id: 'c1', text: "3 Técnicos integrales", type: 'standard', x: -10, y: 640, w: 180, h: 50, color: "#b4d6e0" },
+                { id: 'c2', text: "2 Técnicos voluntarios", type: 'standard', x: 200, y: 640, w: 180, h: 50, color: "voluntario" },
+                { id: 'c3', text: "Red de jardineras\n(Preescolares) (135)", type: 'standard', x: -10, y: 730, w: 180, h: 60, color: "#b4d6e0" },
+                { id: 'c4', text: "Red de Voluntarias\ncomunitarias (254)", type: 'standard', x: 200, y: 730, w: 200, h: 60, color: "voluntario" },
+                { id: 'c5', text: "Técnicos en salud - CIS y\nUAPS (34)", type: 'standard', x: 90, y: 830, w: 220, h: 60, color: "#b4d6e0" },
+                { id: 'r1', text: "4 Técnicos integrales", type: 'standard', x: 310, y: 640, w: 180, h: 50, color: "#b4d6e0" },
+                { id: 'r2', text: "3 Técnicos Voluntarios", type: 'standard', x: 520, y: 640, w: 180, h: 50, color: "voluntario" },
+                { id: 'r3', text: "400 Docentes de Educación\nBásica y Media", type: 'standard', x: 410, y: 730, w: 220, h: 60, color: "#b4d6e0" },
+                { id: 't1', text: "2 Técnicos integral", type: 'standard', x: 710, y: 640, w: 170, h: 50, color: "#b4d6e0" },
+                { id: 't2', text: "1 Técnico voluntario", type: 'standard', x: 900, y: 640, w: 170, h: 50, color: "voluntario" },
+                { id: 't3', text: "Red de Voluntarias\ncomunitarias (86)", type: 'standard', x: 800, y: 730, w: 180, h: 60, color: "voluntario" },
+                { id: 'u1', text: "Unidad de Desarrollo\nComunitario", type: 'standard', x: 600, y: 850, w: 180, h: 60, color: "#34859b" }
+            ],
+            links: [
+                { id: 'x1', from: 'n1', to: 'n2', style: 'solid', arrow: 'both' },
+                { id: 'x2', from: 'n2', to: 'n3', style: 'solid', arrow: 'end', customCy: 230 },
+                { id: 'x3', from: 'n2', to: 'n4', style: 'solid', arrow: 'end', customCy: 230 },
+                { id: 'x4', from: 'n2', to: 'n5', style: 'solid', arrow: 'end', customCy: 230 },
+                { id: 'x5', from: 'n2', to: 'n6', style: 'solid', arrow: 'end', customCy: 230 },
+                { id: 'x6', from: 'n6', to: 'n7', style: 'solid', arrow: 'end', pFrom: 'R', pTo: 'L', oFrom: 0.25 },
+                { id: 'x7', from: 'n6', to: 'n8', style: 'solid', arrow: 'end', pFrom: 'R', pTo: 'L', oFrom: 0.75 },
+                { id: 'x8', from: 'n3', to: 'b_prog', style: 'solid', arrow: 'none' },
+                { id: 'x9', from: 'b_prog', to: 'p1', style: 'solid', arrow: 'end' },
+                { id: 'x10', from: 'b_prog', to: 'p2', style: 'solid', arrow: 'end' },
+                { id: 'x11', from: 'b_prog', to: 'p3', style: 'solid', arrow: 'end' },
+                { id: 'x12', from: 'p1', to: 'l1', style: 'solid', arrow: 'end' },
+                { id: 'x13', from: 'p2', to: 'l2', style: 'solid', arrow: 'end' },
+                { id: 'x14', from: 'p3', to: 'l3', style: 'solid', arrow: 'end' }
+            ],
+            panX: 50, panY: 50, scale: 0.8
+        };
+
+        let state = { nodes: [], links: [], panX: 50, panY: 50, scale: 0.8 };
+        let selectedNodes = new Set(); let selectedLinkId = null;
+        let isDraggingNodes = false; let dragLastX = 0; let dragLastY = 0;
+        let isPanning = false; let startPanX = 0; let startPanY = 0;
+        let isLinkingMode = false; let linkingStartNodeId = null;
+        let isResizing = false; let resizeNodeId = null;
+        let isBoxSelecting = false; let boxStartX = 0; let boxStartY = 0;
+        
+        let isDraggingCurve = false; let activeLinkForCurve = null; let curveDragType = null;
+        let isDraggingAnchor = false; let anchorData = { linkId: null, type: null };
+
+        const nodesLayer = document.getElementById('nodes-layer');
+        const linksGroup = document.getElementById('links-group');
+        const svgLayer = document.getElementById('svg-layer');
+        const ghostLink = document.getElementById('ghost-link');
+        const selectionBox = document.getElementById('selection-box');
+
+        function init() {
+            const saved = localStorage.getItem('ah_orgchart_v5');
+            if (saved) {
+                state = JSON.parse(saved);
+                if(!state.scale) state.scale = 0.8;
+                state.nodes.forEach(n => { if(!n.type) n.type = 'standard'; });
+            } else { state = JSON.parse(JSON.stringify(templateData)); }
+            render(); updateTransform();
+        }
+
+        function saveData() { localStorage.setItem('ah_orgchart_v5', JSON.stringify(state)); }
+        function exportJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "organigrama_ah.json"); dl.click();
+        }
+        function importJSON(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imp = JSON.parse(e.target.result);
+                    if(imp.nodes && imp.links) { state = imp; saveData(); deselectAll(); render(); updateTransform(); alert("¡Cargado con éxito!"); } 
+                    else { alert("Formato incorrecto."); }
+                } catch(err) { alert("Error al leer JSON."); }
+            }; reader.readAsText(file); event.target.value = '';
+        }
+
+        function resetToTemplate() {
+            if(confirm("Esto reemplazará tu trabajo actual con la plantilla inicial. ¿Continuar?")) {
+                state = JSON.parse(JSON.stringify(templateData)); deselectAll(); saveData(); render(); updateTransform();
+            }
+        }
+        function clearAll() {
+            if(confirm("¿Vaciar todo el lienzo?")) { state.nodes = []; state.links = []; deselectAll(); saveData(); render(); }
+        }
+
+        // --- SISTEMA AUTO-FIT Y PDF ---
+        function preparePDF() {
+            deselectAll();
+            
+            if (state.nodes.length === 0) {
+                alert("No hay elementos para imprimir.");
+                return;
+            }
+
+            // 1. Calcular caja de delimitación de todos los nodos
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            state.nodes.forEach(n => {
+                if (n.x < minX) minX = n.x;
+                if (n.y < minY) minY = n.y;
+                if (n.x + n.w > maxX) maxX = n.x + n.w;
+                if (n.y + n.h > maxY) maxY = n.y + n.h;
+            });
+
+            const contentW = maxX - minX;
+            const contentH = maxY - minY;
+            const padding = 50; // Margen interno
+            
+            const wsW = document.getElementById('workspace').clientWidth;
+            const wsH = document.getElementById('workspace').clientHeight;
+            
+            // 2. Calcular escala para que quepa en la pantalla/hoja
+            const scaleX = (wsW - padding * 2) / contentW;
+            const scaleY = (wsH - padding * 2) / contentH;
+            
+            // Limitamos el scale a 1.2 máximo para que no se vea gigante si hay pocos cuadros
+            state.scale = Math.min(scaleX, scaleY, 1.2); 
+            
+            // 3. Centrar en el workspace
+            state.panX = (wsW / 2) - ((minX + contentW / 2) * state.scale);
+            state.panY = (wsH / 2) - ((minY + contentH / 2) * state.scale);
+            
+            updateTransform();
+            saveData();
+
+            // 4. Mostrar alerta y disparar impresión
+            setTimeout(() => {
+                alert("Para un resultado óptimo:\n1. Asegúrate de que el 'Destino' sea 'Guardar como PDF'.\n2. En la configuración selecciona Diseño: 'Horizontal' (Landscape) y Tamaño de Papel: 'Carta'.");
+                window.print();
+            }, 500);
+        }
+
+        // --- SISTEMA DE PUERTOS Y ANCLAJES ---
+        function getPortPoint(node, port, offset) {
+            if (!port) port = 'B'; if (offset === undefined) offset = 0.5;
+            let x, y;
+            if (port === 'T') { x = node.x + node.w * offset; y = node.y; }
+            else if (port === 'B') { x = node.x + node.w * offset; y = node.y + node.h; }
+            else if (port === 'L') { x = node.x; y = node.y + node.h * offset; }
+            else if (port === 'R') { x = node.x + node.w; y = node.y + node.h * offset; }
+            return {x, y, dir: (port==='T'||port==='B') ? 'V' : 'H'};
+        }
+
+        function snapToNodeEdge(node, mx, my) {
+            let cx = Math.max(node.x, Math.min(node.x + node.w, mx));
+            let cy = Math.max(node.y, Math.min(node.y + node.h, my));
+            let dT = Math.abs(cy - node.y); let dB = Math.abs(cy - (node.y + node.h));
+            let dL = Math.abs(cx - node.x); let dR = Math.abs(cx - (node.x + node.w));
+            let min = Math.min(dT, dB, dL, dR);
+            if (min === dT) return { port: 'T', offset: (cx - node.x) / node.w };
+            if (min === dB) return { port: 'B', offset: (cx - node.x) / node.w };
+            if (min === dL) return { port: 'L', offset: (cy - node.y) / node.h };
+            if (min === dR) return { port: 'R', offset: (cy - node.y) / node.h };
+        }
+
+        // --- RENDERIZADO ---
+        function render() {
+            nodesLayer.innerHTML = '';
+            state.nodes.forEach(node => {
+                const el = document.createElement('div');
+                el.className = `node ${node.type} ${node.color === 'voluntario' ? 'voluntario' : ''} ${selectedNodes.has(node.id) ? 'selected' : ''}`;
+                el.id = `node-${node.id}`;
+                const tSpan = document.createElement('span'); tSpan.innerText = node.text; el.appendChild(tSpan);
+                el.style.left = `${node.x}px`; el.style.top = `${node.y}px`;
+                el.style.width = `${node.w}px`; el.style.height = `${node.h}px`;
+                if(node.color !== 'voluntario') { el.style.backgroundColor = node.color; if (node.color === '#b4d6e0') el.style.color = '#1f2937'; }
+                
+                const resizer = document.createElement('div'); resizer.className = 'resizer';
+                resizer.onmousedown = (e) => { e.stopPropagation(); isResizing = true; resizeNodeId = node.id; };
+                el.appendChild(resizer);
+                el.onmousedown = (e) => handleNodeMouseDown(e, node.id);
+                nodesLayer.appendChild(el);
+            });
+
+            linksGroup.innerHTML = '';
+            state.links.forEach(link => {
+                const n1 = state.nodes.find(n => n.id === link.from);
+                const n2 = state.nodes.find(n => n.id === link.to);
+                if (!n1 || !n2) return;
+
+                if(!link.pFrom) link.pFrom = 'B'; if(link.oFrom === undefined) link.oFrom = 0.5;
+                if(!link.pTo) link.pTo = 'T'; if(link.oTo === undefined) link.oTo = 0.5;
+
+                let pt1 = getPortPoint(n1, link.pFrom, link.oFrom);
+                let pt2 = getPortPoint(n2, link.pTo, link.oTo);
+
+                let x1 = pt1.x, y1 = pt1.y, dir1 = pt1.dir;
+                let x2 = pt2.x, y2 = pt2.y, dir2 = pt2.dir;
+
+                if (n1.type === 'barra-h') { y1 = n1.y + n1.h/2; dir1 = 'V'; }
+                if (n2.type === 'barra-h') { y2 = n2.y + n2.h/2; dir2 = 'V'; }
+                if (n1.type === 'barra-v') { x1 = n1.x + n1.w/2; dir1 = 'H'; }
+                if (n2.type === 'barra-v') { x2 = n2.x + n2.w/2; dir2 = 'H'; }
+
+                let pathString = "";
+                let centerPoint = {x: 0, y: 0, handleType: 'none'};
+
+                if (dir1 === 'V' && dir2 === 'V') {
+                    let cy = link.customCy !== undefined ? link.customCy : (y1 + y2) / 2;
+                    pathString = `M ${x1} ${y1} V ${cy} H ${x2} V ${y2}`;
+                    centerPoint = { x: (x1+x2)/2, y: cy, handleType: 'V' };
+                } 
+                else if (dir1 === 'H' && dir2 === 'H') {
+                    let cx = link.customCx !== undefined ? link.customCx : (x1 + x2) / 2;
+                    pathString = `M ${x1} ${y1} H ${cx} V ${y2} H ${x2}`;
+                    centerPoint = { x: cx, y: (y1+y2)/2, handleType: 'H' };
+                } 
+                else if (dir1 === 'V' && dir2 === 'H') {
+                    pathString = `M ${x1} ${y1} V ${y2} H ${x2}`; 
+                } 
+                else if (dir1 === 'H' && dir2 === 'V') {
+                    pathString = `M ${x1} ${y1} H ${x2} V ${y2}`; 
+                }
+
+                if ((n1.type === 'barra-h' || n2.type === 'barra-h') && dir1 === 'V' && dir2 === 'V') {
+                    pathString = `M ${x1} ${y1} V ${y2}`; centerPoint.handleType = 'none';
+                }
+
+                const isSelected = (link.id === selectedLinkId);
+                const strokeColor = isSelected ? '#ffb300' : '#466094';
+                let dash = link.style === 'dashed' ? '6,6' : 'none';
+                let markerStart = link.arrow === 'both' ? 'url(#arrow-start)' : 'none';
+                let markerEnd = link.arrow === 'end' || link.arrow === 'both' ? 'url(#arrow-end)' : 'none';
+
+                const hitbox = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                hitbox.setAttribute("d", pathString); hitbox.setAttribute("class", "link-hitbox");
+                hitbox.onmousedown = (e) => { e.stopPropagation(); selectLink(link.id); };
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", pathString); path.setAttribute("stroke", strokeColor);
+                path.setAttribute("stroke-width", "2.5"); path.setAttribute("stroke-dasharray", dash);
+                path.setAttribute("marker-start", markerStart); path.setAttribute("marker-end", markerEnd);
+                path.setAttribute("class", "link-path");
+                path.onmousedown = (e) => { e.stopPropagation(); selectLink(link.id); };
+
+                linksGroup.appendChild(hitbox); linksGroup.appendChild(path);
+
+                if (isSelected) {
+                    if(centerPoint.handleType !== 'none' && n1.type === 'standard' && n2.type === 'standard') {
+                        const handle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                        handle.setAttribute("cx", centerPoint.x); handle.setAttribute("cy", centerPoint.y);
+                        handle.setAttribute("r", "5"); handle.setAttribute("class", "curve-handle center");
+                        if(centerPoint.handleType === 'H') handle.style.cursor = 'ew-resize'; else handle.style.cursor = 'ns-resize';
+                        handle.onmousedown = (e) => { e.stopPropagation(); isDraggingCurve = true; activeLinkForCurve = link.id; curveDragType = centerPoint.handleType; };
+                        linksGroup.appendChild(handle);
+                    }
+                    if(n1.type === 'standard') {
+                        const aFrom = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                        aFrom.setAttribute("x", x1-5); aFrom.setAttribute("y", y1-5);
+                        aFrom.setAttribute("width", "10"); aFrom.setAttribute("height", "10");
+                        aFrom.setAttribute("class", "curve-handle anchor");
+                        aFrom.onmousedown = (e) => { e.stopPropagation(); isDraggingAnchor = true; anchorData = { linkId: link.id, type: 'From' }; };
+                        linksGroup.appendChild(aFrom);
+                    }
+                    if(n2.type === 'standard') {
+                        const aTo = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                        aTo.setAttribute("x", x2-5); aTo.setAttribute("y", y2-5);
+                        aTo.setAttribute("width", "10"); aTo.setAttribute("height", "10");
+                        aTo.setAttribute("class", "curve-handle anchor");
+                        aTo.onmousedown = (e) => { e.stopPropagation(); isDraggingAnchor = true; anchorData = { linkId: link.id, type: 'To' }; };
+                        linksGroup.appendChild(aTo);
+                    }
+                }
+            });
+        }
+
+        // --- EVENTOS INTERACTIVOS ---
+        function getMouseCoords(e) {
+            const rect = document.getElementById('workspace').getBoundingClientRect();
+            return { x: ((e.clientX - rect.left - state.panX) / state.scale), y: ((e.clientY - rect.top - state.panY) / state.scale), clientX: e.clientX - rect.left, clientY: e.clientY - rect.top };
+        }
+
+        function startAction(e) {
+            if(e.target.id === 'workspace' || e.target.id === 'svg-layer') {
+                if (e.shiftKey) {
+                    isBoxSelecting = true; const coords = getMouseCoords(e);
+                    boxStartX = coords.clientX; boxStartY = coords.clientY;
+                    selectionBox.style.left = boxStartX + 'px'; selectionBox.style.top = boxStartY + 'px';
+                    selectionBox.style.width = '0px'; selectionBox.style.height = '0px'; selectionBox.style.display = 'block';
+                    if(!e.ctrlKey && !e.metaKey) deselectAll(true);
+                } else {
+                    isPanning = true; startPanX = e.clientX - state.panX; startPanY = e.clientY - state.panY; deselectAll();
+                }
+            }
+        }
+
+        function handleNodeMouseDown(e, id) {
+            e.stopPropagation();
+            if (isLinkingMode) {
+                if (linkingStartNodeId && linkingStartNodeId !== id) {
+                    const exists = state.links.find(l => (l.from === linkingStartNodeId && l.to === id) || (l.to === linkingStartNodeId && l.from === id));
+                    if(!exists) { state.links.push({ id: 'l_' + Date.now(), from: linkingStartNodeId, to: id, style: 'solid', arrow: 'end', pFrom: 'B', pTo: 'T' }); }
+                }
+                isLinkingMode = false; document.body.classList.remove('linking-mode'); ghostLink.style.display = 'none';
+                selectLink(state.links[state.links.length-1].id); saveData(); render(); return;
+            }
+
+            if (e.shiftKey || e.ctrlKey || e.metaKey) { if(selectedNodes.has(id)) selectedNodes.delete(id); else selectedNodes.add(id); } 
+            else { if(!selectedNodes.has(id)) { selectedNodes.clear(); selectedNodes.add(id); } }
+
+            selectedLinkId = null; updateSidebarPanel(); render();
+            isDraggingNodes = true; const coords = getMouseCoords(e); dragLastX = coords.x; dragLastY = coords.y;
+        }
+
+        function handleMouseMove(e) {
+            const coords = getMouseCoords(e);
+
+            if (isDraggingNodes) {
+                const dx = coords.x - dragLastX; const dy = coords.y - dragLastY;
+                selectedNodes.forEach(id => { const node = state.nodes.find(n => n.id === id); node.x += dx; node.y += dy; });
+                dragLastX = coords.x; dragLastY = coords.y; render();
+            }
+            else if (isResizing && resizeNodeId) {
+                const node = state.nodes.find(n => n.id === resizeNodeId);
+                node.w = Math.max(12, coords.x - node.x); node.h = Math.max(12, coords.y - node.y); render();
+            }
+            else if (isDraggingAnchor && anchorData.linkId) {
+                const link = state.links.find(l => l.id === anchorData.linkId);
+                const nodeId = anchorData.type === 'From' ? link.from : link.to;
+                const node = state.nodes.find(n => n.id === nodeId);
+                const snap = snapToNodeEdge(node, coords.x, coords.y);
+                link['p' + anchorData.type] = snap.port; link['o' + anchorData.type] = snap.offset; render();
+            }
+            else if (isDraggingCurve && activeLinkForCurve) {
+                const link = state.links.find(l => l.id === activeLinkForCurve);
+                if(curveDragType === 'V') link.customCy = coords.y;
+                if(curveDragType === 'H') link.customCx = coords.x; render();
+            }
+            else if (isBoxSelecting) {
+                const cx = coords.clientX; const cy = coords.clientY;
+                selectionBox.style.left = Math.min(boxStartX, cx) + 'px'; selectionBox.style.top = Math.min(boxStartY, cy) + 'px';
+                selectionBox.style.width = Math.abs(cx - boxStartX) + 'px'; selectionBox.style.height = Math.abs(cy - boxStartY) + 'px';
+            }
+            else if (isLinkingMode && linkingStartNodeId) {
+                const n1 = state.nodes.find(n => n.id === linkingStartNodeId);
+                let x1 = n1.x + n1.w / 2; let y1 = n1.y + n1.h;
+                if(n1.type === 'barra-h') y1 = n1.y + n1.h/2;
+                ghostLink.setAttribute("d", `M ${x1} ${y1} V ${(y1+coords.y)/2} H ${coords.x} V ${coords.y}`);
+                ghostLink.style.display = 'block';
+            }
+            else if (isPanning) { state.panX = e.clientX - startPanX; state.panY = e.clientY - startPanY; updateTransform(); }
+        }
+
+        function handleMouseUp() {
+            if (isDraggingNodes) { isDraggingNodes = false; saveData(); }
+            if (isResizing) { isResizing = false; resizeNodeId = null; saveData(); }
+            if (isPanning) { isPanning = false; saveData(); }
+            if (isDraggingCurve) { isDraggingCurve = false; activeLinkForCurve = null; curveDragType = null; saveData(); }
+            if (isDraggingAnchor) { isDraggingAnchor = false; anchorData = {linkId:null, type:null}; saveData(); }
+            if (isBoxSelecting) {
+                isBoxSelecting = false; selectionBox.style.display = 'none';
+                const rL = (parseFloat(selectionBox.style.left) - state.panX) / state.scale;
+                const rT = (parseFloat(selectionBox.style.top) - state.panX) / state.scale;
+                const rR = rL + (parseFloat(selectionBox.style.width) / state.scale);
+                const rB = rT + (parseFloat(selectionBox.style.height) / state.scale);
+                state.nodes.forEach(n => { if (!(n.x > rR || (n.x+n.w) < rL || n.y > rB || (n.y+n.h) < rT)) selectedNodes.add(n.id); });
+                updateSidebarPanel(); render();
+            }
+        }
+
+        function zoom(e) {
+            if(e.ctrlKey || e.metaKey) {
+                e.preventDefault(); const factor = e.deltaY > 0 ? 0.9 : 1.1;
+                state.scale = Math.min(Math.max(0.2, state.scale * factor), 2.5); updateTransform(); saveData();
+            }
+        }
+        function updateTransform() { const str = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; nodesLayer.style.transform = str; svgLayer.style.transform = str; }
+
+        function addNode() {
+            const id = 'n_' + Date.now();
+            state.nodes.push({ id: id, type: 'standard', text: "Nueva Área", x: (-state.panX / state.scale) + 200, y: (-state.panY / state.scale) + 200, w: 180, h: 60, color: "#34859b" });
+            selectedNodes.clear(); selectedNodes.add(id); selectedLinkId = null; saveData(); updateSidebarPanel(); render();
+        }
+
+        function updateSidebarPanel() {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            if (selectedLinkId) {
+                const link = state.links.find(l => l.id === selectedLinkId);
+                document.getElementById('line-style').value = link.style; document.getElementById('line-arrow').value = link.arrow;
+                document.getElementById('panel-line').classList.add('active');
+            } 
+            else if (selectedNodes.size > 0) {
+                document.getElementById('panel-node').classList.add('active');
+                if (selectedNodes.size === 1) {
+                    const node = state.nodes.find(n => n.id === Array.from(selectedNodes)[0]);
+                    document.getElementById('single-node-editor').style.display = 'block'; document.getElementById('multi-node-editor').style.display = 'none';
+                    document.getElementById('node-type').value = node.type || 'standard';
+                    document.getElementById('node-text').value = node.text; document.getElementById('node-color').value = node.color;
+                    document.getElementById('fg-text').style.display = (node.type === 'barra-h' || node.type === 'barra-v') ? 'none' : 'block';
+                } else {
+                    document.getElementById('single-node-editor').style.display = 'none'; document.getElementById('multi-node-editor').style.display = 'block';
+                    document.getElementById('multi-count').innerText = `${selectedNodes.size} elementos seleccionados`;
+                }
+            } else { document.getElementById('panel-general').classList.add('active'); }
+        }
+
+        function updateNode() {
+            if (selectedNodes.size !== 1) return; const node = state.nodes.find(n => n.id === Array.from(selectedNodes)[0]);
+            node.type = document.getElementById('node-type').value; node.text = document.getElementById('node-text').value; node.color = document.getElementById('node-color').value;
+            if(node.type === 'barra-h') { node.h = 12; if(node.w < 50) node.w = 200; } if(node.type === 'barra-v') { node.w = 12; if(node.h < 50) node.h = 200; }
+            saveData(); updateSidebarPanel(); render();
+        }
+
+        function deleteSelectedNodes() {
+            if (selectedNodes.size === 0) return;
+            selectedNodes.forEach(id => { state.links = state.links.filter(l => l.from !== id && l.to !== id); state.nodes = state.nodes.filter(n => n.id !== id); });
+            deselectAll(true); saveData(); render();
+        }
+
+        function selectLink(id) { selectedLinkId = id; selectedNodes.clear(); updateSidebarPanel(); render(); }
+        function updateLine() {
+            if (!selectedLinkId) return; const link = state.links.find(l => l.id === selectedLinkId);
+            link.style = document.getElementById('line-style').value; link.arrow = document.getElementById('line-arrow').value; saveData(); render();
+        }
+        function resetLineCurve() {
+            if (!selectedLinkId) return; const link = state.links.find(l => l.id === selectedLinkId);
+            delete link.customCy; delete link.customCx; link.pFrom = 'B'; link.pTo = 'T'; link.oFrom = 0.5; link.oTo = 0.5; saveData(); render();
+        }
+        function deleteSelectedLine() {
+            if (!selectedLinkId) return; state.links = state.links.filter(l => l.id !== selectedLinkId);
+            deselectAll(true); saveData(); render();
+        }
+        function startLinking() {
+            if (selectedNodes.size !== 1) return; isLinkingMode = true; linkingStartNodeId = Array.from(selectedNodes)[0]; document.body.classList.add('linking-mode');
+        }
+        function deselectAll(forceUpdate = false) {
+            selectedNodes.clear(); selectedLinkId = null; isLinkingMode = false; document.body.classList.remove('linking-mode'); ghostLink.style.display = 'none';
+            if(forceUpdate) { updateSidebarPanel(); render(); } else { showPanel('panel-general'); render(); }
+        }
+        function showPanel(id) { document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acción Honduras: Storyboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="image-stage"></div>
+
+    <footer id="control-panel">
+        
+        <div class="timeline-wrapper">
+            <input type="range" id="timeline" min="0" max="25" value="0" step="1" oninput="jumpToScene(this.value)">
+        </div>
+
+        <div class="info-grid">
+            <button class="nav-btn" onclick="prevScene()">&#10094;</button>
+
+            <div class="text-content">
+                <h4 id="scene-counter">ESCENA 01 / 26</h4>
+                <h2 id="scene-title">Título</h2>
+                <p id="scene-caption">Descripción...</p>
+            </div>
+
+            <button class="nav-btn" onclick="nextScene()">&#10095;</button>
+        </div>
+
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

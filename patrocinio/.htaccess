@@ -1,0 +1,16 @@
+# 1. Evitar que se listen los archivos de las carpetas
+# Si alguien entra a /assets/ no verá la lista de imágenes
+Options -Indexes
+
+# 2. Proteger archivos sensibles
+# Evita que alguien descargue o vea tu configuración de base de datos
+<Files "db_config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# 3. Opcional: Proteger la carpeta 'vendor' si usas composer
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^vendor/.*$ - [F,L]
+</IfModule>

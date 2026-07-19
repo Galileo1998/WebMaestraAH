@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /classes/
+Disallow: /config/
+Disallow: /security/
+Disallow: /storage/
+
+Sitemap: https://www.accionhonduras.org/sitemap.xml

@@ -1,0 +1,353 @@
+{
+  "format": "AH_FORM_SCHEMA",
+  "version": 1,
+  "exported_at": "2026-07-14T20:38:06Z",
+  "schema": {
+    "form": {
+      "id": null,
+      "titulo": "Registro de Implementación Programática - Centros Educativos / Acción Honduras",
+      "descripcion": "Reciba un cordial saludo. El presente formulario tiene como objetivo recolectar información clave sobre las actividades y temas desarrollados en su centro educativo.\n\nInstrucciones importantes:\n1. Seleccione correctamente la ubicación y el centro educativo.\n2. Al ingresar cantidades de participantes, utilice únicamente números.\n3. En el resumen, describa brevemente la metodología utilizada y los principales logros de la jornada.\n4. Adjunte una fotografía clara de la actividad como evidencia del proceso.\n\nSu aporte es vital para el monitoreo y éxito de nuestras intervenciones pedagógicas. Muchas gracias por su compromiso con la educación.",
+      "estado": "borrador",
+      "tema_color": "#34859B",
+      "mensaje_confirmacion": "¡Muchas gracias! Su reporte de implementación fue enviado correctamente.",
+      "configuracion": {},
+      "fecha_apertura": null,
+      "fecha_cierre": null,
+      "limite_respuestas": null,
+      "requiere_login": false,
+      "una_respuesta": false,
+      "permitir_edicion": true,
+      "recopilar_correo": false,
+      "mostrar_progreso": true,
+      "notificar_correo": ""
+    },
+    "sections": [
+      {
+        "id": null,
+        "titulo": "Identificación y actividad",
+        "descripcion": "Complete los datos de la implementación. Seleccione cuidadosamente la ubicación y el centro educativo.",
+        "orden": 1,
+        "config": {},
+        "questions": [
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "email",
+            "titulo": "Correo electrónico",
+            "descripcion": "Ingrese un correo válido para identificar el reporte.",
+            "requerido": true,
+            "orden": 1,
+            "opciones": [],
+            "validacion": {
+              "message": "Ingrese un correo electrónico válido."
+            },
+            "logica": {},
+            "config": {
+              "width": "half",
+              "logic_key": "correo"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "date",
+            "titulo": "Fecha de la actividad",
+            "descripcion": "Seleccione la fecha en que se desarrolló la actividad.",
+            "requerido": true,
+            "orden": 2,
+            "opciones": [],
+            "validacion": {},
+            "logica": {},
+            "config": {
+              "width": "half",
+              "logic_key": "fecha_actividad"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "dropdown",
+            "titulo": "Mes y actividad implementada",
+            "descripcion": "Seleccione una sola opción.",
+            "requerido": true,
+            "orden": 3,
+            "opciones": [
+              "ABRIL - RA351-03 - Sesión introductoria sobre PEAS, conceptos básicos.",
+              "ABRIL - YA231-02 - Feria vocacional, se incluyen jóvenes de séptimo a doceavo grado.",
+              "MAYO - RA351-03 - Mi cuerpo, mi tesoro.",
+              "MAYO - AA501-02 - Cómo evitarlo.",
+              "MAYO - YA232-01 - Locus de control.",
+              "JUNIO - RA351-03 - Identificando señales de peligro: detectives de la seguridad.",
+              "JUNIO - YA232-01 - Campaña de reforestación y limpieza."
+            ],
+            "validacion": {},
+            "logica": {},
+            "config": {
+              "width": "full",
+              "logic_key": "actividad_mes"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "checkboxes",
+            "titulo": "Grado(s) participante(s)",
+            "descripcion": "Puede seleccionar uno o varios grados.",
+            "requerido": true,
+            "orden": 4,
+            "opciones": [
+              "Primer grado",
+              "Segundo grado",
+              "Tercer grado",
+              "Cuarto grado",
+              "Quinto grado",
+              "Sexto grado",
+              "Séptimo grado",
+              "Octavo grado",
+              "Noveno grado",
+              "Décimo grado",
+              "Undécimo grado",
+              "Duodécimo grado"
+            ],
+            "validacion": {},
+            "logica": {},
+            "config": {
+              "width": "full",
+              "logic_key": "grados"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "geo_cascade",
+            "titulo": "Ubicación y centro educativo",
+            "descripcion": "Seleccione Municipio, Comunidad base, Caserío y Centro. Las opciones se cargan desde la gestión territorial y el catálogo de centros.",
+            "requerido": true,
+            "orden": 5,
+            "opciones": {
+              "levels": [
+                "municipio",
+                "base",
+                "caserio",
+                "centro"
+              ],
+              "center_types": [
+                "Básica",
+                "Media"
+              ]
+            },
+            "validacion": {},
+            "logica": {},
+            "config": {
+              "width": "full",
+              "logic_key": "ubicacion_centro"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "short_text",
+            "titulo": "Nombre del docente",
+            "descripcion": "Escriba su nombre completo tal como aparece en el registro institucional.",
+            "requerido": true,
+            "orden": 6,
+            "opciones": [],
+            "validacion": {
+              "min": 5,
+              "message": "Escriba el nombre completo del docente."
+            },
+            "logica": {},
+            "config": {
+              "width": "full",
+              "logic_key": "nombre_docente"
+            },
+            "puntos": 0
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Datos de participación",
+        "descripcion": "Registre únicamente cantidades numéricas correspondientes a la actividad desarrollada.",
+        "orden": 2,
+        "config": {},
+        "questions": [
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "number",
+            "titulo": "Cantidad de niñas que participaron",
+            "descripcion": "Ingrese únicamente números enteros.",
+            "requerido": true,
+            "orden": 1,
+            "opciones": [],
+            "validacion": {
+              "min": 0,
+              "max": 10000,
+              "message": "Ingrese una cantidad válida igual o mayor que cero."
+            },
+            "logica": {},
+            "config": {
+              "width": "half",
+              "logic_key": "ninas"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "number",
+            "titulo": "Cantidad de niños que participaron",
+            "descripcion": "Ingrese únicamente números enteros.",
+            "requerido": true,
+            "orden": 2,
+            "opciones": [],
+            "validacion": {
+              "min": 0,
+              "max": 10000,
+              "message": "Ingrese una cantidad válida igual o mayor que cero."
+            },
+            "logica": {},
+            "config": {
+              "width": "half",
+              "logic_key": "ninos"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "multiple_choice",
+            "titulo": "¿Hubo participación de niñas o niños con discapacidad?",
+            "descripcion": "Seleccione una opción.",
+            "requerido": true,
+            "orden": 3,
+            "opciones": [
+              "Sí",
+              "No"
+            ],
+            "validacion": {},
+            "logica": {},
+            "config": {
+              "width": "full",
+              "logic_key": "hubo_discapacidad"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "checkboxes",
+            "titulo": "Tipo de discapacidad",
+            "descripcion": "Complete esta pregunta únicamente si respondió Sí en la pregunta anterior. Puede seleccionar varias opciones.",
+            "requerido": true,
+            "orden": 4,
+            "opciones": [
+              "Física / motora",
+              "Intelectual",
+              "Auditiva",
+              "Visual",
+              "Psicosocial"
+            ],
+            "validacion": {},
+            "logica": {
+              "enabled": true,
+              "source_key": "hubo_discapacidad",
+              "operator": "equals",
+              "value": "Sí"
+            },
+            "config": {
+              "width": "full",
+              "logic_key": "tipo_discapacidad"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "number",
+            "titulo": "Cantidad de participantes con discapacidad",
+            "descripcion": "Complete esta pregunta únicamente si hubo participación de niñas o niños con discapacidad.",
+            "requerido": true,
+            "orden": 5,
+            "opciones": [],
+            "validacion": {
+              "min": 0,
+              "max": 10000,
+              "message": "Ingrese una cantidad válida igual o mayor que cero."
+            },
+            "logica": {
+              "enabled": true,
+              "source_key": "hubo_discapacidad",
+              "operator": "equals",
+              "value": "Sí"
+            },
+            "config": {
+              "width": "half",
+              "logic_key": "cantidad_discapacidad"
+            },
+            "puntos": 0
+          }
+        ]
+      },
+      {
+        "id": null,
+        "titulo": "Datos finales",
+        "descripcion": "Describa brevemente la implementación y adjunte la evidencia fotográfica correspondiente.",
+        "orden": 3,
+        "config": {},
+        "questions": [
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "paragraph",
+            "titulo": "Resumen de la actividad desarrollada",
+            "descripcion": "Describa la estrategia y metodología utilizadas, los recursos, el desarrollo de la actividad y los principales logros.",
+            "requerido": true,
+            "orden": 1,
+            "opciones": [],
+            "validacion": {
+              "min": 30,
+              "message": "Describa el desarrollo de la actividad con suficiente detalle."
+            },
+            "logica": {},
+            "config": {
+              "width": "full",
+              "logic_key": "resumen_actividad"
+            },
+            "puntos": 0
+          },
+          {
+            "id": null,
+            "section_id": null,
+            "tipo": "file_upload",
+            "titulo": "Fotografía del evento",
+            "descripcion": "Adjunte una fotografía clara de la actividad como evidencia del proceso.",
+            "requerido": true,
+            "orden": 2,
+            "opciones": [],
+            "validacion": {},
+            "logica": {},
+            "config": {
+              "width": "full",
+              "allowed_types": [
+                "jpg",
+                "jpeg",
+                "png",
+                "webp"
+              ],
+              "max_mb": 10,
+              "logic_key": "fotografia_evento"
+            },
+            "puntos": 0
+          }
+        ]
+      }
+    ]
+  }
+}

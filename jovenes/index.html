@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscador CHASIDE - Acción Honduras</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --ah-verde: #46b094;
+      --ah-azul: #34859b;
+      --ah-celeste: #b4d6e0;
+      --ah-fondo: #f4f6f8;
+    }
+    body { font-family: Arial, system-ui, sans-serif; background: #eef6fb; margin: 0; }
+    .contenedor { max-width: 1000px; margin: 20px auto; padding: 20px; }
+    .titulo { 
+      background: linear-gradient(135deg, var(--ah-verde), var(--ah-azul));
+      color: white; padding: 25px; border-radius: 18px;
+      font-size: 23px; font-weight: bold;
+    }
+    .card { background: white; padding: 20px; margin-top: 20px; border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+    .label { font-weight: bold; margin-top: 10px; }
+    input { width: 100%; padding: 10px; margin-top: 5px; border-radius: 10px;
+      border: 1px solid #ccc; font-size: 14px; }
+    button {
+      margin-top: 15px; padding: 10px 18px; border-radius: 25px; border: 0;
+      font-size: 14px; cursor: pointer; font-weight: bold;
+      background: linear-gradient(135deg, var(--ah-azul), var(--ah-verde)); color: white;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    button.secundario {
+      background: #ffffff;
+      color: #34859b;
+      border: 1px solid #b4d6e0;
+      box-shadow: none;
+    }
+    .resultado { font-size: 15px; margin-top: 8px; }
+    .tag { background: #b4d6e0; padding: 4px 10px; border-radius: 10px; margin-right: 5px; display: inline-block; }
+    #estado, #logEstado { margin-top: 10px; font-size: 13px; color:#34859b; }
+    hr { border: 0; border-top: 1px solid #e0e4ea; margin: 12px 0; }
+    
+    .header-logos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(60deg, var(--ah-azul), var(--ah-verde));
+  padding: 15px 25px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.header-logos .logo {
+  height: 40px;      /* Ajusta el tamaño aquí */
+  width: auto;
+}
+
+.titulo-centro {
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+}
+
+  </style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+  <div class="header-logos">
+    <img src="logo2.png" class="logo" heigth="120px">
+    <div class="titulo-centro">Resultados CHASIDE – Acción Honduras</div>
+    <img src="logo1.png" class="logo" heigth="120px">
+  </div>
+  <div class="card">
+      <p>
+          CHASIDE es un instrumento de orientación vocacional que ayuda a las y los jóvenes a identificar sus intereses, habilidades y áreas de preferencia para el estudio o el empleo. Su nombre proviene de seis dimensiones: Científica, Humanista, Artística, Social, Investigativa, Deportiva y Empresarial, las cuales permiten analizar de manera sencilla qué actividades, carreras o caminos formativos pueden encajar mejor con la personalidad de cada joven. Es una herramienta práctica que orienta decisiones importantes sobre el futuro educativo y laboral.
+      </p>
+  </div>
+
+  <div class="card">
+    <div class="label">Buscar por DNI o Número NNAJ</div>
+    <input id="buscar" placeholder="Ejemplo: 0801… o 151046439">
+
+    <button onclick="buscarJoven()">🔍 Buscar joven</button>
+    <button class="secundario" onclick="descargarJSON()">⬇ Descargar JSON de participaciones</button>
+
+    <div id="estado"></div>
+    <div id="logEstado"></div>
+  </div>
+
+  <div class="card" id="resultados">
+    <em>Aún no has realizado ninguna búsqueda.</em>
+  </div>
+
+</div>
+
+<script>
+  let baseDatos = [];
+  let clientIp = "desconocida";
+
+  // ---- CARGA INICIAL: Excel + IP ----
+  window.onload = function() {
+    // Cargar Excel
+    fetch("jovenes.xlsx")
+      .then(res => res.arrayBuffer())
+      .then(data => {
+        const workbook = XLSX.read(data, { type: "array" });
+        const hoja = workbook.SheetNames[0];
+        baseDatos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja], { defval: "" });
+        document.getElementById("estado").innerText =
+          "✔ Base de datos cargada (" + baseDatos.length + " registros)";
+      })
+      .catch(() => {
+        document.getElementById("estado").innerText =
+          "⚠ No se pudo cargar el archivo jovenes.xlsx";
+      });
+
+    // Detectar IP pública (opcional)
+    fetch("https://api.ipify.org?format=json")
+      .then(r => r.json())
+      .then(d => clientIp = d.ip)
+      .catch(() => clientIp = "desconocida");
+  };
+
+  // ---- BÚSQUEDA ----
+  function buscarJoven() {
+    const valor = document.getElementById("buscar").value.trim();
+    if (!valor) {
+      alert("Ingrese DNI o NNAJ");
+      return;
+    }
+
+    if (!baseDatos || baseDatos.length === 0) {
+      alert("La base de datos aún no se ha cargado.");
+      return;
+    }
+
+    const normalizado = valor.replace(/\.0$/, "");
+
+    const joven = baseDatos.find(j =>
+      String(j["Número NNAJ"]).replace(/\.0$/, "") === normalizado ||
+      String(j["N° de DNI"]).replace(/\.0$/, "") === normalizado
+    );
+
+    if (!joven) {
+      document.getElementById("resultados").innerHTML =
+        "<b style='color:red'>No se encontró ningún joven.</b>";
+      return;
+    }
+
+    mostrarResultados(joven);
+    registrarParticipacion(joven, normalizado);
+  }
+
+  // ---- MOSTRAR RESULTADOS EN PANTALLA ----
+  function mostrarResultados(j) {
+    let area = detectarArea(j["Resultado 1"]);
+    let plataformas = sugerencias(area);
+
+    document.getElementById("resultados").innerHTML = `
+      <div class='resultado'><b>Nombre:</b> ${j["Nombre NNAJ"]}</div>
+      <div class='resultado'><b>DNI:</b> ${j["N° de DNI"]}</div>
+      <div class='resultado'><b>NNAJ:</b> ${j["Número NNAJ"]}</div>
+      <div class='resultado'><b>Comunidad base:</b> ${j["Comunidad base"] || "No registrada"}</div>
+      <div class='resultado'><b>Sexo:</b> ${j["Sexo"] || "No registrado"}</div>
+      <div class='resultado'><b>Edad:</b> ${j["Edad"] || "No registrada"}</div>
+      
+      <hr>
+      <div class='resultado'><b>Resultado 1 (principal):</b><br>${salvarHTML(j["Resultado 1"])}</div>
+      <div class='resultado'><b>Resultado 2:</b><br>${salvarHTML(j["Resultado 2"])}</div>
+      <div class='resultado'><b>Resultado 3:</b><br>${salvarHTML(j["Resultado 3"])}</div>
+
+      <hr>
+      <div class='resultado'>
+        <b>Área principal detectada:</b> 
+        <span class="tag">${area}</span>
+      </div>
+
+      <div class='resultado'><b>Plataformas recomendadas:</b><br>
+        ${plataformas.map(p => `<span class='tag'>${p}</span>`).join(" ")}
+      </div>
+    `;
+  }
+
+  // ---- DETECTAR ÁREA ----
+  function detectarArea(texto) {
+    if (!texto) return "No identificado";
+    const t = String(texto).toLowerCase();
+
+    if (t.includes("administrativa") || t.includes("contable")) return "Administrativas y Contables";
+    if (t.includes("ingenier") || t.includes("comput")) return "Ingeniería y Computación";
+    if (t.includes("medicina") || t.includes("salud")) return "Medicina y Salud";
+    if (t.includes("sociales") || t.includes("humanist")) return "Ciencias Sociales y Humanidades";
+    if (t.includes("arte") || t.includes("artística") || t.includes("artistica")) return "Artísticas";
+    if (t.includes("defensa") || t.includes("seguridad")) return "Defensa y Seguridad";
+
+    return "General";
+  }
+
+  function sugerencias(area) {
+    switch(area) {
+      case "Ingeniería y Computación":
+        return ["Coursera", "edX", "Platzi"];
+      case "Administrativas y Contables":
+        return ["Coursera Business", "Udemy (Excel/Contabilidad)", "Platzi Business"];
+      case "Medicina y Salud":
+        return ["Coursera Salud", "Khan Academy Salud"];
+      case "Ciencias Sociales y Humanidades":
+        return ["Coursera Sociales", "edX Humanidades"];
+      case "Artísticas":
+        return ["Domestika", "Crehana"];
+      case "Defensa y Seguridad":
+        return ["Coursera Seguridad y Gobierno"];
+      default:
+        return ["Khan Academy"];
+    }
+  }
+
+  // ---- REGISTRAR PARTICIPACIÓN EN EL SERVIDOR PHP ----
+  function registrarParticipacion(j, valorBuscado) {
+    const registro = {
+      fecha_hora: new Date().toLocaleString(),
+      valor_buscado: valorBuscado,
+      nombre: j["Nombre NNAJ"] || "",
+      dni: j["N° de DNI"] || "",
+      nnaj: j["Número NNAJ"] || "",
+      comunidad_base: j["Comunidad base"] || "",
+      sexo: j["Sexo"] || "",
+      edad: j["Edad"] || "",
+      area_principal: detectarArea(j["Resultado 1"]),
+      resumen_resultado1: j["Resultado 1"] || "",
+      ip_cliente: clientIp,
+      url_acceso: window.location.href
+    };
+
+    fetch("guardar_log.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(registro)
+    })
+    .then(r => r.json())
+    .then(res => {
+      console.log("Guardado en server:", res);
+      document.getElementById("logEstado").innerText = "✔ Participación registrada";
+    })
+    .catch(err => {
+      console.error("Error al guardar participación en servidor:", err);
+      document.getElementById("logEstado").innerText = "⚠ No se pudo registrar la participación";
+    });
+  }
+
+  // ---- DESCARGAR JSON (servidor) ----
+  function descargarJSON() {
+    // Asumiendo que guardar_log.php soporta ?descargar=1 y devuelve el JSON
+    window.location.href = "guardar_log.php?descargar=1";
+  }
+
+  // ---- Utilidad para evitar HTML raro en resultados ----
+  function salvarHTML(texto) {
+    if (texto === null || texto === undefined) return "";
+    return String(texto)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+  
+  function registrarParticipacion(j, valorBuscado) {
+  const registro = {
+    fecha_hora: new Date().toLocaleString(),
+    valor_buscado: valorBuscado,
+    nombre: j["Nombre NNAJ"] || "",
+    dni: j["N° de DNI"] || "",
+    nnaj: j["Número NNAJ"] || "",
+    comunidad_base: j["Comunidad base"] || "",
+    sexo: j["Sexo"] || "",
+    edad: j["Edad"] || "",
+    area_principal: detectarArea(j["Resultado 1"]),
+    resumen_resultado1: j["Resultado 1"] || "",
+    ip_cliente: clientIp,
+    url_acceso: window.location.href
+  };
+
+  fetch("guardar_log.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(registro)
+  })
+  .then(r => r.json())
+  .then(res => {
+    console.log("Respuesta servidor:", res);
+    document.getElementById("logEstado").innerText = "✔ Participación registrada";
+  })
+  .catch(err => {
+    console.error("Error al guardar participación en servidor:", err);
+    document.getElementById("logEstado").innerText = "⚠ No se pudo registrar la participación";
+  });
+}
+
+</script>
+
+</body>
+</html>

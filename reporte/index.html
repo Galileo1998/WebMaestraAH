@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Registro de Actividades Docentes</title>
+
+<style>
+    *{
+        box-sizing:border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body{
+        margin:0;
+        background:#f4f7f9;
+        padding:40px 20px;
+    }
+
+    .contenedor{
+        max-width:800px;
+        margin:auto;
+        background:#fff;
+        padding:30px;
+        border-radius:12px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    h1{
+        margin-top:0;
+        color:#34859b;
+        text-align:center;
+    }
+
+    p{
+        color:#666;
+        text-align:center;
+    }
+
+    .grupo{
+        margin-bottom:20px;
+    }
+
+    label{
+        display:block;
+        margin-bottom:8px;
+        font-weight:bold;
+        color:#333;
+    }
+
+    input,
+    textarea,
+    select{
+        width:100%;
+        padding:12px;
+        border:1px solid #ccc;
+        border-radius:8px;
+        font-size:15px;
+    }
+
+    textarea{
+        min-height:140px;
+        resize:vertical;
+    }
+
+    .fila{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:20px;
+    }
+
+    button{
+        background:#46b094;
+        color:white;
+        border:none;
+        padding:14px 20px;
+        border-radius:8px;
+        font-size:16px;
+        cursor:pointer;
+        width:100%;
+        transition:0.3s;
+    }
+
+    button:hover{
+        background:#34859b;
+    }
+
+    .nota{
+        margin-top:15px;
+        font-size:13px;
+        color:#777;
+    }
+
+    @media(max-width:700px){
+        .fila{
+            grid-template-columns:1fr;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+
+    <h1>Registro de Actividad Educativa</h1>
+
+    <p>
+        Formulario para reporte de actividades realizadas por docentes.
+    </p>
+
+    <!-- IMPORTANTE -->
+    <!-- ESTE FORMULARIO ENVÍA A guardar.php -->
+    <form action="guardar.php" method="POST" enctype="multipart/form-data">
+
+        <div class="grupo">
+            <label>Nombre del docente</label>
+            <input type="text" name="docente" required>
+        </div>
+
+        <div class="fila">
+
+            <div class="grupo">
+                <label>Centro Educativo</label>
+                <input type="text" name="centro" required>
+            </div>
+
+            <div class="grupo">
+                <label>Municipio</label>
+                <input type="text" name="municipio" required>
+            </div>
+
+        </div>
+
+        <div class="fila">
+
+            <div class="grupo">
+                <label>Mes de la actividad</label>
+                <select name="mes" required>
+                    <option value="">Seleccione</option>
+                    <option>Enero</option>
+                    <option>Febrero</option>
+                    <option>Marzo</option>
+                    <option>Abril</option>
+                    <option>Mayo</option>
+                    <option>Junio</option>
+                    <option>Julio</option>
+                    <option>Agosto</option>
+                    <option>Septiembre</option>
+                    <option>Octubre</option>
+                    <option>Noviembre</option>
+                    <option>Diciembre</option>
+                </select>
+            </div>
+
+            <div class="grupo">
+                <label>Fecha de la actividad</label>
+                <input type="date" name="fecha" required>
+            </div>
+
+        </div>
+
+        <div class="fila">
+
+            <div class="grupo">
+                <label>Número de niñas</label>
+                <input type="number" name="ninas" min="0" required>
+            </div>
+
+            <div class="grupo">
+                <label>Número de niños</label>
+                <input type="number" name="ninos" min="0" required>
+            </div>
+
+        </div>
+
+        <div class="grupo">
+            <label>Descripción de cómo estuvo el evento</label>
+            <textarea 
+                name="descripcion"
+                placeholder="Describa la actividad, participación, resultados, aprendizajes, etc."
+                required></textarea>
+        </div>
+
+        <div class="grupo">
+            <label>Fotografía de la actividad</label>
+            <input type="file" name="foto" accept="image/*" required>
+        </div>
+
+        <button type="submit">
+            Guardar Reporte
+        </button>
+
+        <div class="nota">
+            La fotografía será almacenada en la carpeta <strong>images/</strong>.
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

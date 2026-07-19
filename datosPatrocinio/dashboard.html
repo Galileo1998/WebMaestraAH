@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patrocinio - Acción Honduras</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-logo">
+                    <img src="logo_ah_h.png" alt="Acción Honduras Logo">
+                </div>
+                <div class="header-text">
+                    <h1>Control de Patrocinio AF26</h1>
+                    <p class="subtitle">Análisis de rendimiento: Julio 2025 - Abril 2026</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="tecnicoFilter">Filtrar por Técnico:</label>
+                <select id="tecnicoFilter" class="filter-select">
+                    <option value="todos">Todos los Técnicos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Tipo de Correspondencia:</label>
+                <div class="multi-select-container">
+                    <button id="tipoCartaToggle" class="multi-select-button">Todos los Tipos ▼</button>
+                    <div id="tipoCartaDropdown" class="multi-select-dropdown">
+                        <div id="tipoCartaOptions"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-group filter-actions">
+                <button id="clearFiltersBtn" class="clear-filters-btn">🔄 Limpiar Filtros</button>
+            </div>
+        </div>
+
+        <div class="kpis-section">
+            <h2>Resumen por Trimestre</h2>
+            <div class="kpis-grid" id="kpiContainer">
+                </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>Comparación Evolutiva</h2>
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+
+        <div class="technicians-section">
+            <h2>Rendimiento por Técnico</h2>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Técnico</th>
+                            <th>Trimestre</th>
+                            <th>Total</th>
+                            <th>En Tiempo</th>
+                            <th>Fuera</th>
+                            <th>% Cumplimiento</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="techniciansTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="dashboard.js"></script>
+</body>
+</html>

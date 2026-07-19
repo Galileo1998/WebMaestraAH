@@ -1,0 +1,825 @@
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard de Desempeño - Acción Honduras</title>
+
+  <!-- Fuentes y estilos básicos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- DataTables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+
+  <style>
+    :root {
+      --ah-verde:  #46b094;
+      --ah-azul:   #34859b;
+      --ah-celeste:#b4d6e0;
+      --ah-fondo:  #f4f6f8;
+      --ah-gris:   #555;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--ah-fondo);
+      color: #222;
+    }
+
+    header {
+      background: linear-gradient(90deg, var(--ah-azul), var(--ah-verde));
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ah-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      object-fit: contain;
+      background: rgba(255,255,255,90);
+      padding: 4px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .file-input {
+      background: rgba(255, 255, 255, 0.16);
+      padding: 8px 12px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .file-input input[type="file"] {
+      border: none;
+      background: transparent;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .file-input input[type="file"]::-webkit-file-upload-button {
+      background: white;
+      color: var(--ah-azul);
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    main {
+      padding: 20px 24px 32px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .hint {
+      font-size: 0.9rem;
+      color: var(--ah-gris);
+      margin-bottom: 12px;
+    }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: 1.8fr 1.2fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 950px) {
+      .grid-top {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ah-azul);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 180px;
+      font-size: 0.85rem;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: var(--ah-gris);
+    }
+
+    select {
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid #ccd4dd;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    select[multiple] {
+      min-height: 90px;
+    }
+
+    .extra-options {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--ah-gris);
+    }
+
+    .extra-options label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .extra-options input[type="checkbox"] {
+      accent-color: var(--ah-azul);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 650px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi {
+      background: var(--ah-celeste);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      color: #325466;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ah-azul);
+    }
+
+    .kpi-sub {
+      font-size: 0.8rem;
+      color: #557;
+      margin-top: 2px;
+    }
+
+    .badge-colab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(70, 176, 148, 0.12);
+      color: var(--ah-verde);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .badge-colab span {
+      font-size: 1rem;
+    }
+
+    .colab-photo {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .colab-photo img {
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 2px solid var(--ah-azul);
+    }
+
+    .colab-photo .photo-placeholder {
+      font-size: 0.8rem;
+      color: var(--ah-gris);
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 260px;
+    }
+
+    #tabla-wrapper {
+      margin-top: 18px;
+    }
+
+    table.dataTable {
+      width: 100% !important;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e0e5ec;
+      background: white;
+    }
+
+    table.dataTable thead th {
+      background: #e9f3f6;
+      color: #234;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    table.dataTable tbody td {
+      font-size: 0.84rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .status-alto   { background: var(--ah-verde); }
+    .status-medio  { background: #f1a600; }
+    .status-bajo   { background: #e45757; }
+
+    .hidden { display: none !important; }
+
+    .auto-load-msg {
+      font-size: 0.8rem;
+      color: #eee;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <!-- Cambia el src al archivo real de tu logo -->
+    <img src="logo-accion-honduras.png" alt="Acción Honduras" class="ah-logo">
+    <div>
+      <h1>Evaluación de Desempeño Programático - AF-2026</h1>
+      <div class="auto-load-msg">
+        Se intentará cargar automáticamente el archivo <strong>matriz_desempeno.xlsx</strong>
+        (misma carpeta que este HTML).
+      </div>
+    </div>
+  </div>
+  <div class="file-input">
+    <span>Opcional: cargar otro archivo</span>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" />
+  </div>
+</header>
+
+<main>
+  <p class="hint">
+    Usa la hoja <strong>“Consol”</strong> del archivo de Excel, con las columnas
+    <em>Colaborador, Actividad, Area, periodo, Progr, Entreg, Difer, %</em>.
+    Los filtros permiten seleccionar <strong>varios</strong> colaboradores, áreas y períodos (Ctrl + clic).
+  </p>
+
+  <section id="dashboard" class="hidden">
+    <div class="grid-top">
+      <!-- Filtros + KPIs -->
+      <div class="card">
+        <h2>Filtros y resumen</h2>
+        <div class="filters">
+          <div class="filter-group">
+            <label for="filtro-colaborador">Colaborador (multi)</label>
+            <select id="filtro-colaborador" multiple>
+              <option value="__todos__">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filtro-area">Área (multi)</label>
+            <select id="filtro-area" multiple>
+              <option value="__todas__">Todas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filtro-periodo">Período (multi)</label>
+            <select id="filtro-periodo" multiple>
+              <option value="__todos__">Todos</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Checkboxes extra -->
+        <div class="extra-options">
+          <label>
+            <input type="checkbox" id="chkSinPeriodo" checked>
+            Quitar filas sin período
+          </label>
+          <label>
+            <input type="checkbox" id="chkPctCero">
+            Ocultar % cumplimiento = 0
+          </label>
+        </div>
+
+        <div id="colaboradorActivo" class="badge-colab">
+          <span>👤</span>
+          <span id="colaboradorNombre">Todos los colaboradores</span>
+        </div>
+
+        <!-- Foto del colaborador -->
+        <div class="colab-photo" id="colabPhotoWrapper">
+          <img id="fotoColaborador" src="" alt="Foto del colaborador" style="display:none;">
+          <span class="photo-placeholder" id="fotoPlaceholder">
+            Selecciona un solo colaborador para ver su foto.
+          </span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-label">Meta programada</div>
+            <div class="kpi-value" id="kpiProgramada">0</div>
+            <div class="kpi-sub">Suma de &quot;Progr&quot;</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Logro entregado</div>
+            <div class="kpi-value" id="kpiEntregada">0</div>
+            <div class="kpi-sub">Suma de &quot;Entreg&quot;</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">% Cumplimiento</div>
+            <div class="kpi-value" id="kpiCumplimiento">0%</div>
+            <div class="kpi-sub">Entregada / Programada</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico -->
+      <div class="card">
+        <h2>Cumplimiento por colaborador</h2>
+        <div class="chart-container">
+          <canvas id="graficoColaboradores"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div id="tabla-wrapper" class="card">
+      <h2>Detalle de actividades</h2>
+      <table id="tabla-rendimiento" class="display" style="width:100%">
+        <thead>
+          <tr>
+            <th>Colaborador</th>
+            <th>Actividad</th>
+            <th>Área</th>
+            <th>Período</th>
+            <th>Programada</th>
+            <th>Entregada</th>
+            <th>Diferencia</th>
+            <th>% Cumpl.</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Librerías JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+  const DEFAULT_FILE = "matriz_desempeno.xlsx"; // Cambia este nombre si quieres otro
+  const FOTO_BASE_PATH = "fotos/";              // Carpeta donde guardas las fotos
+  const FOTO_EXT = ".jpg";                      // Extensión de las fotos
+
+  let dataset = [];       // filas individuales
+  let resumenColab = [];  // agregados por colaborador (global)
+  let tabla = null;
+  let graficoColab = null;
+
+  const fileInput = document.getElementById("fileInput");
+  const dashboard = document.getElementById("dashboard");
+
+  const filtroColaborador = document.getElementById("filtro-colaborador");
+  const filtroArea         = document.getElementById("filtro-area");
+  const filtroPeriodo      = document.getElementById("filtro-periodo");
+
+  const chkSinPeriodo = document.getElementById("chkSinPeriodo");
+  const chkPctCero    = document.getElementById("chkPctCero");
+
+  const kpiProgramada    = document.getElementById("kpiProgramada");
+  const kpiEntregada     = document.getElementById("kpiEntregada");
+  const kpiCumplimiento  = document.getElementById("kpiCumplimiento");
+  const colaboradorNombre= document.getElementById("colaboradorNombre");
+
+  const fotoColaborador  = document.getElementById("fotoColaborador");
+  const fotoPlaceholder  = document.getElementById("fotoPlaceholder");
+
+  fileInput.addEventListener("change", handleFile, false);
+  filtroColaborador.addEventListener("change", aplicarFiltros);
+  filtroArea.addEventListener("change", aplicarFiltros);
+  filtroPeriodo.addEventListener("change", aplicarFiltros);
+  chkSinPeriodo.addEventListener("change", aplicarFiltros);
+  chkPctCero.addEventListener("change", aplicarFiltros);
+
+  // Al cargar la página, intentar leer el archivo por defecto
+  window.addEventListener("load", intentarCargarExcelPorDefecto);
+
+  function intentarCargarExcelPorDefecto() {
+    fetch(DEFAULT_FILE)
+      .then(res => {
+        if (!res.ok) throw new Error("No encontrado");
+        return res.arrayBuffer();
+      })
+      .then(buffer => {
+        const data = new Uint8Array(buffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        procesarWorkbook(workbook);
+      })
+      .catch(err => {
+        console.log("No se pudo cargar el archivo por defecto:", err.message);
+      });
+  }
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const data = evt.target.result;
+      const workbook = XLSX.read(data, {type: "binary"});
+      procesarWorkbook(workbook);
+    };
+
+    reader.readAsBinaryString(file);
+  }
+
+  function procesarWorkbook(workbook) {
+    const sheetName = workbook.Sheets["Consol"]
+      ? "Consol"
+      : workbook.SheetNames[0];
+
+    const sheet = workbook.Sheets[sheetName];
+
+    let filas = XLSX.utils.sheet_to_json(sheet, {defval: null});
+
+    filas = filas.filter(r => r.Colaborador && r.Colaborador !== "Colaborador");
+
+    dataset = filas.map(r => ({
+      colaborador: String(r.Colaborador || "").trim(),
+      actividad:   String(r.Actividad   || "").trim(),
+      area:        String(r.Area        || "").trim(),
+      periodo:     String(r.periodo     || "").trim(),
+      programada:  Number(r.Progr  || 0),
+      entregada:   Number(r.Entreg || 0),
+      diferencia:  Number(r.Difer  || 0),
+      porcentaje:  Number(r["%"]   || 0)
+    }));
+
+    construirResumenColab();
+    inicializarDashboard();
+  }
+
+  function construirResumenColab() {
+    const agregados = {};
+    dataset.forEach(f => {
+      if (!agregados[f.colaborador]) {
+        agregados[f.colaborador] = {
+          colaborador: f.colaborador,
+          totalProgramada: 0,
+          totalEntregada: 0
+        };
+      }
+      agregados[f.colaborador].totalProgramada += f.programada || 0;
+      agregados[f.colaborador].totalEntregada  += f.entregada || 0;
+    });
+
+    resumenColab = Object.values(agregados).map(item => {
+      const { totalProgramada, totalEntregada } = item;
+      const cumplimiento = totalProgramada > 0
+        ? (totalEntregada / totalProgramada) * 100
+        : 0;
+      return {
+        colaborador: item.colaborador,
+        totalProgramada,
+        totalEntregada,
+        cumplimiento: Number(cumplimiento.toFixed(2))
+      };
+    });
+
+    resumenColab.sort((a, b) => a.colaborador.localeCompare(b.colaborador, "es"));
+  }
+
+  function inicializarDashboard() {
+    if (!dataset.length) return;
+
+    dashboard.classList.remove("hidden");
+
+    poblarFiltros();
+    inicializarTabla();
+    inicializarGrafico();
+    actualizarKpisYTabla();
+  }
+
+  function poblarFiltros() {
+    filtroColaborador.innerHTML = '<option value="__todos__">Todos</option>';
+    filtroArea.innerHTML        = '<option value="__todas__">Todas</option>';
+    filtroPeriodo.innerHTML     = '<option value="__todos__">Todos</option>';
+
+    const colabs = new Set();
+    const areas  = new Set();
+    const periodos = new Set();
+
+    dataset.forEach(f => {
+      if (f.colaborador) colabs.add(f.colaborador);
+      if (f.area)        areas.add(f.area);
+      if (f.periodo)     periodos.add(f.periodo);
+    });
+
+    Array.from(colabs).sort((a,b) => a.localeCompare(b,"es")).forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      filtroColaborador.appendChild(opt);
+    });
+
+    Array.from(areas).sort((a,b) => a.localeCompare(b,"es")).forEach(a => {
+      const opt = document.createElement("option");
+      opt.value = a;
+      opt.textContent = a;
+      filtroArea.appendChild(opt);
+    });
+
+    Array.from(periodos).sort((a,b) => a.localeCompare(b,"es")).forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p;
+      opt.textContent = p;
+      filtroPeriodo.appendChild(opt);
+    });
+
+    filtroColaborador.selectedIndex = -1;
+    filtroArea.selectedIndex = -1;
+    filtroPeriodo.selectedIndex = -1;
+  }
+
+  function inicializarTabla() {
+    if (tabla) {
+      tabla.destroy();
+      $("#tabla-rendimiento tbody").empty();
+    }
+
+    tabla = $("#tabla-rendimiento").DataTable({
+      data: dataset,
+      columns: [
+        { data: "colaborador" },
+        { data: "actividad" },
+        { data: "area" },
+        { data: "periodo" },
+        { data: "programada" },
+        { data: "entregada" },
+        { data: "diferencia" },
+        {
+          data: "porcentaje",
+          render: function(value) {
+            const pct = Number(value || 0);
+            let clase = "status-bajo";
+            // NUEVOS UMBRALES:
+            // <70 rojo, 70–89 naranja, >=90 verde
+            if (pct >= 90)      clase = "status-alto";
+            else if (pct >=70 ) clase = "status-medio";
+
+            return '<span class="status-pill ' + clase + '">' +
+                    pct.toFixed(1) + '%</span>';
+          }
+        }
+      ],
+      order: [[0, "asc"]],
+      pageLength: 10,
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
+      }
+    });
+  }
+
+  function inicializarGrafico() {
+    const ctx = document.getElementById("graficoColaboradores").getContext("2d");
+
+    const labels = resumenColab.map(r => r.colaborador);
+    const values = resumenColab.map(r => r.cumplimiento);
+
+    if (graficoColab) graficoColab.destroy();
+
+    graficoColab = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "% de cumplimiento",
+          data: values,
+          borderWidth: 1,
+          backgroundColor: "rgba(52, 133, 155, 0.7)"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 120,
+            title: {
+              display: true,
+              text: "% de cumplimiento"
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.parsed.y.toFixed(1) + "%"
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function getMultiSelectValues(selectElem, allToken) {
+    const values = Array.from(selectElem.selectedOptions).map(o => o.value);
+    if (values.length === 0) return null;
+    if (values.includes(allToken)) return null;
+    return values;
+  }
+
+  function aplicarFiltros() {
+    actualizarKpisYTabla();
+  }
+
+  function nombreArchivoFoto(nombre) {
+    if (!nombre) return null;
+    let file = nombre.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    file = file.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+    return FOTO_BASE_PATH + file + FOTO_EXT;
+  }
+
+  function actualizarFoto(nombreColab) {
+    if (!nombreColab) {
+      fotoColaborador.style.display = "none";
+      fotoPlaceholder.textContent = "Selecciona un solo colaborador para ver su foto.";
+      fotoPlaceholder.style.display = "inline";
+      return;
+    }
+    const src = nombreArchivoFoto(nombreColab);
+    if (!src) {
+      fotoColaborador.style.display = "none";
+      fotoPlaceholder.textContent = "No se encontró la foto para: " + nombreColab;
+      fotoPlaceholder.style.display = "inline";
+      return;
+    }
+
+    fotoColaborador.onerror = function() {
+      fotoColaborador.style.display = "none";
+      fotoPlaceholder.textContent = "No se encontró la foto para: " + nombreColab;
+      fotoPlaceholder.style.display = "inline";
+    };
+
+    fotoColaborador.onload = function() {
+      fotoColaborador.style.display = "inline-block";
+      fotoPlaceholder.style.display = "none";
+    };
+
+    fotoColaborador.src = src;
+  }
+
+  function actualizarKpisYTabla() {
+    const selColabs = getMultiSelectValues(filtroColaborador, "__todos__");
+    const selAreas  = getMultiSelectValues(filtroArea, "__todas__");
+    const selPers   = getMultiSelectValues(filtroPeriodo, "__todos__");
+
+    const sinPeriodoActivo = chkSinPeriodo.checked;
+    const pctCeroActivo    = chkPctCero.checked;
+
+    const filtradas = dataset.filter(f => {
+      const okColab = !selColabs || selColabs.includes(f.colaborador);
+      const okArea  = !selAreas  || selAreas.includes(f.area);
+      const okPer   = !selPers   || selPers.includes(f.periodo);
+
+      const tienePeriodo = f.periodo && String(f.periodo).trim() !== "";
+      const okSinPeriodo = !sinPeriodoActivo || tienePeriodo;
+
+      const pct = Number(f.porcentaje || 0);
+      const okPctCero = !pctCeroActivo || pct !== 0;
+
+      return okColab && okArea && okPer && okSinPeriodo && okPctCero;
+    });
+
+    tabla.clear();
+    tabla.rows.add(filtradas);
+    tabla.draw();
+
+    let totalProg = 0;
+    let totalEntr = 0;
+    filtradas.forEach(f => {
+      totalProg += f.programada || 0;
+      totalEntr += f.entregada  || 0;
+    });
+    const cumplimiento = totalProg > 0 ? (totalEntr / totalProg) * 100 : 0;
+
+    kpiProgramada.textContent = totalProg.toLocaleString("es-HN");
+    kpiEntregada.textContent  = totalEntr.toLocaleString("es-HN");
+    kpiCumplimiento.textContent = cumplimiento.toFixed(1) + "%";
+
+    if (!selColabs) {
+      colaboradorNombre.textContent = "Todos los colaboradores";
+      actualizarFoto(null);
+    } else if (selColabs.length === 1) {
+      colaboradorNombre.textContent = selColabs[0];
+      actualizarFoto(selColabs[0]);
+    } else {
+      colaboradorNombre.textContent = "Varios colaboradores (" + selColabs.length + ")";
+      actualizarFoto(null);
+    }
+
+    const agregados = {};
+    filtradas.forEach(f => {
+      if (!agregados[f.colaborador]) {
+        agregados[f.colaborador] = { prog: 0, entr: 0 };
+      }
+      agregados[f.colaborador].prog += f.programada || 0;
+      agregados[f.colaborador].entr += f.entregada || 0;
+    });
+
+    const labels = [];
+    const values = [];
+    Object.keys(agregados).sort((a,b)=>a.localeCompare(b,"es")).forEach(colab => {
+      const prog = agregados[colab].prog;
+      const entr = agregados[colab].entr;
+      const pct  = prog > 0 ? (entr / prog) * 100 : 0;
+      labels.push(colab);
+      values.push(Number(pct.toFixed(2)));
+    });
+
+    graficoColab.data.labels = labels;
+    graficoColab.data.datasets[0].data = values;
+    graficoColab.update();
+  }
+</script>
+
+</body>
+</html>

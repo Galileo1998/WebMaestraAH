@@ -1,0 +1,162 @@
+{
+    "47": {
+        "quotes": [
+            {
+                "id": 1,
+                "posicion": 1,
+                "proveedor": "ACOSA",
+                "rtn": "11111111111111111111111111111",
+                "estado_cotizacion": "Cotizó",
+                "es_ganador": 1,
+                "descuento": 0,
+                "subtotal": 50000,
+                "isv": 7500,
+                "total": 57500
+            },
+            {
+                "id": 2,
+                "posicion": 2,
+                "proveedor": "ACOSA",
+                "rtn": "11111111111111111111111111111",
+                "estado_cotizacion": "Cotizó",
+                "es_ganador": 0,
+                "descuento": 0,
+                "subtotal": 55500,
+                "isv": 8325,
+                "total": 63825
+            },
+            {
+                "id": 3,
+                "posicion": 3,
+                "proveedor": "ACOSA",
+                "rtn": "11111111111111111111111111111",
+                "estado_cotizacion": "Cotizó",
+                "es_ganador": 0,
+                "descuento": 0,
+                "subtotal": 75000,
+                "isv": 11250,
+                "total": 86250
+            }
+        ],
+        "rows": [
+            {
+                "id": 48,
+                "orden": 1,
+                "cantidad": 1,
+                "presentacion": "Unidad",
+                "articulo": "Laptop",
+                "caracteristicas": "16GB, 512SSD",
+                "es_extra": 0,
+                "compra_detalle_id": 48
+            }
+        ],
+        "prices": {
+            "48": {
+                "1": {
+                    "cotizacion_id": 1,
+                    "resumen_fila_id": 48,
+                    "precio_unitario": 50000,
+                    "tipo_impuesto": "G",
+                    "precio_total": 50000
+                },
+                "2": {
+                    "cotizacion_id": 2,
+                    "resumen_fila_id": 48,
+                    "precio_unitario": 55500,
+                    "tipo_impuesto": "G",
+                    "precio_total": 55500
+                },
+                "3": {
+                    "cotizacion_id": 3,
+                    "resumen_fila_id": 48,
+                    "precio_unitario": 75000,
+                    "tipo_impuesto": "G",
+                    "precio_total": 75000
+                }
+            }
+        },
+        "observacion_cotizacion": "Se adjudica la compra a ACOSA.",
+        "fecha_analisis_cotizacion": "2026-07-14",
+        "updated_at": "2026-07-14T05:09:34+00:00"
+    },
+    "51": {
+        "quotes": [
+            {
+                "id": 1,
+                "posicion": 1,
+                "proveedor": "ACOSA",
+                "rtn": "11111111111111111111111111111",
+                "estado_cotizacion": "Cotizó",
+                "es_ganador": 1,
+                "descuento": 0,
+                "subtotal": 58000,
+                "isv": 8700,
+                "total": 66700
+            },
+            {
+                "id": 2,
+                "posicion": 2,
+                "proveedor": "ACOSA",
+                "rtn": "11111111111111111111111111111",
+                "estado_cotizacion": "Cotizó",
+                "es_ganador": 0,
+                "descuento": 0,
+                "subtotal": 60000,
+                "isv": 9000,
+                "total": 69000
+            },
+            {
+                "id": 3,
+                "posicion": 3,
+                "proveedor": "ACOSA",
+                "rtn": "11111111111111111111111111111",
+                "estado_cotizacion": "Cotizó",
+                "es_ganador": 0,
+                "descuento": 0,
+                "subtotal": 70000,
+                "isv": 10500,
+                "total": 80500
+            }
+        ],
+        "rows": [
+            {
+                "id": 54,
+                "orden": 1,
+                "cantidad": 1,
+                "presentacion": "Unidad",
+                "articulo": "Refrigeradora",
+                "caracteristicas": "dos puertas",
+                "es_extra": 0,
+                "compra_detalle_id": 54
+            }
+        ],
+        "prices": {
+            "54": {
+                "1": {
+                    "cotizacion_id": 1,
+                    "resumen_fila_id": 54,
+                    "precio_unitario": 58000,
+                    "tipo_impuesto": "G",
+                    "precio_total": 58000
+                },
+                "2": {
+                    "cotizacion_id": 2,
+                    "resumen_fila_id": 54,
+                    "precio_unitario": 60000,
+                    "tipo_impuesto": "G",
+                    "precio_total": 60000
+                },
+                "3": {
+                    "cotizacion_id": 3,
+                    "resumen_fila_id": 54,
+                    "precio_unitario": 70000,
+                    "tipo_impuesto": "G",
+                    "precio_total": 70000
+                }
+            }
+        },
+        "observacion_cotizacion": "Análisis de compra",
+        "fecha_analisis_cotizacion": "2026-07-14",
+        "updated_at": "2026-07-14T23:03:16+00:00"
+    }
+}

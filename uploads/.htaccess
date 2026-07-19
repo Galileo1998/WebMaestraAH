@@ -1,0 +1,19 @@
+Options -Indexes
+
+# Los archivos cargados son contenido, nunca aplicaciones ejecutables.
+<FilesMatch "(?i)\.(?:php[0-9]?|phtml|phar|cgi|pl|py|sh|shtml)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_mime.c>
+    RemoveHandler .php .php2 .php3 .php4 .php5 .php7 .php8 .phtml .phar
+    RemoveType .php .php2 .php3 .php4 .php5 .php7 .php8 .phtml .phar
+</IfModule>
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

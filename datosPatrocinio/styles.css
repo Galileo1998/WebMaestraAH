@@ -1,0 +1,457 @@
+/* Paleta de colores Acción Honduras */
+:root {
+    --primary-blue: #003366;
+    --secondary-turquoise: #00A0A8;
+    --accent-orange: #F38A00;
+    --bg-light: #F5F9FC;
+    --card-white: #FFFFFF;
+    --border-light: #D7E2EE;
+    --text-primary: #1F2933;
+    --text-secondary: #6B7280;
+    --status-excellent: #10B981;
+    --status-good: #F59E0B;
+    --status-improve: #EF4444;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-turquoise) 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.header-logo {
+    flex-shrink: 0;
+}
+
+.header-logo img {
+    height: 80px;
+    width: auto;
+    filter: brightness(0) invert(1);    
+}
+
+.header-text {
+    flex: 1;
+}
+
+.header-text h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Filtros */
+.filters-section {
+    background: var(--card-white);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    border: 1px solid var(--border-light);
+    align-items: flex-end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.filter-group.filter-actions {
+    flex: 0;
+    min-width: auto;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.filter-select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid var(--border-light);
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: var(--secondary-turquoise);
+    outline: none;
+}
+
+/* Botón Limpiar Filtros */
+.clear-filters-btn {
+    padding: 10px 20px;
+    background-color: var(--accent-orange);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(20, 20, 20, 0.1);
+}
+
+.clear-filters-btn:hover {
+    background-color: #00A0A8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.clear-filters-btn:active {
+    transform: translateY(0);
+}
+
+/* Multi-select para tipo de correspondencia */
+.multi-select-container {
+    position: relative;
+    width: 100%;
+}
+
+.multi-select-button {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid var(--border-light);
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.multi-select-button:hover,
+.multi-select-button:focus {
+    border-color: var(--secondary-turquoise);
+    outline: none;
+}
+
+.multi-select-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid var(--border-light);
+    border-radius: 6px;
+    margin-top: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.multi-select-dropdown.active {
+    display: block;
+}
+
+.multi-select-option {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.multi-select-option:hover {
+    background-color: var(--bg-light);
+}
+
+.multi-select-option input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--secondary-turquoise);
+}
+
+.multi-select-option label {
+    cursor: pointer;
+    margin: 0;
+    flex: 1;
+    font-weight: normal;
+}
+
+.multi-select-option input[type="checkbox"]:checked + label {
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+/* KPIs */
+.kpis-section {
+    margin-bottom: 30px;
+}
+
+.kpis-section h2 {
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.kpi-card {
+    background: var(--card-white);
+    padding: 25px;
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-turquoise);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.kpi-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.status-excellent {
+    border-left-color: var(--status-excellent);
+}
+
+.status-excellent .kpi-value {
+    color: var(--status-excellent);
+}
+
+/* Secciones de gráficos */
+.chart-section,
+.technicians-section,
+.correspondence-section,
+.location-section {
+    background: var(--card-white);
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 1px solid var(--border-light);
+}
+
+.chart-section h2,
+.technicians-section h2,
+.correspondence-section h2,
+.location-section h2 {
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    margin-top: 20px;
+}
+
+.chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.chart-container-half {
+    position: relative;
+}
+
+.chart-container-half h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.chart-container-half canvas {
+    max-height: 350px;
+}
+
+/* Tabla */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.data-table thead {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+.data-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color 0.2s;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--bg-light);
+}
+
+.data-table td {
+    padding: 12px 15px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.excellent {
+    background-color: #D1FAE5;
+    color: var(--status-excellent);
+}
+
+.status-badge.good {
+    background-color: #FEF3C7;
+    color: var(--status-good);
+}
+
+.status-badge.improve {
+    background-color: #FEE2E2;
+    color: var(--status-improve);
+}
+
+/* Grid de correspondencia */
+.correspondence-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.correspondence-card {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+}
+
+.correspondence-card h3 {
+    color: var(--primary-blue);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.correspondence-card canvas {
+    max-height: 250px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chart-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .correspondence-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-section {
+        flex-direction: column;
+    }
+    
+    .filter-group.filter-actions {
+        width: 100%;
+    }
+    
+    .clear-filters-btn {
+        width: 100%;
+    }
+    
+    .header-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .header-logo img {
+        height: 60px;
+    }
+    
+    .header-text h1 {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 0.95rem;
+    }
+}

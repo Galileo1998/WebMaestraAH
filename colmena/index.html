@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Open Graph básico -->
+<!-- Open Graph -->
+<meta property="og:title" content="Acción Honduras">
+<meta property="og:description" content="Inspirando comunidades, creando oportunidades.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://accionhonduras.org/colmena/">
+<meta property="og:site_name" content="Acción Honduras">
+
+<!-- Vista previa (WhatsApp, Facebook, Messenger) -->
+<meta property="og:image" content="https://accionhonduras.org/colmena/logo-1.png">
+<meta property="og:image:secure_url" content="https://accionhonduras.org/colmena/logo-1.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Logo de Acción Honduras">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Colmena — Acción Honduras">
+<meta name="twitter:description" content="Experiencia Educativa Digital Segura. Inspirando comunidades, creando oportunidades.">
+<meta name="twitter:image" content="https://accionhonduras.org/colmena/logo-1.png">
+
+<!-- Fallback -->
+<link rel="image_src" href="https://accionhonduras.org/colmena/logo-1.png">
+
+
+<!-- Fallback clásico (algunos parsers antiguos) -->
+<link rel="image_src" href="https://accionhonduras.org/colmena/og-colmena.jpg">
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acción Honduras</title>
+<style>
+:root{
+  --ah-green:#46b094; --ah-teal:#34859b; --ah-sky:#b4d6e0;
+  --ink:#142329; --muted:#4a5b63; --bg:#f6fbfc; --card:#fff;
+  --radius:22px; --shadow:0 10px 30px rgba(0,0,0,.10);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Helvetica Neue,Arial,Noto Sans;color:var(--ink);background:linear-gradient(180deg,var(--bg),#eaf6f9)}
+.deck{position:relative;height:100dvh;overflow:hidden}
+.chrome{position:absolute;inset:20px;border-radius:26px;padding:26px;background:
+  radial-gradient(1400px 600px at -15% -10%,var(--ah-sky),transparent 60%),
+  radial-gradient(900px 500px at 120% 120%,rgba(70,176,148,.15),transparent 60%),
+  #f7fdff;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--ah-green),var(--ah-teal));box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);position:relative}
+.brand-mark::before{content:"AH";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
+.brand-name{font-weight:800;font-size:18px}
+.subtitle{color:var(--muted);font-size:12px}
+.ribbon{height:10px;width:120px;border-radius:10px;background:linear-gradient(90deg,var(--ah-green),var(--ah-teal));margin-bottom:14px}
+.slides{position:absolute;inset:90px 26px 110px 26px;overflow:hidden auto}
+.track{display:flex;height:100%;transition:transform .6s cubic-bezier(.22,.9,.25,1)}
+.slide{min-width:100%;padding:40px;display:grid;grid-template-rows:auto 1fr;gap:24px;padding-bottom:64px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}
+h1{margin:0;font-size:44px;line-height:1.06}
+h2{margin:0 0 8px;font-size:28px}
+p.lead{font-size:18px;color:var(--muted)}
+.foot{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
+.grid-2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:26px}
+.table-wrap{overflow:auto;border-radius:16px;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;background:#fff;table-layout:fixed;font-size:15px}
+thead th{position:sticky;top:0;background:linear-gradient(180deg,var(--ah-sky),#e9f5f9);color:#0e2a34;text-align:left;padding:14px 16px;font-weight:700;border-bottom:2px solid #d1e8ef}
+tbody td{padding:12px 16px;border-bottom:1px solid #eef6f9;word-break:break-word;hyphens:auto}
+tbody tr:hover{background:#f6fcff}
+td:first-child{font-weight:600}
+.nav{position:absolute;inset:auto 40px 34px 40px;display:flex;justify-content:space-between;align-items:center;gap:16px;z-index:50}
+.btn{border:none;width:54px;height:54px;border-radius:16px;background:linear-gradient(180deg,#fff,#f0fbfe);box-shadow:var(--shadow);cursor:pointer}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.progress{display:flex;gap:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:#cfe8ee;border:none;cursor:pointer}
+.dot.active{background:var(--ah-teal)}
+@media (max-width:1180px){h1{font-size:38px}h2{font-size:24px}.slides{inset:84px 16px 96px 16px}}
+@media (max-width:860px){h1{font-size:34px}h2{font-size:22px}.card{padding:22px}}
+@media (max-width:680px){
+  .slides{inset:72px 10px 96px 10px}
+  .card{padding:18px;border-radius:18px}
+  .table-wrap{box-shadow:none}
+  table,thead,tbody,th,td,tr{display:block}
+  thead{display:none}
+  tbody tr{background:#fff;border-radius:14px;box-shadow:var(--shadow);margin:10px 0;overflow:hidden}
+  tbody td{padding:10px 14px;border:none;border-bottom:1px solid #eef6f9;position:relative}
+  tbody tr td:last-child{border-bottom:none}
+  tbody td::before{content:attr(data-label);display:block;font-weight:700;font-size:12px;color:#0e2a34;margin-bottom:4px;opacity:.9}
+  .btn{width:48px;height:48px;border-radius:14px}
+  .dot{width:8px;height:8px}
+}
+</style>
+</head>
+<body>
+<div class="deck">
+  <div class="chrome">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <div class="brand-name">Acción Honduras</div>
+        <div class="subtitle">Inspirando comunidades, creando oportunidades</div>
+      </div>
+    </div>
+
+    <div class="slides" id="slides">
+      <div class="track" id="track">
+
+        <!-- 1) PORTADA -->
+       <!-- ====== PORTADA (reemplaza tu slide 1 por este bloque) ====== -->
+<section class="slide slide-cover" data-title="Portada institucional">
+
+
+  <div class="cover-grid">
+    <!-- LOGO -->
+    
+    <article class="card media-card">
+
+
+      <!-- Sustituye src="logo.png" por tu ruta; queda bien con transparencia -->
+             <figure class="media-frame">
+        <img class="media-img" src="logo.png" alt="Logo oficial de Acción Honduras"
+             loading="eager" />
+        </figure>
+
+
+    </article>
+    
+        <article class="card media-card">
+
+
+      <!-- Sustituye src="logo.png" por tu ruta; queda bien con transparencia -->
+             <figure class="media-frame">
+        <img class="media-img" src="img2.jpeg" alt="Logo oficial de Acción Honduras" style="height: 320px !important;"
+             loading="eager" />
+        </figure>
+
+
+    </article>
+  </div>
+
+  <div class="foot">
+    <span>Presentación institucional</span>
+    <span>© Acción Honduras</span>
+  </div>
+</section>
+
+<!-- ====== CSS específico de la portada (puedes pegarlo tras tu <style> actual) ====== -->
+<style>
+  /* Portada */
+  .slide-cover { gap: 22px; }
+  .cover-head { display:grid; gap: 6px; }
+  .cover-title { margin:0; font-size: clamp(34px, 5.6vw, 56px); line-height:1.05; }
+  .cover-tag { margin:0; color: var(--muted); font-size: clamp(14px, 1.6vw, 18px); }
+
+  .cover-grid{
+    display:grid;
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    gap: 24px;
+  }
+
+  .media-card{ display:grid; gap:14px; }
+  .media-head h2{ margin:0; font-size: clamp(18px,2.2vw,24px); }
+  .media-foot{ display:flex; flex-wrap:wrap; gap:8px }
+
+  .media-frame{
+    margin:0; position:relative; overflow:hidden;
+    border-radius:18px;
+    background:
+      radial-gradient(1200px 600px at -20% -10%, rgba(180,214,224,.45), transparent 60%),
+      linear-gradient(180deg,#f7fdff,#eef7fb);
+    border: 2px dashed #c8e6ed;
+    min-height: 220px;
+    aspect-ratio: 16 / 9;        /* hace que se vea siempre prolijo */
+    display:grid; place-items:center;
+    box-shadow: var(--shadow);
+  }
+
+  .media-img{
+    width: 75%; height: 75%;
+    object-fit: contain;         /* respeta proporción del logo/mapa */
+    object-position: center;
+    padding: 16px;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,.08));
+    background: transparent;
+  }
+
+  .media-hint{
+    position:absolute; inset:auto 10px 10px 10px;
+    text-align:center; font-size:12px; color:#57707a; opacity:.9;
+    background: rgba(255,255,255,.6); backdrop-filter: blur(2px);
+    padding:6px 10px; border-radius:10px; border:1px solid #e3f2f6;
+  }
+
+  /* Chips reutilizan tu estilo base */
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:13px;font-weight:600;color:#08313a;background:linear-gradient(180deg,#e9fbf6,#d3f4ec);border:1px solid #b7e7d9}
+  .chip.blue{background:linear-gradient(180deg,#ecf7fb,#d7eef6);border-color:#c4e5ef}
+
+  /* Responsive */
+  @media (max-width: 980px){
+    .cover-grid{ grid-template-columns: 1fr; }
+  }
+</style>
+
+
+        <!-- 2) ASOCIOS Y METODOLOGÍAS IMPLEMENTADAS -->
+        <section class="slide">
+          <div class="card">
+            <h2>1. Asocios y Metodologías implementadas</h2>
+            <div class="table-wrap" role="region" aria-label="DPI, Protección, Educación">
+                <!-- DESARROLLO DE LA PRIMERA INFANCIA -->
+                <table>
+                  <thead>
+                    <tr><th colspan="4">DESARROLLO DE LA PRIMERA INFANCIA</th></tr>
+                    <tr>
+                      <th>Proyectos / Metodologías</th>
+                      <th>Asocio</th>
+                      <th>Recursos</th>
+                      <th>Imagen</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <ul class="list-table">
+                          <li>Juega Conmigo – Guía Catrachitos, Estimulación Temprana</li>
+                          <li>Convenio para Reforzar la Educación Preescolar</li>
+                          <li>Modelo Descentralizado de Salud</li>
+                          <li>Guías Nutricionales de Honduras</li>
+                          <li>Recuperación Nutricional y Control de Crecimiento</li>
+                          <li>Agua Segura y Estaciones de Lavado</li>
+                        </ul>
+                      </td>
+                      <td>
+                        • ChildFund • UNICEF • SENAF • SEDUC • SESAL • Orden de Malta • UNAH • P&amp;G • ASER
+                      </td>
+                      <td>
+                        435 líderes, 43 locales ADN-DIT, 18 UAPS, 6 CIS, 120 centros preescolares, módulos Creciendo Contigo.
+                      </td>
+                      <td><img class="tabla-img" src="img1.jpeg" height="200px" alt="Desarrollo de la Primera Infancia"></td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- PROTECCIÓN -->
+                <table style="margin-top:28px">
+                  <thead>
+                    <tr><th colspan="4">PROTECCIÓN</th></tr>
+                    <tr>
+                      <th>Proyectos / Metodologías</th>
+                      <th>Asocio</th>
+                      <th>Recursos</th>
+                      <th>Imagen</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <ul class="list-table">
+                          <li>Programa de Apoyo Socioemocional (PASE)</li>
+                          <li>Miles de Manos</li>
+                          <li>Emisora Radial Construyendo Sueños</li>
+                          <li>Investigación sobre violencia hacia la niñez y la mujer</li>
+                          <li>Identificación de formas de violencia y abuso sexual infantil</li>
+                          <li>Consejos Municipales de Protección a la Niñez</li>
+                        </ul>
+                      </td>
+                      <td>
+                        • ChildFund • SEDUC • Universidad de Sevilla • INE • SENAF • Fiscalía Especial de la Niñez • Alcaldías
+                      </td>
+                      <td>
+                        74 centros educativos, 94 docentes, módulos de Niñez Segura y Protegida, ruta de derivación, líneas de denuncia.
+                      </td>
+                      <td><img class="tabla-img" src="img3.jpeg" height="200px" alt="Protección de la Niñez"></td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <!-- EDUCACIÓN / APRENDIZAJE -->
+                <table style="margin-top:28px">
+                  <thead>
+                    <tr><th colspan="4">EDUCACIÓN / APRENDIZAJE</th></tr>
+                    <tr>
+                      <th>Proyectos / Metodologías</th>
+                      <th>Asocio</th>
+                      <th>Recursos</th>
+                      <th>Imagen</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <ul class="list-table">
+                          <li>Experiencia Educativa Digital Segura (EEDS) – Formación y Kit Tecnológico</li>
+                          <li>Formación para la Promoción de Derechos y Desarrollo Educativo</li>
+                          <li>Liderazgo Escolar y Planes de Seguridad Escolar</li>
+                        </ul>
+                      </td>
+                      <td>
+                        • ChildFund • GFC • FCA • RDS • Policía Nacional • SEDUC
+                      </td>
+                      <td>
+                        65 centros educativos, 292 docentes, 139 APF, 5 direcciones municipales de educación, módulos RRD.
+                      </td>
+                      <td><img class="tabla-img" src="img2.jpeg" height="180px" alt="Educación y Aprendizaje"></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+            </div>
+          </div>
+          <div class="foot"><span>Asocios y Metodologías</span><span>Implementadas</span></div>
+        </section>
+
+        <!-- 3) MEDIOS DE VIDA y RRD -->
+        <section class="slide">
+          <div class="card">
+            <h2>2. Asocios y Metodologías — Medios de Vida</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th colspan="3">MEDIOS DE VIDA</th></tr>
+                  <tr><th>Proyectos / Metodologías</th><th>Asocio</th><th>Recursos</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Comunidades Resilientes</td>
+                    <td>• PMA</td>
+                    <td rowspan="5">
+                      • 43 locales comunitarios<br>
+                      • 86 voluntarias juveniles<br>
+                      • Equipo y salones audiovisuales<br>
+                      • Módulos de Empleabilidad y Plan de Vida
+                    </td>
+                  </tr>
+                  <tr><td>Capacitación y capital semilla para emprendimientos</td><td>• CONEANFO<br>• CDE MiPyme – Golfo de Fonseca</td></tr>
+                  <tr><td>Formación ocupacional juvenil</td><td>• INFOP</td></tr>
+                  <tr><td>Emprendeton</td><td>• SEMPRENDE<br>• ChildFund</td></tr>
+                  <tr><td>Cultura Emprendedora</td><td>• CDE MiPyme – Golfo de Fonseca</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:26px">
+            <h2>Asocios y Metodologías — Reducción de Riesgos y Desastres</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th colspan="3">REDUCCIÓN DE RIESGOS Y DESASTRES</th></tr>
+                  <tr><th>Proyectos / Metodologías</th><th>Asocio</th><th>Recursos</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Alimentos a familias vulnerables — Embarazadas y NN</td>
+                    <td>• PMA<br>• CODEM<br>• Patronatos</td>
+                    <td rowspan="6">
+                      • Talento Humano calificado en áreas de emergencia<br>
+                      • Medios de divulgación y comunicación<br>
+                      • Protocolo de emergencia
+                    </td>
+                  </tr>
+                  <tr><td>Viveros, reforestación y limpieza de caminos</td><td>• PMA<br>• CODEM<br>• Patronatos</td></tr>
+                  <tr><td>Kit de Higiene y alimentación en emergencia – Cash Transfer</td><td>• ChildFund<br>• Iglesia<br>• Alcaldías</td></tr>
+                  <tr><td>Atención a familias vulnerables y en situación de emergencia</td><td>• IRC – Comité Internacional de Rescate</td></tr>
+                  <tr><td>Capacitación a ET sobre protección de niñez en situaciones de emergencia</td><td>• GOAL</td></tr>
+                  <tr><td>Desarrollo de plan de acción y preparación ante emergencias</td><td>• Red Humanitaria<br>• CODEM</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="foot"><span>Medios de Vida & RRD</span><span>Implementación</span></div>
+        </section>
+
+        <!-- 4) ASPIRACIÓN FUTURA -->
+        <section class="slide">
+          <div class="card">
+            <h2>3. Aspiración futura de asocios y metodologías</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th colspan="4">DESARROLLO DE LA PRIMERA INFANCIA</th></tr>
+                  <tr><th>Proyectos / Metodologías</th><th>Asocio</th><th>Recursos</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Integración de servicios de atención Primaria en Salud a NN – 6 años</td>
+                    <td>• SEDUC<br>• SESAL</td>
+                    <td rowspan="2">
+                      • Centros ADN<br>
+                      • Centros de Salud<br>
+                      • Promotores de Salud<br>
+                      • Red de Voluntarias
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Iniciativa Digital Segura para la Salud Preventiva de NN –6 años, madres y embarazadas.</td>
+                    <td>• SESAL<br>• Alcaldías<br>• Patronatos</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-wrap" style="margin-top:26px">
+              <table>
+                <thead>
+                  <tr><th colspan="4">EDUCACIÓN / APRENDIZAJE</th></tr>
+                  <tr><th>Proyectos / Metodologías</th><th>Asocio</th><th>Recursos</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Tutoría Solidaria</td>
+                    <td>• Fundación TERRA<br>• World Vision<br>• SEDUC</td>
+                    <td rowspan="3">
+                      • Centros Educativos<br>
+                      • APFs<br>
+                      • Experiencias previas<br>
+                      • Experiencia y conocimiento tecnológico
+                    </td>
+                  </tr>
+                  <tr><td>Emprendimiento Escolar con enfoque Educativo</td><td>• INFOP<br>• CONEANFO<br>• SEDUC</td></tr>
+                  <tr><td>Acceso Digital a Educación para 3er ciclo, bachillerato y educación informal</td><td>• IHER<br>• INFOP Virtual<br>• Fundación Slim<br>• SEDUC<br>• CENET</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="foot"><span>Aspiración futura</span><span>Alianzas objetivo</span></div>
+        </section>
+        <!-- 5) CERTIFICACIONES Y CAPACIDADES INSTITUCIONALES -->    
+        <section class="slide">
+          <div class="card">
+            <h2>4. Certificaciones o validaciones</h2>
+            <ul class="list-pretty">
+              <li><strong>12 Políticas institucionales</strong></li>
+              <li><strong>UEI – plataforma SAM.gov:</strong> fondos federales de EE. UU.</li>
+              <li><strong>PEAS – UNICEF:</strong> agencias del Sistema de Naciones Unidas</li>
+              <li><strong>EuropeAID – plataforma PADOR:</strong> fondos de la Unión Europea</li>
+              <li><strong>FOPRIDEH</strong></li>
+              <li><strong>DIRSACC:</strong> reconocimiento de informes financieros por la Dirección de Regulación, Registro y Seguimiento de Asociaciones Civiles</li>
+              <li><strong>Cartas de recomendación:</strong> GFC, ChildFund, PMA</li>
+            </ul>
+          </div>
+        
+          <div class="grid-2" style="margin-top:26px">
+            <div class="card">
+              <h2>Capacidades institucionales</h2>
+              <h3>Gestión de recursos</h3>
+              <ul class="list-pretty">
+                <li>Fundación Pestalozzi — Convocatoria abierta de nuevo socio</li>
+                <li>USAID — Adaptación climática y gestión de recursos hídricos en la Reserva de Yerba Buena, Lepaterique</li>
+                <li>GFC</li>
+                <li>GNDR — Resiliencia comunitaria y fortalecimiento de gestión del riesgo</li>
+                <li>IRC</li>
+                <li>PNUD — Proyecto EuroElect-H: apoyo al ciclo electoral transparente y pacífico</li>
+                <li>PMA — Asistencia en emergencias, protección social, alimentación escolar</li>
+                <li>CARE — Empleabilidad juvenil y resiliencia climática</li>
+                <li>Consorcio UE (ADASBA, Aldea Global, AH, PROHMEDA) — Veeduría social</li>
+                <li>COODEFAGOLFF — Sistematización y recursos digitales para defensa ambiental</li>
+                <li>Consultorías diversas</li>
+              </ul>
+            </div>
+        
+            <div class="card">
+              <h2>Gestión del conocimiento</h2>
+              <ul class="list-pretty">
+                <li>Emisora local y virtual (App)</li>
+                <li>Página web institucional</li>
+                <li>Editorial Acción Honduras</li>
+                <li>Redes sociales</li>
+                <li>Academia Acción Honduras</li>
+              </ul>
+            </div>
+          </div>
+        
+          <div class="foot">
+            <span>Certificaciones y Capacidades</span>
+            <span>Gestión institucional</span>
+          </div>
+        </section>
+        
+        <!-- ==== CSS extra (puedes ponerlo después del bloque de @media en tu <style>) ==== -->
+        <style>
+        .list-pretty{
+          margin:0; padding-left:20px;
+          display:grid; gap:6px;
+          font-size:15px; line-height:1.45;
+        }
+        .list-pretty li::marker{color:var(--ah-teal)}
+        .list-pretty strong{color:var(--ah-teal)}
+        @media(max-width:680px){
+          .list-pretty{font-size:14px}
+        }
+        </style>
+      </div>
+      
+
+        
+
+    </div>
+
+    <div class="nav" aria-label="Controles de navegación">
+      <button class="btn" id="prev" aria-label="Anterior">⟵</button>
+      <div class="progress" id="progress"></div>
+      <button class="btn" id="next" aria-label="Siguiente">⟶</button>
+    </div>
+  </div>
+</div>
+<script>
+const track=document.getElementById('track');
+const slides=[...document.querySelectorAll('.slide')];
+const progress=document.getElementById('progress');
+const prev=document.getElementById('prev');
+const next=document.getElementById('next');
+const slidesContainer=document.getElementById('slides');
+let i=0;
+
+function labelizeTables(){
+  document.querySelectorAll('table').forEach(t=>{
+    const heads=[...t.querySelectorAll('thead th')].map(x=>x.textContent.trim());
+    t.querySelectorAll('tbody tr').forEach(tr=>{
+      [...tr.children].forEach((td,k)=>td.setAttribute('data-label',heads[k]||''));
+    });
+  });
+}
+function render(){
+  track.style.transform=`translateX(-${i*100}%)`;
+  progress.innerHTML=slides.map((_,k)=>`<button class="dot ${k===i?'active':''}" data-i="${k}"></button>`).join('');
+  progress.querySelectorAll('.dot').forEach(d=>d.onclick=()=>{i=+d.dataset.i;render();});
+  prev.disabled=(i===0); next.disabled=(i===slides.length-1);
+}
+prev.onclick=()=>{i=Math.max(0,i-1);render();};
+next.onclick=()=>{i=Math.min(slides.length-1,i+1);render();};
+
+window.addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next.click();}
+  if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev.click();}
+  if(e.key==='Home'){i=0;render();}
+  if(e.key==='End'){i=slides.length-1;render();}
+});
+
+let sx=0,sy=0,drag=false;
+slidesContainer.addEventListener('touchstart',e=>{if(!e.touches.length)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;drag=true;},{passive:true});
+slidesContainer.addEventListener('touchmove',e=>{if(!drag)return;const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;if(Math.abs(dx)>Math.abs(dy)*1.5)e.preventDefault();},{passive:false});
+slidesContainer.addEventListener('touchend',e=>{if(!drag)return;drag=false;const ex=(e.changedTouches?.[0]?.clientX)||sx;const dx=ex-sx;const th=50;if(dx<=-th)next.click();if(dx>=th)prev.click();});
+
+window.addEventListener('DOMContentLoaded',()=>{labelizeTables();render();});
+new MutationObserver(()=>labelizeTables()).observe(document.body,{subtree:true,childList:true});
+</script>
+</body>
+</html>

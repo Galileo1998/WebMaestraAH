@@ -1,0 +1,1867 @@
+--- NUEVO INTENTO 2025-12-29 23:07:14 ---
+POST: Array
+(
+    [server_id] => 25
+    [message] => SENTIMIENTOS: 
+ACTIVIDADES: 
+APRENDIZAJE: 
+COMPARTIR: 
+AGRADECIMIENTO:
+)
+
+FILES: Array
+(
+)
+
+--- NUEVO INTENTO 2025-12-29 23:43:15 ---
+POST: Array
+(
+    [server_id] => 23
+    [message] => SENTIMIENTOS: 
+ACTIVIDADES: 
+APRENDIZAJE: 
+COMPARTIR: 
+AGRADECIMIENTO:
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_23.png
+            [full_path] => drawing_23.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php6B03.tmp
+            [error] => 0
+            [size] => 130193
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php6BB0.tmp
+            [error] => 0
+            [size] => 1760637
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php6F6A.tmp
+            [error] => 0
+            [size] => 1733569
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php7363.tmp
+            [error] => 0
+            [size] => 545494
+        )
+
+)
+
+--- NUEVO INTENTO 2025-12-29 23:46:41 ---
+POST: Array
+(
+    [server_id] => 26
+    [message] => Hola h
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_26.png
+            [full_path] => drawing_26.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php916D.tmp
+            [error] => 0
+            [size] => 66221
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php91BC.tmp
+            [error] => 0
+            [size] => 1453986
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php93B1.tmp
+            [error] => 0
+            [size] => 1635940
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php9577.tmp
+            [error] => 0
+            [size] => 1826506
+        )
+
+)
+
+--- NUEVO INTENTO 2025-12-30 02:02:23 ---
+POST: Array
+(
+    [server_id] => 24
+    [message] => Hola hol
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_24.png
+            [full_path] => drawing_24.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\phpD184.tmp
+            [error] => 0
+            [size] => 78468
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpD1B4.tmp
+            [error] => 0
+            [size] => 668652
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpD3C8.tmp
+            [error] => 0
+            [size] => 716294
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpD511.tmp
+            [error] => 0
+            [size] => 720151
+        )
+
+)
+
+--- NUEVO INTENTO 2025-12-30 02:16:28 ---
+POST: Array
+(
+    [server_id] => 21
+    [message] => Hola hola
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_21.png
+            [full_path] => drawing_21.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\phpB381.tmp
+            [error] => 0
+            [size] => 44819
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB3A1.tmp
+            [error] => 0
+            [size] => 744218
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB558.tmp
+            [error] => 0
+            [size] => 740547
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB6C0.tmp
+            [error] => 0
+            [size] => 733783
+        )
+
+)
+
+--- NUEVO INTENTO 2025-12-31 00:30:09 ---
+POST: Array
+(
+    [server_id] => 22
+    [message] => Hola hola
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_22.png
+            [full_path] => drawing_22.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\phpB493.tmp
+            [error] => 0
+            [size] => 78931
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB649.tmp
+            [error] => 0
+            [size] => 515045
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB9E4.tmp
+            [error] => 0
+            [size] => 659645
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpBF06.tmp
+            [error] => 0
+            [size] => 409413
+        )
+
+)
+
+--- NUEVO INTENTO 2025-12-31 03:11:23 ---
+POST: Array
+(
+    [server_id] => 21
+    [message] => Corregida ok
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_21.png
+            [full_path] => drawing_21.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php589C.tmp
+            [error] => 0
+            [size] => 59558
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php58DC.tmp
+            [error] => 0
+            [size] => 660844
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php5A44.tmp
+            [error] => 0
+            [size] => 637124
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php5B8D.tmp
+            [error] => 0
+            [size] => 662169
+        )
+
+)
+
+--- NUEVO INTENTO 2025-12-31 03:24:27 ---
+POST: Array
+(
+    [server_id] => 22
+    [message] => Hola hola 
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_22.png
+            [full_path] => drawing_22.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php4C23.tmp
+            [error] => 0
+            [size] => 45404
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php4CEF.tmp
+            [error] => 0
+            [size] => 546683
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php4FDE.tmp
+            [error] => 0
+            [size] => 619848
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php51E2.tmp
+            [error] => 0
+            [size] => 595257
+        )
+
+)
+
+--- NUEVO INTENTO 2025-12-31 03:45:50 ---
+POST: Array
+(
+    [server_id] => 59
+    [message] => Hoy tyii8
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_59.png
+            [full_path] => drawing_59.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\phpE5AB.tmp
+            [error] => 0
+            [size] => 87981
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpE5BC.tmp
+            [error] => 0
+            [size] => 652949
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpE668.tmp
+            [error] => 0
+            [size] => 671130
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpE715.tmp
+            [error] => 0
+            [size] => 776150
+        )
+
+)
+
+--- NUEVO INTENTO 2026-01-05 15:54:20 ---
+POST: Array
+(
+    [server_id] => 45
+    [message] => Hola hola
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_45.png
+            [full_path] => drawing_45.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\phpB723.tmp
+            [error] => 0
+            [size] => 50575
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB734.tmp
+            [error] => 0
+            [size] => 752478
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB84E.tmp
+            [error] => 0
+            [size] => 818823
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpB92A.tmp
+            [error] => 0
+            [size] => 824725
+        )
+
+)
+
+--- NUEVO INTENTO 2026-01-05 16:29:39 ---
+POST: Array
+(
+    [server_id] => 22
+    [message] => Hola hffhrww
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_22.png
+            [full_path] => drawing_22.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php6D3.tmp
+            [error] => 0
+            [size] => 114664
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\phpA5E.tmp
+            [error] => 0
+            [size] => 734242
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php103B.tmp
+            [error] => 0
+            [size] => 585014
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php11C3.tmp
+            [error] => 0
+            [size] => 676003
+        )
+
+)
+
+--- NUEVO INTENTO 2026-01-05 17:43:05 ---
+POST: Array
+(
+    [server_id] => 36
+    [message] => Hola hokyy
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_36.png
+            [full_path] => drawing_36.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php4503.tmp
+            [error] => 0
+            [size] => 60301
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php4533.tmp
+            [error] => 0
+            [size] => 599368
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php465D.tmp
+            [error] => 0
+            [size] => 703389
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php49AA.tmp
+            [error] => 0
+            [size] => 644223
+        )
+
+)
+
+--- NUEVO INTENTO 2026-01-05 21:19:35 ---
+POST: Array
+(
+    [server_id] => 58
+    [message] => No quiero ser patrocinado, el técnico es malo
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_58.png
+            [full_path] => drawing_58.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php7F4F.tmp
+            [error] => 0
+            [size] => 50342
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php7F60.tmp
+            [error] => 0
+            [size] => 696073
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php802C.tmp
+            [error] => 0
+            [size] => 301999
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php805C.tmp
+            [error] => 0
+            [size] => 474813
+        )
+
+)
+
+--- NUEVO INTENTO 2026-01-05 21:22:36 ---
+POST: Array
+(
+    [server_id] => 58
+    [message] => Querido padrino quiero decirle que usted es el mejor padrino del mundo. Es el mejor padrino que he tenido, no lo cambiaría por nadie.
+
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_58.png
+            [full_path] => drawing_58.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php44EB.tmp
+            [error] => 0
+            [size] => 50342
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php450C.tmp
+            [error] => 0
+            [size] => 696073
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php458A.tmp
+            [error] => 0
+            [size] => 301999
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php45B9.tmp
+            [error] => 0
+            [size] => 474813
+        )
+
+)
+
+--- NUEVO INTENTO 2026-01-05 21:59:38 ---
+POST: Array
+(
+    [server_id] => 58
+    [message] => Querido padrino quiero decirle que usted es el mejor padrino del mundo. Es el mejor padrino que he tenido, no lo cambiaría por nadie.
+
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_58.png
+            [full_path] => drawing_58.png
+            [type] => image/png
+            [tmp_name] => C:\celestia\tmp\php2AF9.tmp
+            [error] => 0
+            [size] => 50342
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php2B29.tmp
+            [error] => 0
+            [size] => 696073
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php2BF5.tmp
+            [error] => 0
+            [size] => 301999
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\celestia\tmp\php2C54.tmp
+            [error] => 0
+            [size] => 290323
+        )
+
+)
+
+[2026-01-18 00:34:35] --- Nueva solicitud de Sync (Pull) ---
+[2026-01-18 00:34:35] Dato recibido: 123456
+[2026-01-18 00:34:35] Cartas encontradas: 0
+[2026-01-18 00:34:35] Enviado correctamente.
+[2026-01-18 00:35:16] --- Nueva solicitud de Sync (Pull) ---
+[2026-01-18 00:35:16] Dato recibido: 123456
+[2026-01-18 00:35:16] Cartas encontradas: 0
+[2026-01-18 00:35:16] Enviado correctamente.
+[2026-01-18 00:37:22] --- Nueva solicitud de Sync ---
+[2026-01-18 00:37:22] Dato recibido: 123456
+[2026-01-18 00:37:22] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:37:22] Cartas encontradas para ID 1: 2
+[2026-01-18 00:37:22] Enviado OK.
+--- NUEVO INTENTO 2026-01-18 00:38:15 ---
+POST: Array
+(
+    [server_id] => 80
+    [message] => Hola que tal
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_80.png
+            [full_path] => drawing_80.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpTNLv4I
+            [error] => 0
+            [size] => 18437
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpOBXZcO
+            [error] => 0
+            [size] => 603514
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php2iCfhZ
+            [error] => 0
+            [size] => 582724
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpsLeIYg
+            [error] => 0
+            [size] => 547444
+        )
+
+)
+
+[2026-01-18 00:38:16] --- Nueva solicitud de Sync ---
+[2026-01-18 00:38:16] Dato recibido: 123456
+[2026-01-18 00:38:16] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:38:16] Cartas encontradas para ID 1: 1
+[2026-01-18 00:38:16] Enviado OK.
+[2026-01-18 00:38:57] --- Nueva solicitud de Sync ---
+[2026-01-18 00:38:57] Dato recibido: 123456
+[2026-01-18 00:38:57] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:38:57] Cartas encontradas para ID 1: 2
+[2026-01-18 00:38:57] Procesando devolución para carta ID: 80
+[2026-01-18 00:38:57] ERROR SQL: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:39:03] --- Nueva solicitud de Sync ---
+[2026-01-18 00:39:03] Dato recibido: 123456
+[2026-01-18 00:39:03] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:39:03] Cartas encontradas para ID 1: 2
+[2026-01-18 00:39:03] Procesando devolución para carta ID: 80
+[2026-01-18 00:39:03] ERROR SQL: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:39:17] --- Nueva solicitud de Sync ---
+[2026-01-18 00:39:17] Dato recibido: 123456
+[2026-01-18 00:39:17] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:39:17] Cartas encontradas para ID 1: 2
+[2026-01-18 00:39:17] Procesando devolución para carta ID: 80
+[2026-01-18 00:39:17] ERROR SQL: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:39:49] --- Nueva solicitud de Sync ---
+[2026-01-18 00:39:49] Dato recibido: 123456
+[2026-01-18 00:39:49] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:39:49] Cartas encontradas para ID 1: 3
+[2026-01-18 00:39:49] Procesando devolución para carta ID: 80
+[2026-01-18 00:39:49] ERROR SQL: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:40:12] --- Nueva solicitud de Sync ---
+[2026-01-18 00:40:12] Dato recibido: 123456
+[2026-01-18 00:40:12] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:40:12] Cartas encontradas para ID 1: 3
+[2026-01-18 00:40:12] Procesando devolución para carta ID: 80
+[2026-01-18 00:40:12] ERROR SQL: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:40:44] --- Nueva solicitud de Sync ---
+[2026-01-18 00:40:44] Dato recibido: 123456
+[2026-01-18 00:40:44] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:40:44] Cartas encontradas para ID 1: 3
+[2026-01-18 00:40:44] Procesando devolución para carta ID: 80
+[2026-01-18 00:40:44] ERROR SQL: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:41:25] --- Nueva solicitud de Sync ---
+[2026-01-18 00:41:25] Dato recibido: 123456
+[2026-01-18 00:41:25] --> El dato '123456' es un TELÉFONO. ID Técnico real: 1
+[2026-01-18 00:41:25] Cartas encontradas para ID 1: 3
+[2026-01-18 00:41:25] Procesando devolución para carta ID: 80
+[2026-01-18 00:41:25] ERROR SQL: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:41:50] >>> INICIO Sync (Pull) <<<
+[2026-01-18 00:41:50] Identificador recibido: 123456
+[2026-01-18 00:41:50] MATCH: El dato '123456' es un TELÉFONO. ID Técnico: 1
+[2026-01-18 00:41:50] Cartas encontradas: 3
+[2026-01-18 00:41:50] Procesando devolución Carta ID: 80
+[2026-01-18 00:41:50] ERROR CRÍTICO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:41:52] >>> INICIO Sync (Pull) <<<
+[2026-01-18 00:41:52] Identificador recibido: 123456
+[2026-01-18 00:41:52] MATCH: El dato '123456' es un TELÉFONO. ID Técnico: 1
+[2026-01-18 00:41:52] Cartas encontradas: 3
+[2026-01-18 00:41:52] Procesando devolución Carta ID: 80
+[2026-01-18 00:41:52] ERROR CRÍTICO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:42:46] >>> INICIO Sync (Pull) <<<
+[2026-01-18 00:42:46] Identificador recibido: 123456
+[2026-01-18 00:42:46] MATCH: El dato '123456' es un TELÉFONO. ID Técnico: 1
+[2026-01-18 00:42:46] Cartas encontradas: 3
+[2026-01-18 00:42:46] Procesando devolución Carta ID: 80
+[2026-01-18 00:42:46] ERROR CRÍTICO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:43:16] >>> INICIO Sync (Pull) <<<
+[2026-01-18 00:43:16] Identificador recibido: 123456
+[2026-01-18 00:43:16] MATCH: El dato '123456' es un TELÉFONO. ID Técnico: 1
+[2026-01-18 00:43:16] Cartas encontradas: 3
+[2026-01-18 00:43:16] Procesando devolución Carta ID: 80
+[2026-01-18 00:43:16] ERROR CRÍTICO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'content' in 'field list'
+[2026-01-18 00:44:37] >>> INICIO Sync (Pull) <<<
+[2026-01-18 00:44:37] MATCH: Teléfono '123456' -> ID 1
+[2026-01-18 00:44:37] Cartas encontradas: 3
+[2026-01-18 00:44:37] Procesando devolución Carta ID: 80
+[2026-01-18 00:44:37] ERROR CRÍTICO: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'type' in 'where clause'
+[2026-01-18 00:46:52] >>> INICIO Sync (Pull v3) <<<
+[2026-01-18 00:46:52] MATCH: Teléfono '123456' -> ID 1
+[2026-01-18 00:46:52] Cartas encontradas: 3
+[2026-01-18 00:46:52] Procesando devolución Carta ID: 80
+[2026-01-18 00:46:52] Enviado OK.
+--- NUEVO INTENTO 2026-01-18 00:47:25 ---
+POST: Array
+(
+    [server_id] => 80
+    [message] => Hola que tal
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_80.png
+            [full_path] => drawing_80.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpai8LDb
+            [error] => 0
+            [size] => 18437
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpfXzxlJ
+            [error] => 0
+            [size] => 603514
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php5js8En
+            [error] => 0
+            [size] => 582724
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpvBR9g8
+            [error] => 0
+            [size] => 547444
+        )
+
+)
+
+[2026-01-18 00:47:26] >>> INICIO Sync (Pull v3) <<<
+[2026-01-18 00:47:26] MATCH: Teléfono '123456' -> ID 1
+[2026-01-18 00:47:26] Cartas encontradas: 2
+[2026-01-18 00:47:26] Enviado OK.
+[2026-01-18 00:50:33] >>> INICIO Sync (Pull v3) <<<
+[2026-01-18 00:50:33] MATCH: Teléfono '123456' -> ID 1
+[2026-01-18 00:50:33] Cartas encontradas: 3
+[2026-01-18 00:50:33] Procesando devolución Carta ID: 80
+[2026-01-18 00:50:33] Enviado OK.
+[2026-01-17 19:03:39] >>> INICIO Sync (Pull v4 - Cálculo Servidor) <<<
+[2026-01-17 19:03:39] Usuario identificado: 1
+[2026-01-17 19:03:48] >>> INICIO Sync (Pull v4 - Cálculo Servidor) <<<
+[2026-01-17 19:03:48] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-18 01:40:02 ---
+POST: Array
+(
+    [server_id] => 77
+    [message] => Holy hyijhyhhj
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_77.png
+            [full_path] => drawing_77.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpJwTwzG
+            [error] => 0
+            [size] => 14155
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php2KQ1cJ
+            [error] => 0
+            [size] => 631533
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpQ3ux7T
+            [error] => 0
+            [size] => 707211
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpLwua9d
+            [error] => 0
+            [size] => 667307
+        )
+
+)
+
+[2026-01-17 19:40:02] >>> INICIO Sync (Pull v4 - Cálculo Servidor) <<<
+[2026-01-17 19:40:02] Usuario identificado: 1
+[2026-01-17 19:40:29] >>> INICIO Sync (Pull v4 - Cálculo Servidor) <<<
+[2026-01-17 19:40:29] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-18 01:41:13 ---
+POST: Array
+(
+    [server_id] => 77
+    [message] => Holy hyijhyhhj
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_77.png
+            [full_path] => drawing_77.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpVdjuyP
+            [error] => 0
+            [size] => 32731
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php24BWa1
+            [error] => 0
+            [size] => 631533
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpibBrBj
+            [error] => 0
+            [size] => 707211
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phphmLw7J
+            [error] => 0
+            [size] => 667307
+        )
+
+)
+
+[2026-01-17 19:41:14] >>> INICIO Sync (Pull v4 - Cálculo Servidor) <<<
+[2026-01-17 19:41:14] Usuario identificado: 1
+[2026-01-17 19:50:19] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-17 19:50:19] Usuario identificado: 1
+[2026-01-17 19:51:51] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-17 19:51:51] Usuario identificado: 1
+[2026-01-18 11:44:23] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 11:44:23] Usuario identificado: 3
+[2026-01-18 12:25:56] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 12:25:56] Usuario identificado: 1
+[2026-01-18 12:27:48] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 12:27:48] Usuario identificado: 1
+[2026-01-18 12:29:03] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 12:29:03] Usuario identificado: 1
+[2026-01-18 12:29:14] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 12:29:14] Usuario identificado: 1
+[2026-01-18 12:29:25] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 12:29:25] Usuario identificado: 1
+[2026-01-18 13:56:35] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 13:56:35] Usuario identificado: 1
+[2026-01-18 14:05:23] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 14:05:23] Usuario identificado: 1
+[2026-01-18 14:37:31] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 14:37:31] Usuario identificado: 1
+[2026-01-18 15:34:55] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 15:34:55] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-18 21:37:49 ---
+POST: Array
+(
+    [server_id] => 78
+    [message] => Hola como estas
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_78.png
+            [full_path] => drawing_78.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpJMnDb8
+            [error] => 0
+            [size] => 48523
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpPN2WNZ
+            [error] => 0
+            [size] => 1082640
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpheb003
+            [error] => 0
+            [size] => 1032773
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpNEUpFj
+            [error] => 0
+            [size] => 1534683
+        )
+
+)
+
+[2026-01-18 15:37:49] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 15:37:49] Usuario identificado: 1
+[2026-01-18 15:38:43] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 15:38:43] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-18 21:39:29 ---
+POST: Array
+(
+    [server_id] => 78
+    [message] => Hola como estas Becky?
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_78.png
+            [full_path] => drawing_78.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpAcSGjT
+            [error] => 0
+            [size] => 48523
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpwDzU2v
+            [error] => 0
+            [size] => 1082640
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpBajasi
+            [error] => 0
+            [size] => 1032773
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpCies9e
+            [error] => 0
+            [size] => 1534683
+        )
+
+)
+
+[2026-01-18 15:39:29] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-18 15:39:29] Usuario identificado: 1
+[2026-01-19 09:47:39] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:47:39] Usuario identificado: 1
+[2026-01-19 09:54:39] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:54:39] Usuario identificado: 1
+[2026-01-19 09:55:49] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:55:49] Usuario identificado: 1
+[2026-01-19 09:55:58] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:55:58] Usuario identificado: 1
+[2026-01-19 09:56:13] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:56:13] Usuario identificado: 1
+[2026-01-19 09:56:28] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:56:28] Usuario identificado: 1
+[2026-01-19 09:56:42] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:56:42] Usuario identificado: 1
+[2026-01-19 09:57:32] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 09:57:32] Usuario identificado: 1
+[2026-01-19 11:29:45] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 11:29:45] Usuario identificado: 2
+--- NUEVO INTENTO 2026-01-19 17:30:50 ---
+POST: Array
+(
+    [server_id] => 79
+    [message] => Hola cómo estas
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_79.png
+            [full_path] => drawing_79.png
+            [type] => image/png
+            [tmp_name] => /tmp/phplA3FE8
+            [error] => 0
+            [size] => 45602
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpXBWdtG
+            [error] => 0
+            [size] => 692338
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpppgstq
+            [error] => 0
+            [size] => 588897
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpYsLpql
+            [error] => 0
+            [size] => 785534
+        )
+
+)
+
+[2026-01-19 11:30:50] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 11:30:50] Usuario identificado: 2
+[2026-01-19 11:32:11] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 11:32:11] Usuario identificado: 2
+--- NUEVO INTENTO 2026-01-19 17:33:09 ---
+POST: Array
+(
+    [server_id] => 79
+    [message] => Hola cómo estas, el niño está realizando una actividad programática en el Centro Educativo.
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_79.png
+            [full_path] => drawing_79.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpCeX6J1
+            [error] => 0
+            [size] => 45602
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpoR2QGs
+            [error] => 0
+            [size] => 692338
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpTdhmx5
+            [error] => 0
+            [size] => 588897
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpKjAtST
+            [error] => 0
+            [size] => 785534
+        )
+
+)
+
+[2026-01-19 11:33:09] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 11:33:09] Usuario identificado: 2
+[2026-01-19 21:06:47] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 21:06:47] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-20 03:14:45 ---
+POST: Array
+(
+    [server_id] => 80
+    [message] => Hola usted 
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_80.png
+            [full_path] => drawing_80.png
+            [type] => image/png
+            [tmp_name] => /tmp/php3u6FXI
+            [error] => 0
+            [size] => 14645
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpqXVsZW
+            [error] => 0
+            [size] => 131987
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpqDMSSc
+            [error] => 0
+            [size] => 558321
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpOGtxdK
+            [error] => 0
+            [size] => 529950
+        )
+
+)
+
+[2026-01-19 21:14:45] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 21:14:45] Usuario identificado: 1
+[2026-01-19 21:16:20] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 21:16:20] Usuario identificado: 1
+[2026-01-19 21:47:08] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-19 21:47:08] Usuario identificado: 1
+[2026-01-20 09:48:17] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:48:17] Usuario identificado: 1
+[2026-01-20 09:49:23] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:49:23] Usuario identificado: 1
+[2026-01-20 09:49:30] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:49:30] Usuario identificado: 1
+[2026-01-20 09:50:58] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:50:58] Usuario identificado: 1
+[2026-01-20 09:51:27] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:51:27] Usuario identificado: 1
+[2026-01-20 09:53:14] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:53:14] Usuario identificado: 1
+[2026-01-20 09:53:18] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:53:18] Usuario identificado: 1
+[2026-01-20 09:53:22] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 09:53:22] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-20 16:17:06 ---
+POST: Array
+(
+    [server_id] => 87
+    [message] => Becky Pastuszek soy Julia mama de Lian. El tiene tres años, le gusta mucho el color verde, tiene como mascota un gato, y cuando sea grande quiere ser policia. 
+A lían le gustaría saber si usted le gustan los dinosaurios
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_87.png
+            [full_path] => drawing_87.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpyqZQBa
+            [error] => 0
+            [size] => 108689
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phppqAe5k
+            [error] => 0
+            [size] => 1148492
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpKxsOMN
+            [error] => 0
+            [size] => 708611
+        )
+
+)
+
+[2026-01-20 10:17:06] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:17:06] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-20 16:18:06 ---
+POST: Array
+(
+    [server_id] => 84
+    [message] => Estimado padrino estoy muy agradecido por todas tus contribuciones conmigo y mi familia.
+
+Te cuéntame estoy por iniciar el periodo de cases voy a séptimo grado, me siento contento ya que espero poder avanzar en mis estudios así poder culminar una carrera de nivel medio.
+
+Me despido deseando lo mejor para usted y su familia, con abundante salud y prosperidad para su vida.
+
+Muchas gracias su ahijado Melvin Ariel.
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_84.png
+            [full_path] => drawing_84.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpP0Xsm8
+            [error] => 0
+            [size] => 70367
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpHtibzg
+            [error] => 0
+            [size] => 609571
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phps8M6NE
+            [error] => 0
+            [size] => 1870580
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phphcCj3Q
+            [error] => 0
+            [size] => 2124772
+        )
+
+)
+
+[2026-01-20 10:18:07] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:18:07] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-20 16:19:14 ---
+POST: Array
+(
+    [server_id] => 86
+    [message] => Querido Delores Romano.
+Me alegro que me haya patrocinado. 
+Vivimos en la comunidad de Cacerique del municipio de Curaren, Honduras. 
+Mi hijo tiene 2 años y le gusta jugar con la carreta de la casa.
+
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_86.png
+            [full_path] => drawing_86.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpPd0fBe
+            [error] => 0
+            [size] => 40541
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpuV80gs
+            [error] => 0
+            [size] => 1253738
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php6s5B30
+            [error] => 0
+            [size] => 1319700
+        )
+
+)
+
+[2026-01-20 10:19:15] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:19:15] Usuario identificado: 1
+[2026-01-20 10:26:18] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:26:18] Usuario identificado: 1
+[2026-01-20 10:29:18] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:29:18] Usuario identificado: 1
+[2026-01-20 10:31:37] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:31:37] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-20 16:31:50 ---
+POST: Array
+(
+    [server_id] => 83
+    [message] => Hola estimada patrocinadora Betty, doy Jaison, tengo 9 años h me gusta el pollo asado, estoy en tercer grado espero este muy bien. Le cuento que aqui esta muy frio, no tengo sueter talvez puduera conseguir alguno. En diciembre tuvimos feria en la comunidad y estuvo muy bonito. Mi mama Esther y mi Papa Armando estan muy bien. Muchas gracias por apadrinsrme, espero me escriba pronto.
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_83.png
+            [full_path] => drawing_83.png
+            [type] => image/png
+            [tmp_name] => /tmp/php3pH2zf
+            [error] => 0
+            [size] => 85755
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpROve8y
+            [error] => 0
+            [size] => 1318573
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpl7jKEo
+            [error] => 0
+            [size] => 1416509
+        )
+
+)
+
+[2026-01-20 10:31:50] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:31:50] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-20 16:32:05 ---
+POST: Array
+(
+    [server_id] => 87
+    [message] => Becky Pastuszek soy Julia mama de Lian. Gracias por apadrinar a mi hijo.  El tiene tres años, le gusta mucho el color verde, tiene como mascota un gato, y cuando sea grande quiere ser policia. 
+A lían le gustaría saber si usted le gustan los dinosaurios
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_87.png
+            [full_path] => drawing_87.png
+            [type] => image/png
+            [tmp_name] => /tmp/php30TvgB
+            [error] => 0
+            [size] => 108689
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpWq8njc
+            [error] => 0
+            [size] => 1148492
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpJf2tU4
+            [error] => 0
+            [size] => 708611
+        )
+
+)
+
+[2026-01-20 10:32:05] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-20 10:32:05] Usuario identificado: 1
+[2026-01-21 15:55:33] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-21 15:55:33] Usuario identificado: 1
+--- NUEVO INTENTO 2026-01-21 21:57:31 ---
+POST: Array
+(
+    [server_id] => 82
+    [message] => Necesito agregar una funcionalidad que Ale el nombre del padrino aquí en el mensaje para que el técnico no se equivoque o si es un regalo para poder colocar el valor de dólares
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_82.png
+            [full_path] => drawing_82.png
+            [type] => image/png
+            [tmp_name] => /tmp/php02zh0p
+            [error] => 0
+            [size] => 14905
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpftY65N
+            [error] => 0
+            [size] => 726260
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpyi42ro
+            [error] => 0
+            [size] => 67625
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpqCIlWZ
+            [error] => 0
+            [size] => 1065575
+        )
+
+)
+
+[2026-01-21 15:57:32] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-01-21 15:57:32] Usuario identificado: 1
+--- NUEVO INTENTO 2026-02-27 22:08:10 ---
+POST: Array
+(
+    [server_id] => 80
+    [message] => Hola s
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_80.png
+            [full_path] => drawing_80.png
+            [type] => image/png
+            [tmp_name] => /tmp/php7BePkv
+            [error] => 0
+            [size] => 41886
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpgAdZLi
+            [error] => 0
+            [size] => 94223
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/php4tSJr7
+            [error] => 0
+            [size] => 153428
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpLrdEBX
+            [error] => 0
+            [size] => 154333
+        )
+
+)
+
+[2026-02-27 16:08:10] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-02-27 16:08:10] Usuario identificado: 1
+[2026-04-30 15:11:05] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-04-30 15:11:05] Usuario identificado: 31904870
+[2026-04-30 15:18:17] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-04-30 15:18:17] Usuario identificado: 4
+--- NUEVO INTENTO 2026-04-30 21:19:42 ---
+POST: Array
+(
+    [server_id] => 97
+    [message] => Texto de carta
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_97.png
+            [full_path] => drawing_97.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpAJT52F
+            [error] => 0
+            [size] => 56657
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpAya7ej
+            [error] => 0
+            [size] => 1722976
+        )
+
+    [photo_1] => Array
+        (
+            [name] => photo_1.jpg
+            [full_path] => photo_1.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpxdMwHa
+            [error] => 0
+            [size] => 1653559
+        )
+
+    [photo_2] => Array
+        (
+            [name] => photo_2.jpg
+            [full_path] => photo_2.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpRJ1Ymh
+            [error] => 0
+            [size] => 1749849
+        )
+
+)
+
+[2026-04-30 15:19:42] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-04-30 15:19:42] Usuario identificado: 4
+[2026-04-30 15:31:28] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-04-30 15:31:28] Usuario identificado: 4
+--- NUEVO INTENTO 2026-04-30 21:32:08 ---
+POST: Array
+(
+    [server_id] => 97
+    [message] => Texto de carta
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_97.png
+            [full_path] => drawing_97.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpUMpxlz
+            [error] => 0
+            [size] => 56657
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpPyon6p
+            [error] => 0
+            [size] => 1556870
+        )
+
+)
+
+[2026-04-30 15:32:09] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-04-30 15:32:09] Usuario identificado: 4
+[2026-05-06 13:37:59] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-05-06 13:37:59] Usuario identificado: 4
+[2026-05-06 13:40:01] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-05-06 13:40:01] Usuario identificado: 4
+--- NUEVO INTENTO 2026-05-06 21:01:15 ---
+POST: Array
+(
+    [server_id] => 85
+    [message] => Hola 👋
+)
+
+FILES: Array
+(
+    [drawing] => Array
+        (
+            [name] => drawing_85.png
+            [full_path] => drawing_85.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpictR1i
+            [error] => 0
+            [size] => 24243
+        )
+
+    [photo_0] => Array
+        (
+            [name] => photo_0.jpg
+            [full_path] => photo_0.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpxqh2WJ
+            [error] => 0
+            [size] => 406795
+        )
+
+)
+
+[2026-05-06 15:01:16] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-05-06 15:01:16] Usuario identificado: 4
+[2026-05-06 15:02:09] >>> INICIO Sync (Pull v5 - Fix Tipos) <<<
+[2026-05-06 15:02:09] Usuario identificado: 4

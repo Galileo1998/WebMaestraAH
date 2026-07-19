@@ -1,0 +1,3 @@
+/security/config.local.php
+/accion_security_storage/
+/security/*.log

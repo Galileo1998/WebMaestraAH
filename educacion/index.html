@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Niñez Segura y Protegida y Me Quiero Me Cuido</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Dashboard Niñez Segura y Protegida y Me Quiero Me Cuido</h2>
+    <input type="file" id="uploadCSV" accept=".csv">
+    <label for="columnX">Selecciona eje X:</label>
+    <select id="columnX"></select>
+    <canvas id="chartCanvas" width="400" height="200"></canvas>
+
+    <script>
+        let jsonData = [];
+        let headers = [];
+
+        document.getElementById('uploadCSV').addEventListener('change', function(event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+                var text = e.target.result;
+                var rows = text.split("\n").map(row => row.split(/[,;\t]/).map(cell => cell.trim()));
+                
+                if (rows.length > 1) {
+                    headers = rows[0].map(header => header.replace(/\r/g, ""));
+                    jsonData = rows.slice(1).filter(row => row.length === headers.length && row.some(cell => cell !== ""));
+                    populateColumnSelection(headers);
+                }
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        });
+
+        function populateColumnSelection(headers) {
+            var selectX = document.getElementById('columnX');
+            selectX.innerHTML = '';
+            headers.forEach((header, index) => {
+                if (header && header.trim() !== "") {
+                    var optionX = document.createElement('option');
+                    optionX.value = index;
+                    optionX.textContent = header;
+                    selectX.appendChild(optionX);
+                }
+            });
+        }
+
+        function countChildrenByColumn(xIndex) {
+            let dataCounts = {};
+            let nnaIndex = headers.indexOf("Número NNAJ");
+            jsonData.forEach(row => {
+                let modeloIndex = headers.indexOf("Modelo");
+                let modelo = row[modeloIndex]?.trim();
+                let nna = row[nnaIndex]?.trim();
+                let keyX = row[xIndex]?.trim();
+                
+                if (modelo && (modelo === 'Niñez Segura y Protegida' || modelo === 'Me Quiero Me Cuido') && nna && keyX) {
+                    if (!dataCounts[keyX]) {
+                        dataCounts[keyX] = new Set();
+                    }
+                    dataCounts[keyX].add(nna);
+                }
+            });
+            
+            let finalCounts = {};
+            for (let key in dataCounts) {
+                finalCounts[key] = dataCounts[key].size;
+            }
+            return finalCounts;
+        }
+
+        document.getElementById('columnX').addEventListener('change', function() {
+            var xIndex = document.getElementById('columnX').value;
+            var filteredData = countChildrenByColumn(xIndex);
+            renderChart(filteredData);
+        });
+        
+        function renderChart(dataCounts) {
+            var labels = Object.keys(dataCounts);
+            var dataValues = Object.values(dataCounts);
+            
+            var ctx = document.getElementById('chartCanvas').getContext('2d');
+            if (window.chartInstance) {
+                window.chartInstance.destroy();
+            }
+            window.chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cantidad de Niños',
+                        data: dataValues,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

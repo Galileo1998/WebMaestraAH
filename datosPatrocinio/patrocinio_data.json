@@ -1,0 +1,4446 @@
+{
+  "Trimestre 1 (Jul-Sep)": [
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Inicial",
+      "Total": 11,
+      "Enviadas en tiempo": 7,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inicial",
+      "Total": 29,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 18,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Inicial",
+      "Total": 19,
+      "Enviadas en tiempo": 8,
+      "Enviadas Fuera de tiempo": 11,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inicial",
+      "Total": 9,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 9,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Inicial",
+      "Total": 30,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 18,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 2
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Inicial",
+      "Total": 4,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Inicial",
+      "Total": 20,
+      "Enviadas en tiempo": 17,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inicial",
+      "Total": 29,
+      "Enviadas en tiempo": 19,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 3
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inicial",
+      "Total": 3,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inicial",
+      "Total": 3,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inicial",
+      "Total": 17,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 15,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inicial",
+      "Total": 7,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Inicial",
+      "Total": 14,
+      "Enviadas en tiempo": 7,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inicial",
+      "Total": 8,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Inicial",
+      "Total": 11,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 3
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inicial",
+      "Total": 9,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 8,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Inicial",
+      "Total": 15,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Inicial",
+      "Total": 8,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Inicial",
+      "Total": 35,
+      "Enviadas en tiempo": 28,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inicial",
+      "Total": 16,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 9,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Respuesta",
+      "Total": 106,
+      "Enviadas en tiempo": 102,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Respuesta",
+      "Total": 30,
+      "Enviadas en tiempo": 22,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Respuesta",
+      "Total": 77,
+      "Enviadas en tiempo": 67,
+      "Enviadas Fuera de tiempo": 8,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 2
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Respuesta",
+      "Total": 30,
+      "Enviadas en tiempo": 22,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Respuesta",
+      "Total": 78,
+      "Enviadas en tiempo": 42,
+      "Enviadas Fuera de tiempo": 33,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Respuesta",
+      "Total": 71,
+      "Enviadas en tiempo": 69,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Respuesta",
+      "Total": 76,
+      "Enviadas en tiempo": 72,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Respuesta",
+      "Total": 43,
+      "Enviadas en tiempo": 42,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Respuesta",
+      "Total": 10,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Respuesta",
+      "Total": 24,
+      "Enviadas en tiempo": 24,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Respuesta",
+      "Total": 64,
+      "Enviadas en tiempo": 54,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 4
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Respuesta",
+      "Total": 29,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 12,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 3
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Respuesta",
+      "Total": 45,
+      "Enviadas en tiempo": 40,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 2
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Respuesta",
+      "Total": 64,
+      "Enviadas en tiempo": 54,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 3
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Respuesta",
+      "Total": 36,
+      "Enviadas en tiempo": 34,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Respuesta",
+      "Total": 72,
+      "Enviadas en tiempo": 71,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Respuesta",
+      "Total": 57,
+      "Enviadas en tiempo": 49,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 2
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Respuesta",
+      "Total": 90,
+      "Enviadas en tiempo": 68,
+      "Enviadas Fuera de tiempo": 13,
+      "Sin Enviar Retrasado": 5,
+      "No se Enviaran": 4
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Respuesta",
+      "Total": 113,
+      "Enviadas en tiempo": 99,
+      "Enviadas Fuera de tiempo": 13,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Respuesta",
+      "Total": 48,
+      "Enviadas en tiempo": 41,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "DFCs",
+      "Total": 22,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 10,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "DFCs",
+      "Total": 12,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "DFCs",
+      "Total": 23,
+      "Enviadas en tiempo": 23,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "DFCs",
+      "Total": 7,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "DFCs",
+      "Total": 33,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 21,
+      "Sin Enviar Retrasado": 12,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "DFCs",
+      "Total": 6,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "DFCs",
+      "Total": 23,
+      "Enviadas en tiempo": 23,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "DFCs",
+      "Total": 15,
+      "Enviadas en tiempo": 13,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "DFCs",
+      "Total": 4,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "DFCs",
+      "Total": 7,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "DFCs",
+      "Total": 17,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 12,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "DFCs",
+      "Total": 15,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 8,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "DFCs",
+      "Total": 18,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 13,
+      "Sin Enviar Retrasado": 5,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "DFCs",
+      "Total": 17,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "DFCs",
+      "Total": 9,
+      "Enviadas en tiempo": 8,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "DFCs",
+      "Total": 19,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 10,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "DFCs",
+      "Total": 16,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 9,
+      "Sin Enviar Retrasado": 7,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "DFCs",
+      "Total": 13,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 10,
+      "Sin Enviar Retrasado": 3,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "DFCs",
+      "Total": 33,
+      "Enviadas en tiempo": 33,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "DFCs",
+      "Total": 9,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "RAM",
+      "Total": 70,
+      "Enviadas en tiempo": 44,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 26,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "RAM",
+      "Total": 49,
+      "Enviadas en tiempo": 15,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 34,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "RAM",
+      "Total": 69,
+      "Enviadas en tiempo": 37,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 32,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "RAM",
+      "Total": 23,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 14,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "RAM",
+      "Total": 52,
+      "Enviadas en tiempo": 25,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 27,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "RAM",
+      "Total": 60,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 60,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "RAM",
+      "Total": 39,
+      "Enviadas en tiempo": 32,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 7,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "RAM",
+      "Total": 26,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 12,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "RAM",
+      "Total": 17,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 17,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "RAM",
+      "Total": 28,
+      "Enviadas en tiempo": 7,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 21,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "RAM",
+      "Total": 38,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 38,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "RAM",
+      "Total": 32,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 32,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "RAM",
+      "Total": 37,
+      "Enviadas en tiempo": 19,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 18,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "RAM",
+      "Total": 65,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 65,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "RAM",
+      "Total": 41,
+      "Enviadas en tiempo": 24,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 17,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "RAM",
+      "Total": 81,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 81,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "RAM",
+      "Total": 46,
+      "Enviadas en tiempo": 23,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 23,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "RAM",
+      "Total": 49,
+      "Enviadas en tiempo": 25,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 24,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "RAM",
+      "Total": 53,
+      "Enviadas en tiempo": 58,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": -5,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "RAM",
+      "Total": 21,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 15,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Inscripción",
+      "Total": 4,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inscripción",
+      "Total": 52,
+      "Enviadas en tiempo": 52,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Inscripción",
+      "Total": 30,
+      "Enviadas en tiempo": 30,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inscripción",
+      "Total": 3,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Inscripción",
+      "Total": 23,
+      "Enviadas en tiempo": 23,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Inscripción",
+      "Total": 13,
+      "Enviadas en tiempo": 13,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inscripción",
+      "Total": 14,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inscripción",
+      "Total": 5,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inscripción",
+      "Total": 27,
+      "Enviadas en tiempo": 27,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inscripción",
+      "Total": 2,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Inscripción",
+      "Total": 27,
+      "Enviadas en tiempo": 27,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inscripción",
+      "Total": 60,
+      "Enviadas en tiempo": 60,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Inscripción",
+      "Total": 3,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Inscripción",
+      "Total": 6,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Inscripción",
+      "Total": 32,
+      "Enviadas en tiempo": 32,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inscripción",
+      "Total": 8,
+      "Enviadas en tiempo": 8,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Salidas",
+      "Total": 10,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Salidas",
+      "Total": 22,
+      "Enviadas en tiempo": 22,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Salidas",
+      "Total": 12,
+      "Enviadas en tiempo": 12,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Salidas",
+      "Total": 8,
+      "Enviadas en tiempo": 8,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Salidas",
+      "Total": 17,
+      "Enviadas en tiempo": 17,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Salidas",
+      "Total": 8,
+      "Enviadas en tiempo": 8,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Salidas",
+      "Total": 15,
+      "Enviadas en tiempo": 15,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Salidas",
+      "Total": 10,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Salidas",
+      "Total": 7,
+      "Enviadas en tiempo": 7,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Salidas",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Salidas",
+      "Total": 18,
+      "Enviadas en tiempo": 18,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Salidas",
+      "Total": 12,
+      "Enviadas en tiempo": 12,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Salidas",
+      "Total": 18,
+      "Enviadas en tiempo": 18,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Salidas",
+      "Total": 6,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Salidas",
+      "Total": 4,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Salidas",
+      "Total": 3,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Salidas",
+      "Total": 4,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Salidas",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Salidas",
+      "Total": 29,
+      "Enviadas en tiempo": 29,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Salidas",
+      "Total": 6,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Casos",
+      "Total": 3,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Casos",
+      "Total": 2,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Casos",
+      "Total": 3,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Casos",
+      "Total": 3,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    }
+  ],
+  "Trimestre 2 (Oct-Dic)": [
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Inicial",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inicial",
+      "Total": 6,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Inicial",
+      "Total": 5,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inicial",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Inicial",
+      "Total": 7,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Inicial",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Inicial",
+      "Total": 6,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inicial",
+      "Total": 5,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inicial",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inicial",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inicial",
+      "Total": 5,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inicial",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Inicial",
+      "Total": 6,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inicial",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Inicial",
+      "Total": 4,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inicial",
+      "Total": 2,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Inicial",
+      "Total": 6,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Inicial",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Inicial",
+      "Total": 15,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inicial",
+      "Total": 8,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Respuesta",
+      "Total": 27,
+      "Enviadas en tiempo": 27,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Respuesta",
+      "Total": 14,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Respuesta",
+      "Total": 20,
+      "Enviadas en tiempo": 20,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Respuesta",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Respuesta",
+      "Total": 12,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 3,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Respuesta",
+      "Total": 14,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Respuesta",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Respuesta",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Respuesta",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Respuesta",
+      "Total": 16,
+      "Enviadas en tiempo": 16,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Respuesta",
+      "Total": 13,
+      "Enviadas en tiempo": 12,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Respuesta",
+      "Total": 7,
+      "Enviadas en tiempo": 7,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Respuesta",
+      "Total": 7,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Respuesta",
+      "Total": 17,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Respuesta",
+      "Total": 11,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Respuesta",
+      "Total": 25,
+      "Enviadas en tiempo": 24,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Respuesta",
+      "Total": 6,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Respuesta",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Respuesta",
+      "Total": 28,
+      "Enviadas en tiempo": 27,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Respuesta",
+      "Total": 17,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "DFCs",
+      "Total": 46,
+      "Enviadas en tiempo": 45,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "DFCs",
+      "Total": 23,
+      "Enviadas en tiempo": 21,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "DFCs",
+      "Total": 54,
+      "Enviadas en tiempo": 51,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "DFCs",
+      "Total": 10,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "DFCs",
+      "Total": 37,
+      "Enviadas en tiempo": 5,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 32,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "DFCs",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "DFCs",
+      "Total": 33,
+      "Enviadas en tiempo": 33,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "DFCs",
+      "Total": 15,
+      "Enviadas en tiempo": 15,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "DFCs",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "DFCs",
+      "Total": 24,
+      "Enviadas en tiempo": 24,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "DFCs",
+      "Total": 20,
+      "Enviadas en tiempo": 19,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "DFCs",
+      "Total": 17,
+      "Enviadas en tiempo": 15,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "DFCs",
+      "Total": 28,
+      "Enviadas en tiempo": 26,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "DFCs",
+      "Total": 27,
+      "Enviadas en tiempo": 22,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 5,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "DFCs",
+      "Total": 19,
+      "Enviadas en tiempo": 16,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "DFCs",
+      "Total": 18,
+      "Enviadas en tiempo": 13,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 5,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "DFCs",
+      "Total": 8,
+      "Enviadas en tiempo": 8,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "DFCs",
+      "Total": 67,
+      "Enviadas en tiempo": 52,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 14,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "DFCs",
+      "Total": 51,
+      "Enviadas en tiempo": 51,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "DFCs",
+      "Total": 14,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "RAM",
+      "Total": 32,
+      "Enviadas en tiempo": 32,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "RAM",
+      "Total": 41,
+      "Enviadas en tiempo": 41,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "RAM",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inscripción",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Salidas",
+      "Total": 31,
+      "Enviadas en tiempo": 31,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Salidas",
+      "Total": 27,
+      "Enviadas en tiempo": 27,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Salidas",
+      "Total": 28,
+      "Enviadas en tiempo": 28,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Salidas",
+      "Total": 14,
+      "Enviadas en tiempo": 14,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Salidas",
+      "Total": 28,
+      "Enviadas en tiempo": 28,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Salidas",
+      "Total": 15,
+      "Enviadas en tiempo": 15,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Salidas",
+      "Total": 23,
+      "Enviadas en tiempo": 23,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Salidas",
+      "Total": 15,
+      "Enviadas en tiempo": 15,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Salidas",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Salidas",
+      "Total": 15,
+      "Enviadas en tiempo": 15,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Salidas",
+      "Total": 20,
+      "Enviadas en tiempo": 20,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Salidas",
+      "Total": 18,
+      "Enviadas en tiempo": 18,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Salidas",
+      "Total": 21,
+      "Enviadas en tiempo": 21,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Salidas",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Salidas",
+      "Total": 13,
+      "Enviadas en tiempo": 13,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Salidas",
+      "Total": 19,
+      "Enviadas en tiempo": 19,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Salidas",
+      "Total": 12,
+      "Enviadas en tiempo": 12,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Salidas",
+      "Total": 10,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Salidas",
+      "Total": 34,
+      "Enviadas en tiempo": 34,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Salidas",
+      "Total": 8,
+      "Enviadas en tiempo": 8,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jhony",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Casos",
+      "Total": 2,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nancy",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Zamir",
+      "Tipo de carta": "Casos",
+      "Total": 2,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Neptaly",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "David",
+      "Tipo de carta": "Casos",
+      "Total": 2,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Alex Castillo",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Yimi Hernandez",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Goel Garcia",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+      
+    }
+  ],
+  "Trimestre 3 (Ene-Abr)": [
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Inicial",
+      "Total": 38,
+      "Enviadas en tiempo": 33,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inicial",
+      "Total": 69,
+      "Enviadas en tiempo": 38,
+      "Enviadas Fuera de tiempo": 17,
+      "Sin Enviar Retrasado": 11,
+      "No se Enviaran": 3
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Inicial",
+      "Total": 32,
+      "Enviadas en tiempo": 28,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Inicial",
+      "Total": 9,
+      "Enviadas en tiempo": 7,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inicial",
+      "Total": 38,
+      "Enviadas en tiempo": 28,
+      "Enviadas Fuera de tiempo": 8,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Inicial",
+      "Total": 4,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Inicial",
+      "Total": 13,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Inicial",
+      "Total": 17,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inicial",
+      "Total": 3,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Inicial",
+      "Total": 6,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inicial",
+      "Total": 4,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Inicial",
+      "Total": 10,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Inicial",
+      "Total": 5,
+      "Enviadas en tiempo": 4,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Inicial",
+      "Total": 10,
+      "Enviadas en tiempo": 7,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Inicial",
+      "Total": 15,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Inicial",
+      "Total": 27,
+      "Enviadas en tiempo": 13,
+      "Enviadas Fuera de tiempo": 11,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Inicial",
+      "Total": 41,
+      "Enviadas en tiempo": 37,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Inicial",
+      "Total": 17,
+      "Enviadas en tiempo": 12,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Respuesta",
+      "Total": 36,
+      "Enviadas en tiempo": 34,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Respuesta",
+      "Total": 47,
+      "Enviadas en tiempo": 38,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Respuesta",
+      "Total": 47,
+      "Enviadas en tiempo": 45,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Respuesta",
+      "Total": 13,
+      "Enviadas en tiempo": 12,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Respuesta",
+      "Total": 33,
+      "Enviadas en tiempo": 22,
+      "Enviadas Fuera de tiempo": 10,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Respuesta",
+      "Total": 30,
+      "Enviadas en tiempo": 12,
+      "Enviadas Fuera de tiempo": 15,
+      "Sin Enviar Retrasado": 2,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Respuesta",
+      "Total": 19,
+      "Enviadas en tiempo": 19,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Respuesta",
+      "Total": 20,
+      "Enviadas en tiempo": 20,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Respuesta",
+      "Total": 17,
+      "Enviadas en tiempo": 16,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Respuesta",
+      "Total": 31,
+      "Enviadas en tiempo": 27,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Respuesta",
+      "Total": 10,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Respuesta",
+      "Total": 18,
+      "Enviadas en tiempo": 16,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Respuesta",
+      "Total": 34,
+      "Enviadas en tiempo": 30,
+      "Enviadas Fuera de tiempo": 4,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Respuesta",
+      "Total": 16,
+      "Enviadas en tiempo": 16,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Respuesta",
+      "Total": 22,
+      "Enviadas en tiempo": 20,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Respuesta",
+      "Total": 43,
+      "Enviadas en tiempo": 30,
+      "Enviadas Fuera de tiempo": 10,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Respuesta",
+      "Total": 67,
+      "Enviadas en tiempo": 61,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Respuesta",
+      "Total": 32,
+      "Enviadas en tiempo": 25,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "DFCs",
+      "Total": 103,
+      "Enviadas en tiempo": 100,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "DFCs",
+      "Total": 34,
+      "Enviadas en tiempo": 28,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "DFCs",
+      "Total": 99,
+      "Enviadas en tiempo": 88,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 4
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "DFCs",
+      "Total": 36,
+      "Enviadas en tiempo": 29,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "DFCs",
+      "Total": 64,
+      "Enviadas en tiempo": 50,
+      "Enviadas Fuera de tiempo": 9,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 5
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "DFCs",
+      "Total": 20,
+      "Enviadas en tiempo": 20,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "DFCs",
+      "Total": 52,
+      "Enviadas en tiempo": 50,
+      "Enviadas Fuera de tiempo": 2,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "DFCs",
+      "Total": 26,
+      "Enviadas en tiempo": 23,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "DFCs",
+      "Total": 32,
+      "Enviadas en tiempo": 31,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "DFCs",
+      "Total": 52,
+      "Enviadas en tiempo": 45,
+      "Enviadas Fuera de tiempo": 5,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "DFCs",
+      "Total": 29,
+      "Enviadas en tiempo": 22,
+      "Enviadas Fuera de tiempo": 6,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "DFCs",
+      "Total": 59,
+      "Enviadas en tiempo": 54,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "DFCs",
+      "Total": 45,
+      "Enviadas en tiempo": 45,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "DFCs",
+      "Total": 33,
+      "Enviadas en tiempo": 32,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 1
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "DFCs",
+      "Total": 49,
+      "Enviadas en tiempo": 38,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 4
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Norma",
+      "Tipo de carta": "DFCs",
+      "Total": 125,
+      "Enviadas en tiempo": 101,
+      "Enviadas Fuera de tiempo": 15,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 9
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Norma",
+      "Tipo de carta": "DFCs",
+      "Total": 115,
+      "Enviadas en tiempo": 106,
+      "Enviadas Fuera de tiempo": 7,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "DFCs",
+      "Total": 30,
+      "Enviadas en tiempo": 25,
+      "Enviadas Fuera de tiempo": 3,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 2
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "RAM",
+      "Total": 39,
+      "Enviadas en tiempo": 39,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "RAM",
+      "Total": 71,
+      "Enviadas en tiempo": 71,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "RAM",
+      "Total": 41,
+      "Enviadas en tiempo": 41,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "RAM",
+      "Total": 21,
+      "Enviadas en tiempo": 21,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "RAM",
+      "Total": 55,
+      "Enviadas en tiempo": 55,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "RAM",
+      "Total": 94,
+      "Enviadas en tiempo": 94,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "RAM",
+      "Total": 17,
+      "Enviadas en tiempo": 17,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "RAM",
+      "Total": 26,
+      "Enviadas en tiempo": 26,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "RAM",
+      "Total": 81,
+      "Enviadas en tiempo": 81,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "RAM",
+      "Total": 114,
+      "Enviadas en tiempo": 114,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "RAM",
+      "Total": 35,
+      "Enviadas en tiempo": 35,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "RAM",
+      "Total": 31,
+      "Enviadas en tiempo": 31,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "RAM",
+      "Total": 138,
+      "Enviadas in tiempo": 138,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "RAM",
+      "Total": 33,
+      "Enviadas en tiempo": 33,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "RAM",
+      "Total": 149,
+      "Enviadas en tiempo": 149,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Norma",
+      "Tipo de carta": "RAM",
+      "Total": 50,
+      "Enviadas en tiempo": 50,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Norma",
+      "Tipo de carta": "RAM",
+      "Total": 33,
+      "Enviadas en tiempo": 33,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "RAM",
+      "Total": 31,
+      "Enviadas en tiempo": 31,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Salidas",
+      "Total": 30,
+      "Enviadas en tiempo": 30,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Salidas",
+      "Total": 26,
+      "Enviadas en tiempo": 26,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Chaparral",
+      "Municipio": "Curaren",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Salidas",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Hatillo",
+      "Municipio": "Alubaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Salidas",
+      "Total": 6,
+      "Enviadas en tiempo": 6,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Llano",
+      "Municipio": "La Venta",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Salidas",
+      "Total": 10,
+      "Enviadas en tiempo": 10,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Salidas",
+      "Total": 27,
+      "Enviadas en tiempo": 27,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Emituca",
+      "Municipio": "Curaren",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Salidas",
+      "Total": 18,
+      "Enviadas en tiempo": 18,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Estancia",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Jennifer",
+      "Tipo de carta": "Salidas",
+      "Total": 2,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "La Brea",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Salidas",
+      "Total": 9,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Salidas",
+      "Total": 28,
+      "Enviadas en tiempo": 28,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Salidas",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Malagua",
+      "Municipio": "Curaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Salidas",
+      "Total": 17,
+      "Enviadas en tiempo": 17,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Salidas",
+      "Total": 9,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Ocote Hueco",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Angelina",
+      "Tipo de carta": "Salidas",
+      "Total": 9,
+      "Enviadas en tiempo": 9,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Salidas",
+      "Total": 20,
+      "Enviadas en tiempo": 20,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Salidas",
+      "Total": 76,
+      "Enviadas en tiempo": 76,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "San Marcos",
+      "Municipio": "Curaren",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Salidas",
+      "Total": 23,
+      "Enviadas en tiempo": 23,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Turturupe",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Salidas",
+      "Total": 11,
+      "Enviadas en tiempo": 11,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Alubaren",
+      "Municipio": "Alubaren",
+      "Tecnico": "Nubia",
+      "Tipo de carta": "Casos",
+      "Total": 0,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Culguaque",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Adalid",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "El Naranjo",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Casos",
+      "Total": 5,
+      "Enviadas en tiempo": 3,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Lepaterique Centro",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Alex Alvarado",
+      "Tipo de carta": "Casos",
+      "Total": 2,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Los Tablones",
+      "Municipio": "Alubaren",
+      "Tecnico": "Milixa",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 1,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Mulhuaca",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Oropule",
+      "Municipio": "Lepaterique",
+      "Tecnico": "Francisca",
+      "Tipo de carta": "Casos",
+      "Total": 3,
+      "Enviadas en tiempo": 2,
+      "Enviadas Fuera de tiempo": 0,
+      "Sin Enviar Retrasado": 1,
+      "No se Enviaran": 0
+    },
+    {
+      "Base": "Reitoca",
+      "Municipio": "Reitoca",
+      "Tecnico": "Norma",
+      "Tipo de carta": "Casos",
+      "Total": 1,
+      "Enviadas en tiempo": 0,
+      "Enviadas Fuera de tiempo": 1,
+      "Sin Enviar Retrasado": 0,
+      "No se Enviaran": 0
+    }
+  ]
+}

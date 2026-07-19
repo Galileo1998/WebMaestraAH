@@ -1,0 +1,17 @@
+# Archivos ZIP específicos
+/security/config.local.php
+/.env
+/.env.*
+/config/Database.local.php
+/accion_honduras.sql
+/error_log
+*.sql
+*.log
+*.bak
+*.backup
+*.old
+/accion_security_storage/
+/security/*.log
+WEB_ANTIGUA.zip
+WEB_ANTIGUA/
+*.zip

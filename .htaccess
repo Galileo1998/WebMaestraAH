@@ -1,0 +1,79 @@
+# ========================================================
+# ARCHIVO MAESTRO .HTACCESS - ACCIÓN HONDURAS
+# Seguridad Avanzada + Enmascaramiento Forzado de /public
+# ========================================================
+
+# 1. DESACTIVAR LA NAVEGACIÓN DE DIRECTORIOS
+Options -Indexes
+
+# Bloquear artefactos de desarrollo, respaldos y datos sensibles.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule "(^|/)\.(?!well-known(?:/|$))" - [F,L,NC]
+    RewriteRule "(^|/)(?:accion_honduras\.sql|error_log|composer\.(?:json|lock)|.*\.(?:sql|log|bak|backup|old|orig|save|swp|zip|tar|gz|7z|rar))$" - [F,L,NC]
+    RewriteRule "^(?:config/|security/(?:config(?:\.|$)|sql/|cli_|cron/README))" - [F,L,NC]
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+# 2. PROTEGER ARCHIVOS DE CONFIGURACIÓN CRÍTICOS Y EL PROPIO .HTACCESS
+<FilesMatch "(?i)^(?:config\.php|\.env(?:\..*)?|\.htaccess|\.user\.ini|.*\.(?:sql|log|bak|backup|old|orig|save|swp))$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# 3. PREVENIR LA INYECCIÓN DE SCRIPTS (Cabeceras de Seguridad)
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=(), usb=(), interest-cohort=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+    
+    # NUEVO: Política CSP explícita que autoriza a Google Maps (y permite a Kaspersky no asustarse)
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; connect-src 'self' https://api.groq.com https://generativelanguage.googleapis.com https://raw.githubusercontent.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com https://*.cartocdn.com https://raw.githubusercontent.com https://cdnjs.cloudflare.com https://unpkg.com; media-src 'self' blob:; frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com; upgrade-insecure-requests"
+</IfModule>
+
+# 4. ENMASCARADOR ESTRICTO SIN REDIRECCIÓN VISIBLE
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Conservar la autoridad SEO de las antiguas URL publicadas bajo /web.
+    RewriteRule ^web/?$ / [R=301,L,NE]
+    RewriteRule ^web/(.*)$ /$1 [R=301,L,NE]
+
+    # Sitemap generado desde las páginas y noticias publicadas en el CMS.
+    RewriteRule ^sitemap\.xml$ public/sitemap.php [L]
+
+    # Apagar la corrección automática de barras de Apache que expone la carpeta
+    DirectorySlash Off
+
+    # Si el usuario escribe manualmente /public/ en la URL, lo limpia físicamente
+    RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]
+    RewriteRule ^ %1 [R=301,L,NE]
+
+    # Si la petición es exactamente la raíz vacía, ir a public/ internamente
+    RewriteRule ^$ public/index.php [L]
+
+    # Si la petición NO es para un archivo o carpeta física real en la raíz...
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Y tampoco estamos buscando ya dentro de public/
+    RewriteCond %{REQUEST_URI} !^/public/
+
+    # ...Enruta el tráfico de forma transparente por dentro de la carpeta public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php82” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit

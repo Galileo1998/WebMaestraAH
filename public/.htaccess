@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Si la ruta no es un archivo real (como una imagen o un CSS)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    # Y tampoco es un directorio real
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Entonces, envía todo silenciosamente a index.php como un "slug"
+    RewriteRule ^(.*)$ index.php?slug=$1 [QSA,L]
+</IfModule>

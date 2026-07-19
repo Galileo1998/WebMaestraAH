@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolo de Actividades - Acción Honduras</title>
+    <style>
+/* --- COLORES INSTITUCIONALES --- */
+:root {
+    --primario: #34859B;
+    --secundario: #46B094;
+    --acento: #B4D6E0;
+    --texto: #333333;
+    --alerta: #e74c3c;
+    --fondo: #f0f2f5;
+}
+
+/* --- ESTILOS GENERALES --- */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: var(--fondo);
+    color: var(--texto);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Formato Tamaño Carta - Horizontal (Landscape) */
+.page {
+    width: 11in;
+    min-height: 8.5in;
+    background: white;
+    padding: 0.6in 0.8in;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* --- ENCABEZADO --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--secundario);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.logos-container { 
+    display: flex; 
+    gap: 15px; 
+    align-items: center;
+}
+
+.logo-img {
+    height: 55px; 
+    max-width: 180px; 
+    object-fit: contain; 
+}
+
+.title-box { 
+    text-align: right; 
+}
+
+.title-box h1 { 
+    margin: 0; 
+    font-size: 20px; 
+    color: var(--primario); 
+    text-transform: uppercase; 
+}
+
+.title-box p { 
+    margin: 2px 0 0; 
+    font-size: 11px; 
+    color: var(--secundario); 
+    font-weight: bold; 
+}
+
+/* --- SECCIONES Y GRIDS --- */
+.section-header {
+    background-color: var(--acento);
+    color: var(--primario);
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    border-left: 5px solid var(--primario);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px 12px;
+    margin-bottom: 8px;
+}
+
+/* Clases de columnas */
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-6 { grid-column: span 6; }
+
+.input-group { 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.input-group label { 
+    font-size: 10px; 
+    font-weight: bold; 
+    color: #666; 
+    margin-bottom: 2px; 
+}
+
+/* --- INPUTS Y TEXTAREAS (Fuera de tabla) --- */
+input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px;
+    font-size: 12px;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border 0.2s;
+}
+
+input:focus, textarea:focus { 
+    outline: none; 
+    border-color: var(--primario); 
+    background-color: #fcfcfc; 
+}
+
+textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 30px;
+}
+
+/* --- TABLAS DINÁMICAS --- */
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 5px; 
+}
+
+th { 
+    background-color: var(--primario); 
+    color: white; 
+    font-size: 11px; 
+    padding: 5px; 
+    text-align: left; 
+}
+
+td { 
+    border-bottom: 1px solid #ddd; 
+    padding: 2px; 
+    vertical-align: top; /* Asegura que el texto empiece arriba */
+}
+
+/* Campos dentro de la tabla */
+td input, td textarea { 
+    border: none; 
+    background: transparent; 
+    padding: 5px; 
+    width: 100%; 
+    box-sizing: border-box; 
+    font-family: inherit;
+    font-size: 12px;
+}
+
+td textarea {
+    resize: none;
+    overflow: hidden;
+    min-height: 28px;
+    vertical-align: top;
+}
+
+/* Botones de borrar fila */
+.action-cell { 
+    width: 30px; 
+    text-align: center; 
+}
+
+.btn-delete { 
+    background: none; 
+    border: none; 
+    color: #ccc; 
+    cursor: pointer; 
+    font-size: 16px; 
+    padding: 0; 
+    font-weight: bold; 
+}
+
+.btn-delete:hover { 
+    color: var(--alerta); 
+}
+
+/* --- CONTROLES Y BOTONES GLOBALES --- */
+.controls { 
+    margin-top: 15px; 
+    text-align: center; 
+    display: flex; 
+    justify-content: center; 
+    gap: 10px; 
+}
+
+.btn { 
+    background-color: var(--secundario); 
+    color: white; 
+    border: none; 
+    padding: 6px 12px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 12px; 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+}
+
+.btn:hover { 
+    background-color: var(--primario); 
+}
+
+.btn-outline { 
+    background-color: transparent; 
+    border: 1px solid var(--alerta); 
+    color: var(--alerta); 
+}
+
+.btn-outline:hover { 
+    background-color: #fff5f5; 
+}
+
+.toggle-btn { 
+    background-color: #6c757d; 
+    font-size: 10px; 
+    padding: 2px 8px; 
+}
+
+/* --- VISIBILIDAD --- */
+.hidden { 
+    display: none; 
+}
+
+/* --- ESTILOS DE IMPRESIÓN --- */
+@media print {
+    @page { 
+        size: letter landscape; 
+        margin: 0.5in; 
+    }
+    
+    body { 
+        background: white; 
+        padding: 0; 
+        margin: 0; 
+    }
+    
+    .page { 
+        width: 100%; 
+        box-shadow: none; 
+        padding: 0; 
+        margin: 0; 
+        min-height: auto; 
+    }
+    
+    .no-print { 
+        display: none !important; 
+    }
+    
+    input, textarea, select, td textarea { 
+        border: none !important; 
+        border-bottom: 1px solid #ccc !important; 
+        border-radius: 0 !important; 
+        background: transparent !important; 
+    }
+    
+    .section-header { 
+        background-color: #eee !important; 
+        color: black !important; 
+        -webkit-print-color-adjust: exact; 
+    }
+    
+    th { 
+        background-color: #ddd !important; 
+        color: black !important; 
+        border-bottom: 2px solid #333; 
+        -webkit-print-color-adjust: exact; 
+    }
+    
+    /* Ocultar sección presupuesto al imprimir si está colapsada */
+    .budget-section.hidden { 
+        display: none !important; 
+    }
+}
+    </style>
+</head>
+<body>
+
+    <div class="page" id="formatoData">
+        
+        <div class="header">
+            <div class="logos-container">
+                <div class="logos-container">
+                    <img src="logo_cf.png" alt="Logo ChildFund" class="logo-img">
+                    <img src="logo_ah.png" alt="Logo Acción Honduras" class="logo-img">
+                </div>
+            </div>
+            <div class="title-box">
+                <h1>Protocolo de Actividades</h1>
+                <p>Planificación Operativa y MGR</p>
+            </div>
+        </div>
+
+        <div class="section-header">1. Información de POA y MGR</div>
+        <div class="grid-container">
+            <div class="input-group col-1"><label>POA (Año)</label><input type="text" id="poa" data-save="true"></div>
+            <div class="input-group col-2"><label>Programa</label><input type="text" id="programa" data-save="true"></div>
+            <div class="input-group col-1"><label>Cód. Programa</label><input type="text" id="codPrograma" data-save="true"></div>
+            <div class="input-group col-1"><label>Sector (MGR)</label><input type="text" id="sector" data-save="true"></div>
+            <div class="input-group col-1"><label>Subsector (MGR)</label><input type="text" id="subsector" data-save="true"></div>
+        </div>
+        <div class="grid-container">
+            <div class="input-group col-2"><label>Actividad (MGR)</label><input type="text" id="actividadMgr" data-save="true"></div>
+            <div class="input-group col-2"><label>Tipo de Participantes</label><input type="text" id="tipoPart" placeholder="Ej. Jóvenes, Docentes..." data-save="true"></div>
+            <div class="input-group col-1"><label>Masculino (Cant.)</label><input type="number" id="cantMasc" data-save="true"></div>
+            <div class="input-group col-1"><label>Femenino (Cant.)</label><input type="number" id="cantFem" data-save="true"></div>
+        </div>
+
+        <div class="section-header">
+            <span>2. Información Financiera</span>
+            <button class="btn toggle-btn no-print" onclick="toggleBudget()">Mostrar/Ocultar Presupuesto</button>
+        </div>
+        <div id="budgetSection" class="budget-section hidden">
+            <table id="budgetTable">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Cuenta Contable</th>
+                        <th style="width: 45%;">Detalle / Concepto</th>
+                        <th style="width: 20%;">Monto Disponible</th>
+                        <th class="action-cell no-print"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button class="btn no-print" style="margin-top: 5px; font-size: 10px;" onclick="agregarFila('budgetTable', 3)">+ Añadir Cuenta</button>
+        </div>
+
+        <div class="section-header">3. Codificación y Ubicación</div>
+        <div class="grid-container">
+            <div class="input-group col-1"><label style="color: var(--primario);">MARCO LÓGICO</label><input type="text" id="kmc" style="font-weight:bold; background-color: #f0f8ff;" data-save="true"></div>
+            <div class="input-group col-1"><label>Extensión</label><input type="text" id="extension" data-save="true"></div>
+            <div class="input-group col-2"><label>Comunidad</label><input type="text" id="comunidad" placeholder="Ej. Las Delicias" data-save="true"></div>
+            <div class="input-group col-1"><label>Fecha</label><input type="date" id="fecha" data-save="true"></div>
+            <div class="input-group col-1"><label>Tipo Actividad</label><input type="text" id="tipoAct" data-save="true"></div>
+        </div>
+        <div class="grid-container">
+            <div class="input-group col-6">
+                <label>Descripción General</label>
+                <textarea id="descripcion" data-save="true" placeholder="Escribe la descripción... el cuadro crecerá automáticamente."></textarea>
+            </div>
+        </div>
+
+        <div class="section-header">4. Agenda / Minuta a Minuta</div>
+        <table id="agendaTable">
+            <thead>
+                <tr>
+                    <th style="width: 12%;">Hora</th>
+                    <th style="width: 43%;">Actividad</th>
+                    <th style="width: 25%;">Responsable</th>
+                    <th style="width: 20%;">Recursos</th>
+                    <th class="action-cell no-print"></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="btn no-print" style="margin-top: 5px;" onclick="agregarFila('agendaTable', 4)">+ Añadir Fila a Agenda</button>
+
+        <div class="grid-container" style="margin-top: 15px;">
+            <div class="input-group col-3">
+                <div class="section-header" style="margin-top:0;">Responsabilidades Específicas</div>
+                <textarea id="responsabilidades" data-save="true" placeholder="Detalle de logística..."></textarea>
+            </div>
+            <div class="input-group col-3">
+                <div class="section-header" style="margin-top:0;">Observaciones / Protocolo</div>
+                <textarea id="observaciones" data-save="true" placeholder="Acuerdos o notas..."></textarea>
+            </div>
+        </div>
+
+        <div class="controls no-print">
+            <button class="btn" style="background-color: #666;" onclick="window.print()">🖨️ Imprimir Formato</button>
+            <button class="btn btn-outline" onclick="limpiarTodo()">🗑️ Limpiar Todo</button>
+        </div>
+
+    </div>
+
+<script>
+        // 1. Delegación de eventos global
+        document.addEventListener('input', manejarCambios);
+        document.addEventListener('change', manejarCambios);
+
+        function manejarCambios(e) {
+            if (e.target.tagName.toLowerCase() === 'textarea') {
+                autoExpand(e.target);
+            }
+            guardarDatos();
+        }
+
+        function autoExpand(field) {
+            field.style.height = 'inherit';
+            const computed = window.getComputedStyle(field);
+            const height = field.scrollHeight + parseInt(computed.borderTopWidth || 0) + parseInt(computed.borderBottomWidth || 0);
+            field.style.height = height + 'px';
+        }
+
+        // 2. Mostrar/Ocultar Presupuesto
+        function toggleBudget() {
+            const section = document.getElementById('budgetSection');
+            section.classList.toggle('hidden');
+            guardarDatos();
+        }
+
+        // 3. Añadir Filas Dinámicas (AQUI CAMBIAMOS INPUT POR TEXTAREA)
+        function agregarFila(tableId, numInputs, values = []) {
+            const tbody = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+            const row = tbody.insertRow();
+            
+            for (let i = 0; i < numInputs; i++) {
+                let cell = row.insertCell(i);
+                let campo = document.createElement("textarea"); // <-- Cambio clave
+                campo.rows = 1;
+                campo.value = values[i] || "";
+                cell.appendChild(campo);
+                
+                // Si estamos cargando datos guardados, expandir el campo de inmediato
+                if (campo.value !== "") {
+                    // Un pequeño retraso para que el DOM renderice antes de medir la altura
+                    setTimeout(() => autoExpand(campo), 10);
+                }
+            }
+            
+            let actionCell = row.insertCell(numInputs);
+            actionCell.className = "action-cell no-print";
+            actionCell.innerHTML = `<button class="btn-delete" type="button" onclick="eliminarFila(this)">×</button>`;
+            
+            guardarDatos();
+        }
+
+        function eliminarFila(btn) {
+            const row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            guardarDatos();
+        }
+
+        // 4. Lógica de Autoguardado
+        function guardarDatos() {
+            const data = { estaticos: {}, agenda: [], presupuesto: [], budgetVisible: !document.getElementById('budgetSection').classList.contains('hidden') };
+            
+            document.querySelectorAll('[data-save="true"]').forEach(el => {
+                data.estaticos[el.id] = el.value;
+            });
+
+            // Guardar Agenda (ahora busca textareas)
+            document.querySelectorAll('#agendaTable tbody tr').forEach(tr => {
+                const campos = tr.querySelectorAll('textarea');
+                if(campos.length >= 4) {
+                    data.agenda.push([campos[0].value, campos[1].value, campos[2].value, campos[3].value]);
+                }
+            });
+
+            // Guardar Presupuesto (ahora busca textareas)
+            document.querySelectorAll('#budgetTable tbody tr').forEach(tr => {
+                const campos = tr.querySelectorAll('textarea');
+                if(campos.length >= 3) {
+                    data.presupuesto.push([campos[0].value, campos[1].value, campos[2].value]);
+                }
+            });
+
+            localStorage.setItem('protocoloAccionHn', JSON.stringify(data));
+        }
+
+        function cargarDatos() {
+            const saved = localStorage.getItem('protocoloAccionHn');
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                for (const key in data.estaticos) {
+                    const elemento = document.getElementById(key);
+                    if (elemento) {
+                        elemento.value = data.estaticos[key];
+                        if (elemento.tagName === 'TEXTAREA') {
+                            setTimeout(() => autoExpand(elemento), 10);
+                        }
+                    }
+                }
+
+                if (data.budgetVisible) {
+                    document.getElementById('budgetSection').classList.remove('hidden');
+                } else {
+                    document.getElementById('budgetSection').classList.add('hidden');
+                }
+
+                document.querySelector('#agendaTable tbody').innerHTML = '';
+                document.querySelector('#budgetTable tbody').innerHTML = '';
+
+                data.agenda.forEach(row => agregarFila('agendaTable', 4, row));
+                data.presupuesto.forEach(row => agregarFila('budgetTable', 3, row));
+            }
+
+            if (document.querySelectorAll('#agendaTable tbody tr').length === 0) agregarFila('agendaTable', 4);
+            if (document.querySelectorAll('#budgetTable tbody tr').length === 0) agregarFila('budgetTable', 3);
+        }
+
+        // 5. Limpiar Todo
+        function limpiarTodo() {
+            if (confirm("¿Borrar todos los datos y reiniciar el formulario?")) {
+                localStorage.removeItem('protocoloAccionHn');
+                document.querySelectorAll('input, textarea').forEach(el => {
+                    el.value = '';
+                    if(el.tagName === 'TEXTAREA') el.style.height = 'inherit'; // Resetear alturas
+                });
+                document.querySelector('#agendaTable tbody').innerHTML = '';
+                document.querySelector('#budgetTable tbody').innerHTML = '';
+                agregarFila('agendaTable', 4);
+                agregarFila('budgetTable', 3);
+                guardarDatos();
+            }
+        }
+
+        window.onload = cargarDatos;
+    </script>
+</body>
+</html>

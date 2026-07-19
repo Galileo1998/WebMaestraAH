@@ -1,0 +1,353 @@
+[18-May-2026 17:44:51 UTC] PHP Warning:  Undefined variable $mod in /home2/acciotif/public_html/admin/constructor_curso.php on line 305
+[18-May-2026 17:44:51 UTC] PHP Warning:  Trying to access array offset on null in /home2/acciotif/public_html/admin/constructor_curso.php on line 305
+[19-May-2026 02:29:45 UTC] PHP Warning:  Undefined array key "slug" in /home2/acciotif/public_html/admin/noticias.php on line 132
+[19-May-2026 02:49:58 UTC] PHP Warning:  Undefined array key "slug" in /home2/acciotif/public_html/admin/noticias.php on line 132
+[19-May-2026 02:56:38 UTC] PHP Warning:  Undefined array key "slug" in /home2/acciotif/public_html/admin/noticias.php on line 132
+[19-May-2026 18:37:36 UTC] PHP Warning:  Undefined array key "slug" in /home2/acciotif/public_html/admin/noticias.php on line 132
+[22-May-2026 15:56:03 UTC] PHP Warning:  Undefined array key "slug" in /home2/acciotif/public_html/admin/noticias.php on line 132
+[25-May-2026 16:40:13 UTC] PHP Warning:  Undefined array key "slug" in /home2/acciotif/public_html/admin/noticias.php on line 132
+[25-May-2026 16:48:21 UTC] PHP Warning:  Undefined array key "slug" in /home2/acciotif/public_html/admin/noticias.php on line 132
+[25-May-2026 16:55:37 UTC] PHP Warning:  Undefined array key "content" in /home2/acciotif/public_html/admin/editar_noticia.php on line 225
+[29-May-2026 03:35:15 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'min_score' in 'field list' in /home2/acciotif/public_html/admin/constructor_quiz.php:34
+Stack trace:
+#0 /home2/acciotif/public_html/admin/constructor_quiz.php(34): PDO->prepare('INSERT INTO ah_...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/constructor_quiz.php on line 34
+[29-May-2026 03:35:24 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'min_score' in 'field list' in /home2/acciotif/public_html/admin/constructor_quiz.php:34
+Stack trace:
+#0 /home2/acciotif/public_html/admin/constructor_quiz.php(34): PDO->prepare('INSERT INTO ah_...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/constructor_quiz.php on line 34
+[29-May-2026 03:36:29 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'min_score' in 'field list' in /home2/acciotif/public_html/admin/constructor_quiz.php:34
+Stack trace:
+#0 /home2/acciotif/public_html/admin/constructor_quiz.php(34): PDO->prepare('INSERT INTO ah_...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/constructor_quiz.php on line 34
+[29-May-2026 03:41:30 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'min_score' in 'field list' in /home2/acciotif/public_html/admin/constructor_quiz.php:34
+Stack trace:
+#0 /home2/acciotif/public_html/admin/constructor_quiz.php(34): PDO->prepare('INSERT INTO ah_...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/constructor_quiz.php on line 34
+[29-May-2026 03:42:13 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'course_id' in 'field list' in /home2/acciotif/public_html/admin/constructor_quiz.php:108
+Stack trace:
+#0 /home2/acciotif/public_html/admin/constructor_quiz.php(108): PDO->query('SELECT id, cour...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/constructor_quiz.php on line 108
+[29-May-2026 03:45:06 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'course_id' in 'field list' in /home2/acciotif/public_html/admin/constructor_quiz.php:103
+Stack trace:
+#0 /home2/acciotif/public_html/admin/constructor_quiz.php(103): PDO->query('SELECT id, cour...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/constructor_quiz.php on line 103
+[29-May-2026 03:47:17 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:47:17 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:47:17 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:47:17 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:47:17 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:49:43 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:49:43 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:49:43 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:49:43 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:49:43 UTC] PHP Warning:  Undefined variable $get_course_id in /home2/acciotif/public_html/admin/constructor_quiz.php on line 176
+[29-May-2026 03:56:11 UTC] PHP Warning:  Undefined array key "passing_score" in /home2/acciotif/public_html/admin/constructor_quiz.php on line 48
+[29-May-2026 13:53:15 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.email' in 'field list' in /home2/acciotif/public_html/admin/calificaciones.php:47
+Stack trace:
+#0 /home2/acciotif/public_html/admin/calificaciones.php(47): PDO->prepare('SELECT \r\n      ...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/calificaciones.php on line 47
+[29-May-2026 15:04:59 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.email' in 'field list' in /home2/acciotif/public_html/admin/calificaciones.php:66
+Stack trace:
+#0 /home2/acciotif/public_html/admin/calificaciones.php(66): PDO->prepare('SELECT \r\n      ...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/calificaciones.php on line 66
+[29-May-2026 15:07:22 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'field list' in /home2/acciotif/public_html/admin/calificaciones.php:86
+Stack trace:
+#0 /home2/acciotif/public_html/admin/calificaciones.php(86): PDO->query('SELECT user_id,...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/calificaciones.php on line 86
+[01-Jun-2026 18:08:24 UTC] PHP Warning:  Undefined array key "tipo_impuesto" in /home2/acciotif/public_html/admin/compras.php on line 385
+[01-Jun-2026 18:08:24 UTC] PHP Warning:  Undefined array key "tipo_impuesto" in /home2/acciotif/public_html/admin/compras.php on line 386
+[01-Jun-2026 18:08:36 UTC] PHP Warning:  Undefined array key "tipo_impuesto" in /home2/acciotif/public_html/admin/compras.php on line 385
+[01-Jun-2026 18:08:36 UTC] PHP Warning:  Undefined array key "tipo_impuesto" in /home2/acciotif/public_html/admin/compras.php on line 386
+[01-Jun-2026 18:09:05 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'banco' in 'field list' in /home2/acciotif/public_html/admin/compras.php:131
+Stack trace:
+#0 /home2/acciotif/public_html/admin/compras.php(131): PDO->prepare('UPDATE ah_compr...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/compras.php on line 131
+[01-Jun-2026 18:09:08 UTC] PHP Warning:  Undefined array key "tipo_impuesto" in /home2/acciotif/public_html/admin/compras.php on line 385
+[01-Jun-2026 18:09:08 UTC] PHP Warning:  Undefined array key "tipo_impuesto" in /home2/acciotif/public_html/admin/compras.php on line 386
+[01-Jun-2026 18:13:30 UTC] PHP Warning:  Trying to access array offset on false in /home2/acciotif/public_html/admin/compras.php on line 252
+[01-Jun-2026 22:54:06 UTC] PHP Parse error:  syntax error, unexpected end of file, expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 459
+[01-Jun-2026 22:54:15 UTC] PHP Parse error:  syntax error, unexpected end of file, expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 459
+[01-Jun-2026 22:54:43 UTC] PHP Parse error:  syntax error, unexpected end of file, expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 459
+[02-Jun-2026 01:59:41 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'acciotif_accion_honduras.ah_poa' doesn't exist in /home2/acciotif/public_html/admin/poa.php:98
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(98): PDO->query('SELECT * FROM a...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 98
+[02-Jun-2026 01:59:59 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'acciotif_accion_honduras.ah_poa' doesn't exist in /home2/acciotif/public_html/admin/poa.php:98
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(98): PDO->query('SELECT * FROM a...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 98
+[02-Jun-2026 02:04:26 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'acciotif_accion_honduras.ah_poa' doesn't exist in /home2/acciotif/public_html/admin/poa.php:98
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(98): PDO->query('SELECT * FROM a...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 98
+[02-Jun-2026 02:10:06 UTC] PHP Warning:  Undefined variable $mapSectorSub in /home2/acciotif/public_html/admin/compras.php on line 789
+[02-Jun-2026 02:10:06 UTC] PHP Warning:  Undefined variable $mapSubML in /home2/acciotif/public_html/admin/compras.php on line 790
+[02-Jun-2026 02:10:13 UTC] PHP Warning:  Undefined variable $mapSectorSub in /home2/acciotif/public_html/admin/compras.php on line 789
+[02-Jun-2026 02:10:13 UTC] PHP Warning:  Undefined variable $mapSubML in /home2/acciotif/public_html/admin/compras.php on line 790
+[02-Jun-2026 02:20:30 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'acciotif_accion_honduras.ah_poa' doesn't exist in /home2/acciotif/public_html/admin/poa.php:98
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(98): PDO->query('SELECT * FROM a...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 98
+[02-Jun-2026 02:21:46 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY093]: Invalid parameter number in /home2/acciotif/public_html/classes/Auth.php:147
+Stack trace:
+#0 /home2/acciotif/public_html/classes/Auth.php(147): PDOStatement->execute(Array)
+#1 /home2/acciotif/public_html/classes/Auth.php(49): Auth->recordFailedLogin('admin@accionhon...')
+#2 /home2/acciotif/public_html/admin/login.php(29): Auth->login('admin@accionhon...', '581galileo@1998')
+#3 {main}
+  thrown in /home2/acciotif/public_html/classes/Auth.php on line 147
+[02-Jun-2026 02:53:56 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'nombre_poa' in 'field list' in /home2/acciotif/public_html/admin/poa.php:180
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(180): PDO->query('SELECT nombre_p...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 180
+[02-Jun-2026 02:54:16 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'nombre_poa' in 'field list' in /home2/acciotif/public_html/admin/poa.php:180
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(180): PDO->query('SELECT nombre_p...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 180
+[02-Jun-2026 02:54:20 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'nombre_poa' in 'field list' in /home2/acciotif/public_html/admin/poa.php:180
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(180): PDO->query('SELECT nombre_p...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 180
+[02-Jun-2026 02:54:44 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'nombre_poa' in 'field list' in /home2/acciotif/public_html/admin/poa.php:180
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(180): PDO->query('SELECT nombre_p...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 180
+[02-Jun-2026 02:54:48 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'nombre_poa' in 'field list' in /home2/acciotif/public_html/admin/poa.php:180
+Stack trace:
+#0 /home2/acciotif/public_html/admin/poa.php(180): PDO->query('SELECT nombre_p...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/poa.php on line 180
+[02-Jun-2026 03:33:08 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 425
+[02-Jun-2026 03:33:45 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 425
+[02-Jun-2026 03:33:57 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 425
+[02-Jun-2026 04:08:58 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 425
+[02-Jun-2026 04:57:36 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 425
+[02-Jun-2026 04:58:12 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 425
+[02-Jun-2026 14:11:53 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 423
+[02-Jun-2026 14:12:02 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 423
+[02-Jun-2026 14:12:10 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 423
+[02-Jun-2026 14:12:17 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 423
+[02-Jun-2026 14:12:25 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 423
+[02-Jun-2026 14:17:31 UTC] PHP Parse error:  syntax error, unexpected token "?", expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 499
+[02-Jun-2026 14:17:34 UTC] PHP Parse error:  syntax error, unexpected token "?", expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 499
+[02-Jun-2026 14:17:35 UTC] PHP Parse error:  syntax error, unexpected token "?", expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 499
+[02-Jun-2026 14:17:36 UTC] PHP Parse error:  syntax error, unexpected token "?", expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 499
+[02-Jun-2026 14:18:05 UTC] PHP Parse error:  syntax error, unexpected token "?", expecting "elseif" or "else" or "endif" in /home2/acciotif/public_html/admin/compras.php on line 499
+[02-Jun-2026 14:21:34 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 451
+[02-Jun-2026 14:22:21 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 451
+[02-Jun-2026 14:22:24 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 451
+[02-Jun-2026 14:23:02 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 451
+[02-Jun-2026 14:23:06 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 451
+[02-Jun-2026 14:23:14 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 451
+[02-Jun-2026 15:12:09 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:17:21 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:18:17 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:18:20 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:18:35 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:22:26 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:22:30 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:22:40 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:22:55 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:26:36 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 15:26:47 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 17:38:09 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:30:00 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:30:04 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:30:06 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:30:09 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:30:11 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:30:23 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:30:29 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 18:31:30 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 19:40:58 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 19:59:03 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 19:59:07 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 19:59:18 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 19:59:47 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 19:59:55 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 19:59:58 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:03:02 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:22:44 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:23:00 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:23:16 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:23:30 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:23:53 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:28:47 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:29:06 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:29:24 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:29:40 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:32:16 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 20:41:19 UTC] PHP Fatal error:  Cannot use [] for reading in /home2/acciotif/public_html/admin/imprimir_compra.php on line 551
+[02-Jun-2026 20:43:56 UTC] PHP Parse error:  Unmatched ')' in /home2/acciotif/public_html/admin/imprimir_compra.php on line 551
+[02-Jun-2026 20:44:13 UTC] PHP Fatal error:  Uncaught ValueError: explode(): Argument #1 ($separator) cannot be empty in /home2/acciotif/public_html/admin/imprimir_compra.php:551
+Stack trace:
+#0 /home2/acciotif/public_html/admin/imprimir_compra.php(551): explode('', '50204-Capacitac...')
+#1 {main}
+  thrown in /home2/acciotif/public_html/admin/imprimir_compra.php on line 551
+[02-Jun-2026 20:51:23 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 511
+[02-Jun-2026 20:51:27 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 511
+[02-Jun-2026 20:51:35 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 511
+[02-Jun-2026 20:51:45 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 511
+[02-Jun-2026 20:53:39 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 511
+[02-Jun-2026 20:53:50 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 511
+[02-Jun-2026 22:13:55 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 511
+[02-Jun-2026 22:32:38 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 505
+[02-Jun-2026 22:32:45 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 505
+[02-Jun-2026 22:32:52 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 505
+[02-Jun-2026 22:33:00 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 505
+[02-Jun-2026 22:33:25 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 505
+[02-Jun-2026 22:33:58 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 505
+[02-Jun-2026 22:34:05 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 505
+[02-Jun-2026 22:37:19 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 22:37:24 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 22:37:31 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 22:38:07 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 492
+[02-Jun-2026 22:41:31 UTC] PHP Warning:  Undefined variable $num_filas_fuente in /home2/acciotif/public_html/admin/imprimir_compra.php on line 683
+[02-Jun-2026 22:44:55 UTC] PHP Warning:  Undefined variable $num_filas_fuente in /home2/acciotif/public_html/admin/imprimir_compra.php on line 691
+[02-Jun-2026 23:30:08 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 450
+[02-Jun-2026 23:38:43 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[02-Jun-2026 23:38:49 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[02-Jun-2026 23:39:09 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[02-Jun-2026 23:39:21 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[02-Jun-2026 23:39:26 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[02-Jun-2026 23:40:05 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[02-Jun-2026 23:41:31 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[02-Jun-2026 23:41:37 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 03:31:47 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 03:31:52 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 03:32:00 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:39:31 UTC] PHP Warning:  Undefined array key "id_fila" in /home2/acciotif/public_html/admin/poa.php on line 130
+[03-Jun-2026 03:45:18 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 03:48:38 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:21:46 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:21:52 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:22:01 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:23:18 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:25:49 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:47:03 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:47:14 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[03-Jun-2026 23:49:19 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:52:01 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:52:15 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:52:19 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:52:35 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:52:58 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:53:10 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:53:25 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:54:22 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:55:29 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
+[04-Jun-2026 17:55:34 UTC] PHP Warning:  Undefined variable $poa_vigente_texto in /home2/acciotif/public_html/admin/compras.php on line 460
