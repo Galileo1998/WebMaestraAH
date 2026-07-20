@@ -343,23 +343,24 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
         .b-quote-table { font-size: 8px !important; }
         .b-quote-table th, .b-quote-table td { padding: 3px 2px; }
         .b-quote-table .provider-name { font-size: 7.5px; line-height: 1.15; }
-        .receipt-page { padding: 1cm 1.1cm; }
-        .receipt-shell { border: 1.5px solid #000; min-height: 24.8cm; padding: .75cm .7cm; display: flex; flex-direction: column; }
-        .receipt-head { margin: 0 0 12px; }
+        .receipt-page { padding: .75cm 1cm; }
+        .receipt-shell { min-height: 24.8cm; padding: .15cm 0 0; display: flex; flex-direction: column; }
+        .receipt-head { margin: 0 0 8px; }
         .receipt-head td { border: 0; }
-        .receipt-title { font-size: 20px; font-weight: 800; letter-spacing: .2px; text-align: center; }
-        .receipt-amount { font-size: 14px; font-weight: 800; margin: 15px 0 10px; }
+        .receipt-title { font-size: 16px; font-weight: 800; letter-spacing: .1px; text-align: center; white-space: nowrap; }
+        .receipt-amount { font-size: 12px; font-weight: 800; margin: 7px 0 9px; }
+        .receipt-amount td { border: 0; padding: 4px 0; }
         .receipt-rule { border-top: 6px solid #000; margin: 4px 0 0; }
-        .receipt-body { margin: 0; font-size: 12px; }
-        .receipt-body td { border: 0; padding: 11px 3px; }
+        .receipt-body { margin: 0; font-size: 10px; }
+        .receipt-body td { border: 0; padding: 8px 1px; }
         .receipt-body .receipt-label { width: 24%; font-weight: 800; vertical-align: top; }
         .receipt-body .receipt-value { text-align: center; vertical-align: top; }
-        .receipt-body .concept-row td { min-height: 105px; height: auto; padding-top: 42px; }
-        .receipt-body .place-row td { min-height: 110px; height: auto; padding-top: 28px; }
-        .receipt-signature { margin: auto 0 0; font-size: 12px; }
-        .receipt-signature td { border: 1px solid #000; padding: 7px 4px; }
+        .receipt-body .concept-row td { height: 105px; padding-top: 40px; }
+        .receipt-body .place-row td { height: 120px; padding-top: 25px; }
+        .receipt-signature { margin: auto 0 .55cm; font-size: 10px; border-top: 1px solid #000; }
+        .receipt-signature td { border: 0; padding: 4px 1px; vertical-align: top; }
         .receipt-signature .signature-label { width: 24%; font-weight: 800; }
-        .receipt-signature .signature-value { text-align: center; font-weight: 800; }
+        .receipt-signature .signature-value { text-align: center; font-weight: 800; font-size: 12px; }
 
         .print-controls { background: #fff; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #ccc; }
         .print-controls form { display: inline-flex; align-items: center; gap: 8px; margin-right: 12px; }
