@@ -1134,11 +1134,11 @@ function getCompraCotizacionesFallback(int $compraId): array {
 }
 
 function buildCompraCotizacionesPayload(array $quotesPost, array $rowsPost, int $winnerPos, string $observation, string $analysisDate): array {
-    while (count($quotesPost) < 3) $quotesPost[] = [];
-    if ($winnerPos < 1 || $winnerPos > 3) $winnerPos = 1;
+    while (count($quotesPost) < 4) $quotesPost[] = [];
+    if ($winnerPos < 1 || $winnerPos > 4) $winnerPos = 1;
 
     $quotes = [];
-    for ($idx = 0; $idx < 3; $idx++) {
+    for ($idx = 0; $idx < 4; $idx++) {
         $pos = $idx + 1;
         $q = (array)($quotesPost[$idx] ?? []);
         $provider = trim((string)($q['proveedor'] ?? ''));
@@ -1161,7 +1161,7 @@ function buildCompraCotizacionesPayload(array $quotesPost, array $rowsPost, int 
 
     $rows = [];
     $prices = [];
-    $totals = [1 => ['subtotal'=>0.0,'gravado'=>0.0], 2 => ['subtotal'=>0.0,'gravado'=>0.0], 3 => ['subtotal'=>0.0,'gravado'=>0.0]];
+    $totals = [1 => ['subtotal'=>0.0,'gravado'=>0.0], 2 => ['subtotal'=>0.0,'gravado'=>0.0], 3 => ['subtotal'=>0.0,'gravado'=>0.0], 4 => ['subtotal'=>0.0,'gravado'=>0.0]];
     foreach ($rowsPost as $order => $rowRaw) {
         $row = (array)$rowRaw;
         $article = trim((string)($row['articulo'] ?? ''));
@@ -1181,7 +1181,7 @@ function buildCompraCotizacionesPayload(array $quotesPost, array $rowsPost, int 
         ];
         $rows[] = $stored;
         $prices[(string)$rowId] = [];
-        for ($pos = 1; $pos <= 3; $pos++) {
+        for ($pos = 1; $pos <= 4; $pos++) {
             $pd = (array)($row['precios'][$pos] ?? []);
             $unit = money($pd['precio'] ?? 0);
             $tax = strtoupper((string)($pd['impuesto'] ?? 'E')) === 'G' ? 'G' : 'E';

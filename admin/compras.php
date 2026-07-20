@@ -509,9 +509,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (($purchase['formato_compra']??'A')!=='B') throw new RuntimeException('La comparación de cotizaciones solo aplica al Formato B.');
 
                 $quotes=(array)($_POST['cotizaciones']??[]);
-                while (count($quotes)<3) $quotes[]=[];
+                while (count($quotes)<4) $quotes[]=[];
                 $winnerPos=(int)($_POST['ganador_posicion']??1);
-                if ($winnerPos<1) $winnerPos=1;
+                if ($winnerPos<1 || $winnerPos>4) $winnerPos=1;
                 $savedQuotes=[];
                 $qUpsert=$db->prepare("INSERT INTO ah_compras_cotizaciones(compra_id,posicion,proveedor,rtn,estado_cotizacion,es_ganador,descuento) VALUES(?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE proveedor=VALUES(proveedor),rtn=VALUES(rtn),estado_cotizacion=VALUES(estado_cotizacion),es_ganador=VALUES(es_ganador),descuento=VALUES(descuento)");
                 foreach ($quotes as $idx=>$quote) {

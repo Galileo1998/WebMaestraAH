@@ -337,7 +337,14 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
         .logo-img { max-height: 55px; max-width: 100%; object-fit: contain; }
         .expediente-box { border: 2px solid #000; border-radius: 6px; padding: 4px; margin-top: 5px; text-align: center; font-weight: bold; font-size: 13px; }
         .planilla-print-table thead th { background: #000; color: #fff; font-style: italic; }
+        .long-table thead { display: table-header-group; }
+        .long-table tfoot { display: table-row-group; }
+        .long-table tr { break-inside: avoid; page-break-inside: avoid; }
+        .b-quote-table { font-size: 8px !important; }
+        .b-quote-table th, .b-quote-table td { padding: 3px 2px; }
+        .b-quote-table .provider-name { font-size: 7.5px; line-height: 1.15; }
         .receipt-page { padding: 1cm 1.1cm; }
+        .receipt-shell { border: 1.5px solid #000; min-height: 24.8cm; padding: .75cm .7cm; display: flex; flex-direction: column; }
         .receipt-head { margin: 0 0 12px; }
         .receipt-head td { border: 0; }
         .receipt-title { font-size: 20px; font-weight: 800; letter-spacing: .2px; text-align: center; }
@@ -347,9 +354,9 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
         .receipt-body td { border: 0; padding: 11px 3px; }
         .receipt-body .receipt-label { width: 24%; font-weight: 800; vertical-align: top; }
         .receipt-body .receipt-value { text-align: center; vertical-align: top; }
-        .receipt-body .concept-row td { height: 105px; padding-top: 45px; }
-        .receipt-body .place-row td { height: 125px; padding-top: 28px; }
-        .receipt-signature { margin: 0; font-size: 12px; }
+        .receipt-body .concept-row td { min-height: 105px; height: auto; padding-top: 42px; }
+        .receipt-body .place-row td { min-height: 110px; height: auto; padding-top: 28px; }
+        .receipt-signature { margin: auto 0 0; font-size: 12px; }
         .receipt-signature td { border: 1px solid #000; padding: 7px 4px; }
         .receipt-signature .signature-label { width: 24%; font-weight: 800; }
         .receipt-signature .signature-value { text-align: center; font-weight: 800; }
@@ -368,7 +375,10 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
             @page portrait { size: letter portrait; margin: 0.5cm; }
             @page landscape { size: letter landscape; margin: 0.5cm; }
             .page { margin: 0; padding: 0.5cm 1cm; box-shadow: none; width: 100%; min-height: 100%; height: auto; page-break-after: always; }
-            table, tr, td { page-break-inside: avoid; }
+            table { page-break-inside: auto; }
+            tr, td, th { break-inside: avoid; page-break-inside: avoid; }
+            .long-table thead { display: table-header-group; }
+            .receipt-shell { min-height: 24.8cm; }
         }
     </style>
 </head>
@@ -487,7 +497,7 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
 
         <div class="separator-black"></div>
 
-        <table class="thick-outer">
+        <table class="thick-outer long-table">
             <colgroup>
                 <col style="width: 4%;">
                 <col style="width: 7%;">
@@ -564,21 +574,28 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
         
         <div class="separator-black"></div>
 
-        <table class="thick-outer" style="font-size: 10px; margin-top: 5px;">
+        <table class="thick-outer long-table b-quote-table" style="margin-top: 5px;">
+            <colgroup>
+                <col style="width:2.5%"><col style="width:4.5%"><col style="width:6%">
+                <col style="width:10%"><col style="width:13%">
+                <?php for($p=1; $p<=4; $p++): ?>
+                    <col style="width:5.5%"><col style="width:6.5%"><col style="width:2.25%">
+                <?php endfor; ?>
+            </colgroup>
             <thead>
                 <tr class="bg-light text-center">
                     <th rowspan="2" style="width: 2%;">#</th>
                     <th rowspan="2" style="width: 5%;">Cantidad</th>
                     <th rowspan="2" style="width: 7%;">Presentación</th>
                     <th colspan="2">Descripción de la compra</th>
-                    <?php for($p=1; $p<=3; $p++): ?>
-                        <th colspan="3">Proveedor <?php echo $p; ?><br><?php echo htmlspecialchars($quotes[$p-1]['proveedor'] ?? '---'); ?></th>
+                    <?php for($p=1; $p<=4; $p++): ?>
+                        <th colspan="3" class="provider-name">Proveedor <?php echo $p; ?><br><?php echo htmlspecialchars($quotes[$p-1]['proveedor'] ?? '---'); ?></th>
                     <?php endfor; ?>
                 </tr>
                 <tr class="bg-light text-center">
                     <th style="width: 14%;">Artículo / Insumo</th>
                     <th style="width: 14%;">Características requeridas</th>
-                    <?php for($p=1; $p<=3; $p++): ?>
+                    <?php for($p=1; $p<=4; $p++): ?>
                         <th style="width: 6%;">Valor unitario</th>
                         <th style="width: 6%;">Valor Total</th>
                         <th style="width: 2%;">G/E</th>
@@ -593,7 +610,7 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
                     <td class="text-center"><?php echo htmlspecialchars($fila['presentacion']); ?></td>
                     <td style="padding-left: 5px;"><?php echo htmlspecialchars($fila['articulo']); ?></td>
                     <td style="padding-left: 5px;"><?php echo htmlspecialchars($fila['caracteristicas']); ?></td>
-                    <?php for($p=1; $p<=3; $p++): 
+                    <?php for($p=1; $p<=4; $p++):
                         $quoteId = $quotes[$p-1]['id'] ?? $p; 
                         $pr = $precios[$fila['id']][$quoteId] ?? $precios[$fila['id']][$p] ?? null;
                     ?>
@@ -606,41 +623,41 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
                 
                 <tr>
                     <td colspan="5" class="bg-light text-center text-bold">Ultima línea</td>
-                    <?php for($p=1; $p<=3; $p++): ?>
+                    <?php for($p=1; $p<=4; $p++): ?>
                         <td colspan="3" class="bg-light text-center"></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td colspan="5" class="bg-light text-right text-bold" style="padding-right: 8px;">Subtotal</td>
-                    <?php for($p=1; $p<=3; $p++): ?>
+                    <?php for($p=1; $p<=4; $p++): ?>
                         <td colspan="2" class="text-right text-bold" style="padding-right: 8px;">L. <?php echo number_format((float)($quotes[$p-1]['subtotal'] ?? 0), 2); ?></td>
                         <td class="bg-light text-center">-</td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td colspan="5" class="bg-light text-right text-bold" style="padding-right: 8px;">Gravado (15%)</td>
-                    <?php for($p=1; $p<=3; $p++): ?>
+                    <?php for($p=1; $p<=4; $p++): ?>
                         <td colspan="2" class="text-right text-bold" style="padding-right: 8px;">L. <?php echo number_format((float)(($quotes[$p-1]['subtotal'] ?? 0) * 0.15), 2); ?></td>
                         <td class="bg-light text-center">-</td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td colspan="5" class="bg-light text-right text-bold" style="padding-right: 8px;">Descuento</td>
-                    <?php for($p=1; $p<=3; $p++): ?>
+                    <?php for($p=1; $p<=4; $p++): ?>
                         <td colspan="2" class="text-right text-bold" style="padding-right: 8px;">L. <?php echo number_format((float)($quotes[$p-1]['descuento'] ?? 0), 2); ?></td>
                         <td class="bg-light text-center">-</td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td colspan="5" class="bg-light text-right text-bold" style="padding-right: 8px;">Mas 15% ISV</td>
-                    <?php for($p=1; $p<=3; $p++): ?>
+                    <?php for($p=1; $p<=4; $p++): ?>
                         <td colspan="2" class="text-right text-bold" style="padding-right: 8px;">L. <?php echo number_format((float)($quotes[$p-1]['isv'] ?? 0), 2); ?></td>
                         <td class="bg-light text-center">-</td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td colspan="5" class="bg-light text-right text-bold" style="padding-right: 8px;">Total General</td>
-                    <?php for($p=1; $p<=3; $p++): ?>
+                    <?php for($p=1; $p<=4; $p++): ?>
                         <td colspan="2" class="text-right text-bold" style="padding-right: 8px;">L. <?php echo number_format((float)($quotes[$p-1]['total'] ?? 0), 2); ?></td>
                         <td class="bg-light text-center">-</td>
                     <?php endfor; ?>
@@ -809,7 +826,7 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
             </tr>
         </table>
 
-        <table class="thick-outer" style="margin-top: 5px;">
+        <table class="thick-outer long-table" style="margin-top: 5px;">
             <colgroup>
                 <col style="width: 4%;">
                 <col style="width: 7%;">
@@ -1219,7 +1236,7 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
                     </tr>
                 </table>
                 
-                <table class="thick-outer planilla-print-table" style="margin-top: 20px;">
+                <table class="thick-outer planilla-print-table long-table" style="margin-top: 20px;">
                     <thead>
                         <tr class="bg-light text-center">
                             <th style="padding: 10px;">No</th>
@@ -1286,6 +1303,7 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
             <!-- Recibos Individuales -->
             <?php foreach($plan['detalles'] as $det): ?>
             <div class="page receipt-page">
+                <div class="receipt-shell">
                 <table class="receipt-head no-border">
                     <tr>
                         <td style="width:18%;"></td>
@@ -1327,6 +1345,7 @@ $descuento = number_format($compra['descuento_total'] ?? 0, 2);
                             <td class="signature-value"><?php echo htmlspecialchars($det['nombre']); ?><br><br><?php echo htmlspecialchars($det['identidad']); ?></td>
                         </tr>
                     </table>
+                </div>
             </div>
             <?php endforeach; ?>
             
