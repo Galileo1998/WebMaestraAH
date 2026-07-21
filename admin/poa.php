@@ -529,7 +529,72 @@ function poaHydrateExecutionRows(PDO $db, array $rows) {
     return $rows;
 }
 
+function poaDashboardSummary(PDO $db): array {
+    $stActive = $db->query("SELECT nombre_poa FROM ah_poa WHERE is_active=1 LIMIT 1");
+    $poaName = trim((string)($stActive ? $stActive->fetchColumn() : ''));
+    if ($poaName === '') {
+        $stFallback = $db->query("SELECT nombre_poa FROM ah_poa ORDER BY id DESC LIMIT 1");
+        $poaName = trim((string)($stFallback ? $stFallback->fetchColumn() : ''));
+    }
+
+    $rows = [];
+    if ($poaName !== '') {
+        $stRows = $db->prepare('SELECT * FROM ah_poa WHERE nombre_poa=? ORDER BY id ASC LIMIT 2000');
+        $stRows->execute([$poaName]);
+        $rows = poaHydrateExecutionRows($db, $stRows->fetchAll(PDO::FETCH_ASSOC));
+    }
+
+    $budget = 0.0;
+    $executed = 0.0;
+    $pendingTotal = 0.0;
+    $authorizedTotal = 0.0;
+    $sectorSummary = [];
+    foreach ($rows as $row) {
+        $rowBudget = (float)($row['presupuesto_anual'] ?? 0);
+        $rowExecuted = (float)($row['ejecutado'] ?? 0);
+        $budget += $rowBudget;
+        $executed += $rowExecuted;
+        $pendingTotal += array_sum(array_map('floatval', (array)($row['_purchase_pending'] ?? [])));
+        $authorizedTotal += array_sum(array_map('floatval', (array)($row['_purchase_authorized'] ?? [])));
+
+        $sector = trim((string)($row['sector'] ?? '')) ?: 'Sin sector';
+        if (!isset($sectorSummary[$sector])) {
+            $sectorSummary[$sector] = ['sector'=>$sector, 'presupuesto'=>0.0, 'ejecutado'=>0.0];
+        }
+        $sectorSummary[$sector]['presupuesto'] += $rowBudget;
+        $sectorSummary[$sector]['ejecutado'] += $rowExecuted;
+    }
+    usort($sectorSummary, static function (array $a, array $b): int {
+        return $b['presupuesto'] <=> $a['presupuesto'];
+    });
+
+    return [
+        'ok'=>true,
+        'poa'=>$poaName,
+        'presupuesto'=>round($budget, 2),
+        'ejecutado'=>round($executed, 2),
+        'disponible'=>round($budget - $executed, 2),
+        'porcentaje'=>$budget > 0 ? round(($executed / $budget) * 100, 1) : 0,
+        'compras_pendientes'=>round($pendingTotal, 2),
+        'compras_autorizadas'=>round($authorizedTotal, 2),
+        'ejecucion_manual'=>round(max(0, $executed - $pendingTotal - $authorizedTotal), 2),
+        'sectores'=>array_values($sectorSummary),
+    ];
+}
+
 $poaExecutionStoreReady = ensurePoaExecutionStore($db);
+
+if (isset($_GET['dashboard_summary'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        echo json_encode(poaDashboardSummary($db), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        error_log('POA dashboard summary: ' . $e->getMessage());
+        echo json_encode(['ok'=>false, 'message'=>'No fue posible calcular el resumen del POA.']);
+    }
+    exit;
+}
 
 $poaSchemaSessionKey = 'poa_schema_checked_20260714_v2';
 if (empty($_SESSION[$poaSchemaSessionKey])) {
@@ -1031,6 +1096,7 @@ if(!empty($filtro_poa)) {
 
     } catch (Exception $e) {}
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

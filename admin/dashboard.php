@@ -102,7 +102,8 @@ foreach($sectores_data as $sd) {
     <main class="main-wrapper">
         <div class="page-header">
             <h1><i class="fa-solid fa-chart-pie" style="color: var(--ah-primary);"></i> Panel Gerencial</h1>
-            <p>Monitoreo de ejecución en tiempo real. Mostrando datos de: <strong><?php echo htmlspecialchars($poa_vigente); ?></strong></p>
+            <p>Monitoreo de ejecución en tiempo real. Mostrando datos de: <strong id="dashboard-poa-name"><?php echo htmlspecialchars($poa_vigente); ?></strong></p>
+            <p id="dashboard-sync-status" style="font-size:.84rem;color:#64748b;"><i class="fa-solid fa-rotate fa-spin"></i> Sincronizando con la matriz POA…</p>
         </div>
 
         <!-- Indicadores Clave de Rendimiento (KPIs) -->
@@ -110,27 +111,27 @@ foreach($sectores_data as $sd) {
             <div class="kpi-card" style="border-top: 4px solid var(--ah-primary);">
                 <i class="fa-solid fa-sack-dollar icon-bg" style="color: var(--ah-primary);"></i>
                 <h3>Techo Programado (POA)</h3>
-                <p class="value">L. <?php echo number_format($total_pto, 2); ?></p>
+                <p class="value" id="dashboard-budget">L. <?php echo number_format($total_pto, 2); ?></p>
             </div>
             
             <div class="kpi-card" style="border-top: 4px solid #b45309;">
                 <i class="fa-solid fa-money-bill-transfer icon-bg" style="color: #b45309;"></i>
-                <h3>Total Ejecutado</h3>
-                <p class="value" style="color: #b45309;">L. <?php echo number_format($total_ejec, 2); ?></p>
+                <h3>Ejecutado y comprometido</h3>
+                <p class="value" id="dashboard-executed" style="color: #b45309;">L. <?php echo number_format($total_ejec, 2); ?></p>
             </div>
 
             <div class="kpi-card" style="border-top: 4px solid #166534;">
                 <i class="fa-solid fa-vault icon-bg" style="color: #166534;"></i>
                 <h3>Saldo Disponible</h3>
-                <p class="value" style="color: #166534;">L. <?php echo number_format($saldo_disponible, 2); ?></p>
+                <p class="value" id="dashboard-available" style="color: #166534;">L. <?php echo number_format($saldo_disponible, 2); ?></p>
             </div>
 
             <div class="kpi-card" style="border-top: 4px solid #6366f1;">
                 <i class="fa-solid fa-gauge-high icon-bg" style="color: #6366f1;"></i>
                 <h3>Nivel de Ejecución</h3>
-                <p class="value" style="color: #4f46e5; font-size: 2.2rem;"><?php echo $porcentaje_ejecucion; ?>%</p>
+                <p class="value" id="dashboard-percentage" style="color: #4f46e5; font-size: 2.2rem;"><?php echo $porcentaje_ejecucion; ?>%</p>
                 <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width: <?php echo $porcentaje_ejecucion; ?>%; background: #4f46e5;"></div>
+                    <div class="progress-bar-fill" id="dashboard-progress" style="width: <?php echo min(100, max(0, $porcentaje_ejecucion)); ?>%; background: #4f46e5;"></div>
                 </div>
             </div>
         </div>
@@ -159,7 +160,7 @@ foreach($sectores_data as $sd) {
 
         // Configuración Gráfico de Barras (Sectores)
         const ctxBar = document.getElementById('barChart').getContext('2d');
-        new Chart(ctxBar, {
+        const barChart = new Chart(ctxBar, {
             type: 'bar',
             data: {
                 labels: labelsSectores,
@@ -171,7 +172,7 @@ foreach($sectores_data as $sd) {
                         borderRadius: 4
                     },
                     {
-                        label: 'Monto Ejecutado',
+                        label: 'Ejecutado / comprometido',
                         data: dataEjecSectores,
                         backgroundColor: '#34859B',
                         borderRadius: 4
@@ -204,10 +205,10 @@ foreach($sectores_data as $sd) {
 
         // Configuración Gráfico de Dona (Gasto Global)
         const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
-        new Chart(ctxDoughnut, {
+        const doughnutChart = new Chart(ctxDoughnut, {
             type: 'doughnut',
             data: {
-                labels: ['Ejecutado', 'Disponible'],
+                labels: ['Ejecutado / comprometido', 'Disponible'],
                 datasets: [{
                     data: [<?php echo $total_ejec; ?>, <?php echo $saldo_disponible; ?>],
                     backgroundColor: ['#b45309', '#166534'],
@@ -235,6 +236,50 @@ foreach($sectores_data as $sd) {
                 }
             }
         });
+
+        const money = value => 'L. ' + Number(value || 0).toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2});
+        async function syncDashboardWithPoa() {
+            const status = document.getElementById('dashboard-sync-status');
+            try {
+                const response = await fetch('poa.php?dashboard_summary=1', {
+                    credentials:'same-origin',
+                    headers:{'Accept':'application/json'}
+                });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const summary = await response.json();
+                if (!summary.ok) throw new Error(summary.message || 'Resumen no disponible');
+
+                document.getElementById('dashboard-poa-name').textContent = summary.poa || 'Ningún POA activo';
+                document.getElementById('dashboard-budget').textContent = money(summary.presupuesto);
+                document.getElementById('dashboard-executed').textContent = money(summary.ejecutado);
+                document.getElementById('dashboard-available').textContent = money(summary.disponible);
+                document.getElementById('dashboard-percentage').textContent = Number(summary.porcentaje || 0).toLocaleString('es-HN', {maximumFractionDigits:1}) + '%';
+                document.getElementById('dashboard-progress').style.width = Math.min(100, Math.max(0, Number(summary.porcentaje || 0))) + '%';
+
+                const sectors = Array.isArray(summary.sectores) ? summary.sectores : [];
+                barChart.data.labels = sectors.map(item => String(item.sector || 'Varios').split('_')[0]);
+                barChart.data.datasets[0].data = sectors.map(item => Number(item.presupuesto || 0));
+                barChart.data.datasets[1].data = sectors.map(item => Number(item.ejecutado || 0));
+                barChart.update();
+
+                doughnutChart.data.datasets[0].data = [
+                    Math.max(0, Number(summary.ejecutado || 0)),
+                    Math.max(0, Number(summary.disponible || 0))
+                ];
+                doughnutChart.update();
+
+                status.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sincronizado con POA: manual L. '
+                    + Number(summary.ejecucion_manual || 0).toLocaleString('es-HN', {minimumFractionDigits:2})
+                    + ' · compras autorizadas L. ' + Number(summary.compras_autorizadas || 0).toLocaleString('es-HN', {minimumFractionDigits:2})
+                    + ' · compras pendientes L. ' + Number(summary.compras_pendientes || 0).toLocaleString('es-HN', {minimumFractionDigits:2});
+                status.style.color = '#166534';
+            } catch (error) {
+                console.error('No fue posible sincronizar el dashboard con POA.', error);
+                status.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> No fue posible actualizar las cifras desde POA; se muestran los valores almacenados.';
+                status.style.color = '#b45309';
+            }
+        }
+        syncDashboardWithPoa();
     </script>
 </body>
 </html>
