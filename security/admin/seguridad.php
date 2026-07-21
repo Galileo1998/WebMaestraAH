@@ -33,6 +33,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
 $flash=$_SESSION['ah_security_flash']??null;unset($_SESSION['ah_security_flash']);
 $statusFilter=trim((string)($_GET['status']??'open'));$severityFilter=trim((string)($_GET['severity']??''));
+$security->reconcileMissingOpenFindings($securityUserLabel);
 $dashboard=$security->dashboard();$findings=$security->findings($statusFilter,$severityFilter,400);$backups=$security->backups(40);$scans=$security->recentScans(12);$csrf=ahSecurityCsrfToken();
 $open=(int)($dashboard['findings']['open_total']??0);$high=(int)($dashboard['findings']['critical_total']??0)+(int)($dashboard['findings']['high_total']??0);$lastScan=$dashboard['last_scan'];$health=$dashboard['health'];$git=$dashboard['git'];
 ?>

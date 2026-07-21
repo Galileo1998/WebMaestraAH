@@ -131,6 +131,30 @@ final class SecurityService
         return $this->db->query("SELECT * FROM ah_security_scans ORDER BY id DESC LIMIT $limit")->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function reconcileMissingOpenFindings(string $user='SYSTEM'): array
+    {
+        $rows=$this->db->query("SELECT id,path FROM ah_security_findings WHERE status='open' ORDER BY id")->fetchAll(PDO::FETCH_ASSOC);
+        $missing=[];
+        foreach($rows as $row){
+            try{$absolute=$this->absoluteFromRelative((string)$row['path']);}
+            catch(Throwable $e){$missing[]=(int)$row['id'];continue;}
+            if(!is_file($absolute))$missing[]=(int)$row['id'];
+        }
+        if(!$missing)return ['checked'=>count($rows),'removed'=>0];
+        $this->db->beginTransaction();
+        try{
+            foreach(array_chunk($missing,250) as $ids){
+                $marks=implode(',',array_fill(0,count($ids),'?'));
+                $st=$this->db->prepare("DELETE FROM ah_security_findings WHERE status='open' AND id IN ($marks)");
+                $st->execute($ids);
+            }
+            $this->db->commit();
+        }catch(Throwable $e){$this->db->rollBack();throw $e;}
+        $result=['checked'=>count($rows),'removed'=>count($missing)];
+        $this->logAction($user,'reconcile_missing_findings',$this->root,'ok',$result);
+        return $result;
+    }
+
     public function findings(string $status='open',string $severity='',int $limit=300): array
     {
         $where=[];$params=[];
@@ -187,6 +211,7 @@ final class SecurityService
             $findings=array_sum($sev);$limited=(!$cli&&$limit>0&&$files>=$limit);
             $st=$this->db->prepare("UPDATE ah_security_scans SET finished_at=NOW(),status='finished',files_scanned=?,bytes_scanned=?,findings_count=?,critical_count=?,high_count=?,medium_count=?,low_count=?,errors_count=?,summary_json=? WHERE id=?");
             $st->execute([$files,$bytes,$findings,$sev['critical'],$sev['high'],$sev['medium'],$sev['low'],$errors,json_encode(['limited_by_web'=>$limited,'root'=>$this->root],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES),$scanId]);
+            $this->reconcileMissingOpenFindings($initiatedBy);
             $this->logAction($initiatedBy,'scan_'.$mode,$this->root,'ok',['scan_id'=>$scanId,'findings'=>$findings]);
             if (($sev['critical']+$sev['high'])>0) $this->notify('Alerta de seguridad en Acción Honduras',"El escaneo #$scanId encontró ".($sev['critical']+$sev['high'])." hallazgos críticos o altos.");
             return ['scan_id'=>$scanId,'mode'=>$mode,'files_scanned'=>$files,'bytes_scanned'=>$bytes,'findings_count'=>$findings,'severity'=>$sev,'errors'=>$errors,'limited'=>$limited];
