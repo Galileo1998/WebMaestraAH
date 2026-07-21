@@ -4,6 +4,15 @@ function ensureAccountingCatalog(PDO $db): void {
     static $ready = false;
     if ($ready) return;
 
+    // La carga normal solo comprueba disponibilidad; el DDL se ejecuta una vez,
+    // cuando el catálogo todavía no existe.
+    try {
+        $db->query('SELECT 1 FROM ah_catalogo_cuentas LIMIT 1');
+        $db->query('SELECT 1 FROM ah_compras_cuentas LIMIT 1');
+        $ready = true;
+        return;
+    } catch (Throwable $missingCatalog) {}
+
     $db->exec("CREATE TABLE IF NOT EXISTS ah_catalogo_cuentas (
         id INT AUTO_INCREMENT PRIMARY KEY,
         codigo VARCHAR(30) NOT NULL,
