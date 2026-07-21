@@ -69,6 +69,7 @@
         const rows = visibleRows(table);
         countLabel.textContent = `${rows.length} fila${rows.length === 1 ? '' : 's'} visible${rows.length === 1 ? '' : 's'}`;
         let foot = table.querySelector('tfoot[data-ah-generated="true"]');
+        if (table.tFoot && !foot) return;
         const analysis = totalColumns(table, rows);
         if (!analysis.columns.length) {
             if (foot) foot.remove();
@@ -152,6 +153,15 @@
         try {
             const XLSX = await loadXlsx();
             const clone = table.cloneNode(true);
+            const originalControls = table.querySelectorAll('tbody input, tbody select, tbody textarea, tbody [contenteditable="true"]');
+            const clonedControls = clone.querySelectorAll('tbody input, tbody select, tbody textarea, tbody [contenteditable="true"]');
+            clonedControls.forEach((control, index) => {
+                const originalControl = originalControls[index];
+                const value = originalControl?.matches('select')
+                    ? originalControl.options[originalControl.selectedIndex]?.text || ''
+                    : originalControl?.value ?? originalControl?.textContent ?? '';
+                control.replaceWith(document.createTextNode(value));
+            });
             Array.from(clone.tBodies).forEach(body => Array.from(body.rows).forEach((row, index) => {
                 const sourceRow = table.tBodies[Array.from(clone.tBodies).indexOf(body)]?.rows[index];
                 if (sourceRow && !isVisible(sourceRow)) row.remove();
@@ -171,13 +181,14 @@
 
     function qualifies(table) {
         if (table.dataset.tableUx === 'off' || table.dataset.ahEnhanced === 'true') return false;
+        const forced = table.dataset.tableUx === 'on';
         if (!table.tBodies.length || !table.tHead || table.rows[0]?.cells.length < 2) return false;
         if (SKIP_CLASSES.some(className => table.classList.contains(className))) return false;
-        if (table.querySelector('tbody input, tbody select, tbody textarea, tbody [contenteditable="true"]')) return false;
+        if (!forced && table.querySelector('tbody input, tbody select, tbody textarea, tbody [contenteditable="true"]')) return false;
         const semanticClass = /data-table|styled-table|centers-table|center-table|base-table|audit-table|table/.test(table.className);
         const context = table.closest('main, section, article, .card, .panel, .content, .main-content') || document;
         const hasFilters = !!context.querySelector('.filters, .filter-bar, [id*="filter" i], [id*="filtro" i], [id*="search" i], [id*="buscar" i], form[method="get" i]');
-        return semanticClass || hasFilters || table.dataset.tableUx === 'on';
+        return forced || semanticClass || hasFilters;
     }
 
     function enhance(table) {
