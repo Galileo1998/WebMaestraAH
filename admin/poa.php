@@ -16,8 +16,10 @@ $database = new Database();
 $db = $database->getConnection();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $auth = new Auth($db);
-$auth->requireLogin();
-$auth->checkAccess(basename($_SERVER['PHP_SELF']), $db);
+$isDashboardSummary = isset($_GET['dashboard_summary']);
+$accessScript = $isDashboardSummary ? 'dashboard.php' : basename($_SERVER['PHP_SELF']);
+$auth->requireLogin(['admin'], $accessScript);
+$auth->checkAccess($accessScript, $db);
 
 if (empty($_SESSION['poa_audit_schema_v1'])) {
     poaEnsureAuditTable($db);
@@ -584,7 +586,7 @@ function poaDashboardSummary(PDO $db): array {
 
 $poaExecutionStoreReady = ensurePoaExecutionStore($db);
 
-if (isset($_GET['dashboard_summary'])) {
+if ($isDashboardSummary) {
     header('Content-Type: application/json; charset=utf-8');
     try {
         echo json_encode(poaDashboardSummary($db), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

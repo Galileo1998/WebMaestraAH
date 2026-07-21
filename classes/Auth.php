@@ -71,7 +71,7 @@ class Auth {
         return true;
     }
 
-    public function requireLogin($allowedSources = ['admin']) {
+    public function requireLogin($allowedSources = ['admin'], $permissionScript = null) {
         if(!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
             header("Location: login.php");
             exit;
@@ -93,7 +93,8 @@ class Auth {
 
         // Los usuarios del CMS deben conservar permiso explicito para el modulo actual.
         if ($source === 'admin' && $this->db) {
-            $this->checkAccess(basename($_SERVER['SCRIPT_NAME'] ?? ''), $this->db);
+            $script = $permissionScript ?: basename($_SERVER['SCRIPT_NAME'] ?? '');
+            $this->checkAccess($script, $this->db);
         }
     }
 
