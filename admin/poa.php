@@ -551,6 +551,8 @@ function poaDashboardSummary(PDO $db): array {
     $pendingTotal = 0.0;
     $authorizedTotal = 0.0;
     $sectorSummary = [];
+    $subsectorSummary = [];
+    $lineSummary = [];
     foreach ($rows as $row) {
         $rowBudget = (float)($row['presupuesto_anual'] ?? 0);
         $rowExecuted = (float)($row['ejecutado'] ?? 0);
@@ -565,9 +567,62 @@ function poaDashboardSummary(PDO $db): array {
         }
         $sectorSummary[$sector]['presupuesto'] += $rowBudget;
         $sectorSummary[$sector]['ejecutado'] += $rowExecuted;
+
+        $subsector = trim((string)($row['sub_sector'] ?? '')) ?: 'Sin subsector';
+        $subsectorKey = $sector . "\x1f" . $subsector;
+        if (!isset($subsectorSummary[$subsectorKey])) {
+            $subsectorSummary[$subsectorKey] = [
+                'sector'=>$sector,
+                'subsector'=>$subsector,
+                'presupuesto'=>0.0,
+                'ejecutado'=>0.0,
+                'lineas'=>0,
+            ];
+        }
+        $subsectorSummary[$subsectorKey]['presupuesto'] += $rowBudget;
+        $subsectorSummary[$subsectorKey]['ejecutado'] += $rowExecuted;
+        $subsectorSummary[$subsectorKey]['lineas']++;
+
+        $available = $rowBudget - $rowExecuted;
+        $percentage = $rowBudget > 0 ? ($rowExecuted / $rowBudget) * 100 : ($rowExecuted > 0 ? 100 : 0);
+        $lineSummary[] = [
+            'hash'=>(string)($row['hash_id'] ?? ''),
+            'sector'=>$sector,
+            'subsector'=>$subsector,
+            'marco_logico'=>trim((string)($row['marco_logico'] ?? '')),
+            'actividad'=>trim((string)($row['descripcion_actividad'] ?? '')),
+            'cuenta'=>trim((string)($row['cuenta_contable'] ?? '')),
+            'presupuesto'=>round($rowBudget, 2),
+            'ejecutado'=>round($rowExecuted, 2),
+            'disponible'=>round($available, 2),
+            'porcentaje'=>round($percentage, 1),
+            'estado'=>$rowExecuted > $rowBudget && $rowExecuted > 0 ? 'Sobreejecución' : ($rowExecuted < $rowBudget ? 'Subejecución' : 'Equilibrado'),
+        ];
     }
-    usort($sectorSummary, static function (array $a, array $b): int {
+    foreach ($sectorSummary as &$item) {
+        $item['presupuesto'] = round($item['presupuesto'], 2);
+        $item['ejecutado'] = round($item['ejecutado'], 2);
+        $item['disponible'] = round($item['presupuesto'] - $item['ejecutado'], 2);
+        $item['porcentaje'] = $item['presupuesto'] > 0 ? round(($item['ejecutado'] / $item['presupuesto']) * 100, 1) : 0;
+    }
+    unset($item);
+    foreach ($subsectorSummary as &$item) {
+        $item['presupuesto'] = round($item['presupuesto'], 2);
+        $item['ejecutado'] = round($item['ejecutado'], 2);
+        $item['disponible'] = round($item['presupuesto'] - $item['ejecutado'], 2);
+        $item['porcentaje'] = $item['presupuesto'] > 0 ? round(($item['ejecutado'] / $item['presupuesto']) * 100, 1) : 0;
+    }
+    unset($item);
+    $byBudget = static function (array $a, array $b): int {
         return $b['presupuesto'] <=> $a['presupuesto'];
+    };
+    usort($sectorSummary, $byBudget);
+    usort($subsectorSummary, $byBudget);
+    usort($lineSummary, static function (array $a, array $b): int {
+        $aOver = max(0, -$a['disponible']);
+        $bOver = max(0, -$b['disponible']);
+        if ($aOver !== $bOver) return $bOver <=> $aOver;
+        return abs($b['disponible']) <=> abs($a['disponible']);
     });
 
     return [
@@ -581,6 +636,13 @@ function poaDashboardSummary(PDO $db): array {
         'compras_autorizadas'=>round($authorizedTotal, 2),
         'ejecucion_manual'=>round(max(0, $executed - $pendingTotal - $authorizedTotal), 2),
         'sectores'=>array_values($sectorSummary),
+        'subsectores'=>array_values($subsectorSummary),
+        'lineas'=>$lineSummary,
+        'alertas'=>[
+            'sobreejecutadas'=>count(array_filter($lineSummary, static fn(array $line): bool => $line['estado'] === 'Sobreejecución')),
+            'subejecutadas'=>count(array_filter($lineSummary, static fn(array $line): bool => $line['estado'] === 'Subejecución')),
+            'sin_presupuesto_con_ejecucion'=>count(array_filter($lineSummary, static fn(array $line): bool => $line['presupuesto'] <= 0 && $line['ejecutado'] > 0)),
+        ],
     ];
 }
 
