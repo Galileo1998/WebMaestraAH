@@ -22,6 +22,9 @@ if (!function_exists('canView')) {
 }
 ?>
 
+<link rel="stylesheet" href="/admin/assets/css/table-ux.css?v=1">
+<script src="/admin/assets/js/table-ux.js?v=1" defer></script>
+
 <style>
     .sidebar { width: 280px; background: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; min-height: 100vh; transition: margin-left 0.3s ease; position: relative; z-index: 100; }
     .sidebar.collapsed { margin-left: -280px; }
