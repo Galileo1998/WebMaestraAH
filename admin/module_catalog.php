@@ -49,6 +49,7 @@ return [
             'mis_compras.php' => ['label' => 'Mis compras', 'icon' => 'fa-basket-shopping', 'sidebar' => true],
             'compras.php' => ['label' => 'Expedientes de compra', 'icon' => 'fa-folder-tree', 'sidebar' => true, 'active' => ['compras.php', 'imprimir_compra.php']],
             'imprimir_compra.php' => ['label' => 'Impresión de compras', 'icon' => 'fa-print'],
+            'catalogo_cuentas.php' => ['label' => 'Catálogo contable', 'icon' => 'fa-book-open', 'sidebar' => true],
             'poa.php' => ['label' => 'Presupuesto (POA)', 'icon' => 'fa-table-cells-large', 'sidebar' => true],
             'dashboard.php' => ['label' => 'Panel gerencial', 'icon' => 'fa-chart-column', 'sidebar' => true]
         ]

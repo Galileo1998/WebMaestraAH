@@ -453,7 +453,8 @@ function resolveCurrentPoaHash(PDO $db, array $purchaseLine): string {
 
     $code = comprasNormalizeLineCode((string)($purchaseLine['marco_logico'] ?? ''));
     $ext = comprasNormalizeExt((string)($purchaseLine['ext'] ?? ''));
-    $account = comprasNormalizeAccount((string)($purchaseLine['cuenta_contable'] ?? ''));
+    $accountSource = function_exists('purchasePoaSourceAccount') ? purchasePoaSourceAccount($db, $purchaseLine) : (string)($purchaseLine['cuenta_contable'] ?? '');
+    $account = comprasNormalizeAccount($accountSource);
     if ($code === '') throw new RuntimeException('La línea imputada no tiene código de marco lógico.');
 
     $sql = "SELECT hash_id, marco_logico, ext, cuenta_contable

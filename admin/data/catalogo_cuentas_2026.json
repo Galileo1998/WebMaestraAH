@@ -1,0 +1,1367 @@
+[
+  [
+    "50100",
+    "COSTO DE PERSONAL",
+    "Todas las compensaciones, inclusivas brutas por servicios prestados por personal \ncontratado como \"empleado\" (tiempo completo, medio tiempo o temporal). Esta\ncuenta incluye todos los beneficios, incluyendo impuestos de empleo, seguros,\nprestaciones, etc.",
+    "Gasto",
+    1
+  ],
+  [
+    "50101",
+    "Salarios Personal Regular",
+    "Salarios del Personal",
+    "Gasto",
+    2
+  ],
+  [
+    "50102",
+    "Salarios Tiempo Extra e Incentivos",
+    "Salarios tiempo extra por trabajo extraordinario del  Personal y por desempeño desarrollado en las actividades realizadas.",
+    "Gasto",
+    3
+  ],
+  [
+    "50103",
+    "Decimo tercero y Decimo Cuarto",
+    "Treceavo y Catorceavo mes de salario",
+    "Gasto",
+    4
+  ],
+  [
+    "50104",
+    "Beneficios Adicionales",
+    "Beneficios Adicionales : IHSS Instituto Hondureño de Seguridad Social, RAP Regimen de Aportaciones Privadas, Bono Educativo, INFOP Instituto Nacional de Formacion Profesional.",
+    "Gasto",
+    5
+  ],
+  [
+    "50105",
+    "Vacaciones",
+    "Vacaciones (solamente se incluirá a las personas que cubren las vacaciones de asistentes en comunicaciones ).",
+    "Gasto",
+    6
+  ],
+  [
+    "50106",
+    "Equipo de seguridad y uniformes",
+    "Costo uniformes y equipamiento de uniformes, gorras y otros utenciliios que promocionen la imagen de Accion Honduras",
+    "Gasto",
+    7
+  ],
+  [
+    "50107",
+    "Membresias profesionales",
+    "Suscripciones y menbresias por Diplomados, cursos y otros recibidos por el personal de Accion Honduras.",
+    "Gasto",
+    8
+  ],
+  [
+    "50108",
+    "Seguro - Medico / Dental",
+    "Seguro Medico Hospitalario /Servicio Dental  Suscrito por Accion Honduras este valor corresponde.",
+    "Gasto",
+    9
+  ],
+  [
+    "50109",
+    "Seguro - De vida / Hospitalario.",
+    "Seguro de Vida suscrito para todos los empleados de Accion Honduras.",
+    "Gasto",
+    10
+  ],
+  [
+    "50110",
+    "Impuestos de empleados",
+    "Impuestos Municipales obligados a pagar por empleados / este valor corresponde al complemento patronal pagado por Accion Honduras",
+    "Gasto",
+    11
+  ],
+  [
+    "50111",
+    "Prestaciones Laborales",
+    "Corresponde al pago de prestaciones e Imdemnizaciones pagadas a  los empleados como ser : Cesantia ( Imdenizacion por despido) Pre-aviso Vacaciones.",
+    "Gasto",
+    12
+  ],
+  [
+    "50112",
+    "Contribucion Plan de Pensiones",
+    "Cuota o %  patronal pagado por el patrono en lo que corresponde a los Planes pensiones AFP Administradora de Fondos de Pensiones.",
+    "Gasto",
+    13
+  ],
+  [
+    "50200",
+    "CAPACITACION.",
+    "Incluye todos los costos incurridos para propósitos de capacitación. Esto incluye los honorarios del capacitador,materiales, transportación, alimentos y hospedaje.",
+    "Gasto",
+    14
+  ],
+  [
+    "50201",
+    "Cuota de capacitacion combinada",
+    "Comprende los gastos de materiales, fotocopias, meriendas, almuerzos, transporte de las capacitaciones impartidas por capacitadores que no pertenezcan al proyecto, por   educadores, asistentes en comunicaciones y auxiliares administrativos al personal voluntaria de los proyectos.",
+    "Gasto",
+    15
+  ],
+  [
+    "50202",
+    "Pago a capacitadores",
+    "Incluye el pago de honorarios profesionales cuando se contrata capacitadores externos para desarrollar talleres de capacitación para el personal contratado de los proyectos .comité de padres, jardineras y otros-",
+    "Gasto",
+    16
+  ],
+  [
+    "50203",
+    "Material de capacitacion",
+    "Incluye fotocopias y materiales de capacitación.",
+    "Gasto",
+    17
+  ],
+  [
+    "50204",
+    "Transporte para capacitacion",
+    "Transporte para capacitación que se realizan fuera del proyecto.Comprende el transporte para jardineras, Comité de Padres, personal contratado.",
+    "Gasto",
+    18
+  ],
+  [
+    "50205",
+    "Alimentos y hospedaje-Capacitacion",
+    "Alimentos y hospedajes para capacitación que se realiza fuera del proyecto\nIncluye jardineras, personal contratado, comiite de padres.",
+    "Gasto",
+    19
+  ],
+  [
+    "50206",
+    "Alquiler de local y equipo",
+    "Incluye alquiler de local, alquiler de equipo para la capacitación, etc.",
+    "Gasto",
+    20
+  ],
+  [
+    "50207",
+    "Capacitacion de personal",
+    "Comprende los costos que se realizan cuando el personal permanente recibe capcitaciones",
+    "Gasto",
+    21
+  ],
+  [
+    "50300",
+    "SERVICIOS CONTRATADOS.",
+    "Incluye cualquier pago realizado a consultores y contratistas por los servicios recibidos",
+    "Gasto",
+    22
+  ],
+  [
+    "50301",
+    "Servicios profesionales",
+    "Incluye los pagos realizados por concepto de consultas médicas, exámenes de laboratorio",
+    "Gasto",
+    23
+  ],
+  [
+    "50302",
+    "Servicios contratados ( Vigilancia, aseo y otros )",
+    "Incluye los pagos a personas particulares que prestan un servicio por un período de tiempo determinado, tales como técnicos avícolas, instructores de talleres vocacionales, vigilantes, aseadoras y otros.",
+    "Gasto",
+    24
+  ],
+  [
+    "50303",
+    "Servicios de traduccion",
+    "Se refiere a los pagos que el proyecto realiza por concepto de traducción de la correspondencia entre niños y padrinos y viceversa.",
+    "Gasto",
+    25
+  ],
+  [
+    "50304",
+    "Servicios Legales",
+    "Se refiere a pagos hechos a abogados por realizar un trámite legal del proyecto.",
+    "Gasto",
+    26
+  ],
+  [
+    "50305",
+    "Gastos de Auditoria",
+    "Incluye el pago de los servicios de auditorio realizadas a los proyectos.",
+    "Gasto",
+    27
+  ],
+  [
+    "50306",
+    "Apoyo a Voluntarios",
+    "Subcontratacion exporadica de personal que no es empleado de Accion Honduras.",
+    "Gasto",
+    28
+  ],
+  [
+    "50307",
+    "Servicios de alimentos y bebidas",
+    "-",
+    "Gasto",
+    29
+  ],
+  [
+    "50400",
+    "ARTICULOS, MATERIALES Y EQUIPO MENOR",
+    "Todos los egresos de artículos y materiales que se requieran para la implementación de Actividades dei Programa. Por Ejemplo. - Artículos de salud, medicinas, educación, agricultura, oficina, y renta de equipo. Esta cuenta también incluye todos los egresos de equipo menor, equipo no considerado corno activo fijo.",
+    "Gasto",
+    30
+  ],
+  [
+    "50401",
+    "Equipo menor",
+    "Se consideran los pagos por calculadoras, grapadoras, perforadoras, reglas y otros que tengan un valor entre L.1,000.00  a 5,000.00",
+    "Gasto",
+    31
+  ],
+  [
+    "50402",
+    "Cargos financieros por arrendamiento",
+    "Son pagos de intereses ocasionados por retrasos en las fechas de cancelación de un servicio de alquileres de locales.",
+    "Gasto",
+    32
+  ],
+  [
+    "50403",
+    "Articulos de oficina",
+    "Incluye los gastos realizados en la compra de materiales como papelería, lápices. folders otros que son destinados para el uso del personal permanente y voluntario del proyecto.",
+    "Gasto",
+    33
+  ],
+  [
+    "50404",
+    "Articulos y servicios de fotografia",
+    "Incluye todos los gastos de fotografías para Ficha Social, informes. reportes de progreso, tarjetas navideñas, programas y otros.",
+    "Gasto",
+    34
+  ],
+  [
+    "50405",
+    "Articulos de limpieza",
+    "Incluye todos los gastos en materiales y artículos usados para la limpieza (Jabón, desinfectantes, escobas, trapeadores. etc) de bodegas de alimentos, centros preescolares",
+    "Gasto",
+    35
+  ],
+  [
+    "50406",
+    "Articulos de salud, medicina Y Otros",
+    "Incluye los pagos que realizan los proyectos por compra de medicamentos que son recetados en el centro de salud, hospital y medicas privados (casos de emergencia y casos especiales), desparasitantes, vitaminas destinadas directamente a los niños. Medicinas y equipo menor Y Mayor ( Laptop, Impresoras, escaner y Otros) que se done a los centros de salud, Pagos realizados por la compra de recipientes para agua, material de construcción para pilas, letrinas, chimeneas, reparación de viviendas, pegues de agua, material para ferias de salud.",
+    "Gasto",
+    36
+  ],
+  [
+    "50407",
+    "Articulos relacionados con agricultura",
+    "Incluye los gastos realizados por compra de semillas, herramientas, especies menores, material para construcción de gallineros familiares",
+    "Gasto",
+    37
+  ],
+  [
+    "50408",
+    "Articulos relacionados con Educacion",
+    "Son los gastos que se relacionan al apoyo brindado a niños, jóvenes y adultos (Círculos de Alfabetización) como ser: útiles escolares, uniformes, matricula, 111 material didáctico para las escuelas y colegios, compra de equipo menor como:\nradiograbadoras, baterias, cassettes, mobiliario, herramientas. equipo y materiales\npara talleres vocacionales, pago de incentivos monitores de alfabetización",
+    "Gasto",
+    38
+  ],
+  [
+    "50409",
+    "Material de construccion",
+    "Materiales para reparación de pre-escolares, escuelas colegios, centros de Salud y oficina del proyecto que los gastos sean menores a Lps.5,000.00.",
+    "Gasto",
+    39
+  ],
+  [
+    "50410",
+    "Material de Estimulacion Temprana",
+    "Material didáctico para madres guías y jardineras, materiales elaborados por Madres Guías para juegos de los niños, merienda de niños de preescolares, compra de nutria] educativo, equipo y mobiliario para los preescolares, pago de incentivo de madres guías y jardineras, materiales para realizar actividades de intercambios y evaluación de niños de POMII y pre-escolarcs, feria _jugando con los niños y celebración del Día del Niño.",
+    "Gasto",
+    40
+  ],
+  [
+    "50411",
+    "Articulos de emergencia",
+    "Cuando se presentan gastos por compra de materiales para reparaciones menores, suministros de alimentos, mantas y otros para atender familias afectadas por algún fenómenos natural.",
+    "Gasto",
+    41
+  ],
+  [
+    "50412",
+    "Articulos de nutricion",
+    "Pagos de equipo (balanzas y tallímetros) para pesar y medir ni os, pago de alimentos para niños desnutridos y casos especiales, pago de utensilios de cocina, molinos y otros,",
+    "Gasto",
+    42
+  ],
+  [
+    "50413",
+    "Material de impresión",
+    "Se incluyen los gastos de fotocopias e impresión salud, educación, nutrición, agricultura y Estimulación Temprana; fichas familiares, hojas de tabulación, manuales fotocopiados, etc.",
+    "Gasto",
+    43
+  ],
+  [
+    "50414",
+    "Libros y publicaciones",
+    "Pago de impresión de libros de Estimulación Temprana, nutrición, curriculum de preescolar, cartillas de salud, resiliencia, libros de alfabetización, etc",
+    "Gasto",
+    44
+  ],
+  [
+    "50415",
+    "Otros articulos y materiales",
+    "Son gastos que no fueron incluidos en las cuentas anteriores pero que estar relacionados y complementan las actividades del programa.",
+    "Gasto",
+    45
+  ],
+  [
+    "50416",
+    "Visibilidad y Publicidad",
+    "Son gastos  todos los gastos  que estan realcionados  con los conceptos : publicidad, visibilidad de la organizacion incluye : Rotulos, grandes y pequeños,  camisas, gorras, afiches, logo en mochilas.",
+    "Gasto",
+    46
+  ],
+  [
+    "50500",
+    "VIAJES",
+    "Egresos\tincurridos\tpor\tel\tpersonal\tdurante\tel\tcurso de implementación/administración/monitoreo del proyecto, Estos incluyen costo de alimentos y hospedaje, transporte, etc.",
+    "Gasto",
+    47
+  ],
+  [
+    "50501",
+    "Boleto de avion",
+    "Incluye gastos de trasporte aéreo fuera del área o región donde se localizan los proyectos para asistir a reuniones de trabajo dentro y fuera del país convocados por CCF1-1.",
+    "Gasto",
+    48
+  ],
+  [
+    "50502",
+    "Alimentos y hospedaje",
+    "Incluye gastos de alimentos y hospedaje del personal voluntario, comité de padres y personal permanente para asistir a reuniones de coordinación fuera de la comunidad, gestiones, compras, traer y dejar correspondencia, etc",
+    "Gasto",
+    49
+  ],
+  [
+    "50503",
+    "Transporte",
+    "Incluye gastos de transporte para personal voluntario, comité de padres y personal permanente cuando se trasladan a lugares cercanos en la misma arca o región donde se localizan los proyectos o fuera de los mismos para asistir a reuniones de coordinación, gestiones, compras, traer y dejar correspondencia etc.",
+    "Gasto",
+    50
+  ],
+  [
+    "50504",
+    "Otros gastos de viaje",
+    "Incluye gastos imprevistos realizados durante el viaje debidamente amparado por facturas, Ejemplo, agua, otros.",
+    "Gasto",
+    51
+  ],
+  [
+    "50505",
+    "Reuniones / Conferencias",
+    "Incluye gastos en la organización de eventos grandes que incluyen comidas, materiales, transporte, hospedaje, pago de local y otros. Esto solamente ocurrirá si la oficina nacional promueve conjuntamente con el proyecto este tipo de actividades.",
+    "Gasto",
+    52
+  ],
+  [
+    "50600",
+    "PROYECTOS COMUNITARIOS",
+    "Todos los gastos relacionados con actividades implementadas directamente por las comunidades; por ejemplo: Actividades generadoras de ingreso, préstamos, pequeños donativos, granjas, remodelaciones, edificios, programas de rápido impacto.",
+    "Gasto",
+    53
+  ],
+  [
+    "50601",
+    "Prestamos",
+    "Se refiere a la relación que el proyecto establezca con otras instituciones del gobierno u ONGs que trabajan con crédito para apoyar grupos organizados que trabajan con microcrédito. Los fondos de subsidio no serán destinados para realizar este tipo de actividades. Los gastos que se reporten por este concepto de préstamos serán con fondos que provengan de otras instituciones presentes en las comunidades.",
+    "Gasto",
+    54
+  ],
+  [
+    "50602",
+    "DFCs pagados",
+    "Se incluye los pagos de todos los regalos especiales que aparecen en el váucher que están destinados por los padrinos a los niños, familia o proyectos. También se consideran los DFC o regalos que recibe el proyecto para realizar actividades comunitarias que el padrino o madrina desean que se lleve a cabo en determinada localidad.",
+    "Gasto",
+    55
+  ],
+  [
+    "50603",
+    "Actividades generadoras de ingreso",
+    "Se incluyen, todos los gastos que el proyecto realiza en apoyo a grupos \norganizados de padres de familia, jóvenes y niños que realizan actividades de \ngeneración de ingreso con capital servilla para continuar trabajando en sus emprendimientos.",
+    "Gasto",
+    56
+  ],
+  [
+    "50604",
+    "CP Pequeños Donativos",
+    "Se refiere a pequeñas donaciones realizadas por los proyectos para llevar a cabo una actividad especifica dirigida al niño o niños, familia y comunidad. Los gastos a realizar son de acuerdo a un presupuesto específico que ha sido discutido y aprobado por personal de CCFH",
+    "Gasto",
+    57
+  ],
+  [
+    "50605",
+    "CP Implementacion y remodelacion de granjas.",
+    "Solamente se utilizará esta cuenta cuando el proyecto haya recibido fondos que no son de subsidio (NSID, Donaciones, Regalos Especiales) para realizar la instalación y ampliación de granjas avícolas comunales para la comercialización, aquí no se consideran los gallineros familiares que el proyecto instala",
+    "Gasto",
+    58
+  ],
+  [
+    "50606",
+    "CP Edificios",
+    "Se incluirán gastos que el proyecto realice cuando construye centros preescolares, aulas de escuelas y otros. Estas actividades son comunitarias, por lo que se ejecutarán en coordinación con las municipalidades, otras organizaciones y las comunidades, quienes aportarán materiales, terrenos, mano de obra no calificada para la construcción del edificio.",
+    "Gasto",
+    59
+  ],
+  [
+    "50607",
+    "CP Programas de rapido impacto",
+    "Se refiere a los gastos que el proyecto realice de manera puntual para beneficiar los niños directamente como ser el caso del apoyo de las ollas Comunitarias (complemento de alimentos y utensilios). Complemento de alimentos de las escuelas, pago temporal de maestros de escueta y capacitación de maestros",
+    "Gasto",
+    60
+  ],
+  [
+    "50608",
+    "CP arranque",
+    "Se refiere a los gastos que el proyecto realice para la afiliación de niños de una comunidad nueva que incluye gastos de fotografías, tiraje de fichas familiares, ficha social No 2, gastos de transporte y alimentación, traducciones y otros que se relacionen con la afiliación.",
+    "Gasto",
+    61
+  ],
+  [
+    "50609",
+    "Otros proyectos Comunitarios",
+    "Incluye los gastos que el proyecto realiza cuando construye tanques de abastecimiento de agua, red de distribución de agua, protección de fuentes de agua, reforestaciones, sistemas de aguas negras, reparación o construcción de puentes, carreteras, centros de salud,Educacion e instalación de energía eléctrica, organización.",
+    "Gasto",
+    62
+  ],
+  [
+    "50700",
+    "OTROS GASTOS OPERATIVOS.",
+    "Egresos incurridos en apoyo general de implementación de programa: Espacio de Oficina, necesidades básicas, gasolina, mantenimiento de vehículos seguros, publicidad, correo, renta de equipo, Mantenimiento de equipo y oficina, cargos y cuotas bancarias.",
+    "Gasto",
+    63
+  ],
+  [
+    "50701",
+    "Combustible",
+    "Combustible para vehículos propiedad del proyecto. (En caso de que alguna organización les done un vehículo.)",
+    "Gasto",
+    64
+  ],
+  [
+    "50702",
+    "Mantenimiento de vehiculos",
+    "Mantenimiento de vehículos propiedad del proyecto",
+    "Gasto",
+    65
+  ],
+  [
+    "50703",
+    "Mantenimiento - Equipo",
+    "Mantenimiento de Mobiliario y equipo de oficina y otros propiedad del proyecto",
+    "Gasto",
+    66
+  ],
+  [
+    "50704",
+    "Mantenimiento- Edificio",
+    "Incluye los gastos que se realizan por reparaciones pequeñas del edificio donde funciona la oficina del proyecto. Pinturas, reparación de servicios sanitarios, puertas, techos, otros.",
+    "Gasto",
+    67
+  ],
+  [
+    "50705",
+    "Gastos de Renta",
+    "Pagos por alquiler de oficinas y bodegas",
+    "Gasto",
+    68
+  ],
+  [
+    "50706",
+    "Servicios Basicos",
+    "Pagos por servicios de agua y luz.",
+    "Gasto",
+    69
+  ],
+  [
+    "50707",
+    "Renta de Equipo",
+    "Gastos por alquiler de equipo corno: scaner, data show, retroproyector, otros",
+    "Gasto",
+    70
+  ],
+  [
+    "50708",
+    "Alquiler de programas de computación",
+    "Alquiler de juegos educativos para los niños",
+    "Gasto",
+    71
+  ],
+  [
+    "50709",
+    "Cargos bancarios y otros servicios",
+    "Comprende cargos por emisión de estados de cuenta, por cheques devueltos por falta de firmas o por falta de fondos, por iliquidez de la cuenta bancaria, por emisión de constancias, por certificación de cheques, otros.",
+    "Gasto",
+    72
+  ],
+  [
+    "50710",
+    "Seguro de vehiculo",
+    "Seguros de los vehículos que posea el proyecto.",
+    "Gasto",
+    73
+  ],
+  [
+    "50711",
+    "Seguro de edificio y equipo",
+    "Seguros por el edificio y equipo del proyecto.",
+    "Gasto",
+    74
+  ],
+  [
+    "50712",
+    "Telefono, cable e internet",
+    "Gastos por llamadas telefónicas realizadas por teléfono fijo. alquiler de teléfono comunitario o particular, tarjetas de teléfonos celulares, pago de servicio de internet instalada en el proyecto o por alquiler de servicio en centros comunitarios. o café nets.",
+    "Gasto",
+    75
+  ],
+  [
+    "50713",
+    "Correo y fletes",
+    "Incluye los gastos por envio de correspondencia a través del uso de couries Expreco, envio de cartas para padrinos. También comprende el alquiler de vehículos para transportar suministros de casas comerciales al proyecto, pago de fletes por traslado de materiales y alimentos a las comunidades.",
+    "Gasto",
+    76
+  ],
+  [
+    "50714",
+    "Gastos de Aseo",
+    "Comprende todos los gastos relacionados con el aseo de la oficina del proyecto, tales como escobas, trapeadores, jabones, desinfectantes, etc",
+    "Gasto",
+    77
+  ],
+  [
+    "50715",
+    "Anuncios y publicaciones",
+    "Incluye gastos por publicaciones hechas en periódicos, emisoras radiales o servicios locales de televisión por cable que el proyecto ejecute para la promoción de sus programas en las comunidades.",
+    "Gasto",
+    78
+  ],
+  [
+    "50716",
+    "Comision Administrativa PMA",
+    "Comision registrada por servicios administrativos cobrados por Accion Honduras por manejo administrativo y contable de proyectos .",
+    "Gasto",
+    79
+  ],
+  [
+    "50717",
+    "Gastos Miscelaneos",
+    "Son los gastos que no se pueden incluir en las otras cuentas de este catálogo. Por ejemplo, los pagos que se hacen para transmitir programa radial de Aprendamos Matemáticas y otros que no apliquen a las cuentas anteriores.",
+    "Gasto",
+    80
+  ],
+  [
+    "50718",
+    "Gastos de impuestos",
+    "Aplica en caso d que los proyectos paguen impuesto sobre la renta, impuestos municipales, desaduanaje de rulos de los padrinos y de equipo recibido por concepto de donaciones.",
+    "Gasto",
+    81
+  ],
+  [
+    "50719",
+    "Costos Indirectos/Administra-AH",
+    "Registro y cobro de % administrativo y financiero  cobrado a DONANTES por diversas transacciones, gastos administrativos y Logisticos.",
+    "Gasto",
+    82
+  ],
+  [
+    "50720",
+    "Otros Gastos varios",
+    "Registrar gastos varios, ocasionales o no recurrentes o devoluciones, relacionadas con las actividades operativas, administrativas e institucionales de la organización, que no pueden clasificarse adecuadamente en otras cuentas específicas del catálogo.  Su uso debe limitarse a gastos debidamente autorizados y respaldados con la documentación correspondiente.",
+    "Gasto",
+    83
+  ],
+  [
+    "50800",
+    "ACTIVOS MAYORES",
+    "Todos los egresos de activos de capital (o una porción), donde las entidades retienen propiedad del activo de capital: Vehículos, Equipo, Mobiliario, Computadoras, etc.",
+    "Gasto",
+    84
+  ],
+  [
+    "50801",
+    "Vehiculos",
+    "Comprende la compra de vehículos.",
+    "Gasto",
+    85
+  ],
+  [
+    "50802",
+    "Equipo",
+    "Se refiere a las compras de concepto de equipo que tenga un valor superior a L500.00, tales como: bombas para agua, balanzas para adultos, camillas, equipo de laboratorio, cámaras fotográficas digitales, televisores, VHS, retroproyector, data show, otros.",
+    "Gasto",
+    86
+  ],
+  [
+    "50803",
+    "Mobiliario y equipo",
+    "Incluye las compras de mobiliario para el funcionamiento de la oficina que tenga un costo superior a L500.00. Escritorios, sillas, archivos, etc.",
+    "Gasto",
+    87
+  ],
+  [
+    "50804",
+    "Equipo de Computacion / Software.",
+    "Incluye solo las  compras de programas de computación, Licencias y  todo  tipo de software.",
+    "Gasto",
+    88
+  ],
+  [
+    "50805",
+    "Equipo de Computacion /Laptop, PC,Impresoras.",
+    "Equipo de Computacion /Equipos como ser:  Laptop, PC, Impresoras, Escaner, Tablet Samsung y de otras marcas y otros",
+    "Gasto",
+    89
+  ],
+  [
+    "50900",
+    "REGALOS EN ESPECIE DONADOS.",
+    "Valor estimado de servicios desarrollados por voluntarios o artículos donados (de los cuales no se esperaba pago) Una cantidad igual deberá ser asignada para la cuenta de ingresos 40303-Contribuciones de la Comunidad-Servicios Mano de Obra 40401-Servicios Donados, 40402-Regalos en Especie. Se requiere la documentación adecuada para ingresos y egresos en especie.",
+    "Gasto",
+    90
+  ],
+  [
+    "50901",
+    "Regalos en especie (Materiales)",
+    "Se refiere a la entrega o materiales que el proyecto recibió por concepto de donación. Incluye donaciones de la propia comunidad tales como: piedra, arena, donaciones de artículos para los preescolares y otros.",
+    "Gasto",
+    91
+  ],
+  [
+    "50902",
+    "Servicios donados / Mano de obra",
+    "Se refiere a la donación de mano de obra no calificada que aporta la comunidad para la construcción de preescolares, letrinas, carreteras u otras actividades en las cuales participe la comunidad.",
+    "Gasto",
+    92
+  ],
+  [
+    "51000",
+    "GASTOS POR DEPRECIACION",
+    "Los estados financieros que se preparan han sido elaborados conforme a los Principios de Contabilidad Generalmente Aceptados (PCGA´s). la depreciación es el mecanismo mediante el cual se reconoce contable, financieramente el desgaste y perdida del valor que sufre un bien o un activo por el uso que se haga de el con el paso del tiempo.\nLos activos están registrados al costo histórico menos la depreciación acumulada. La depreciación es calculada con base en el método de línea recta conforme a las vida útil  estimada de los activos, como se detalla a continuación:",
+    "Gasto",
+    93
+  ],
+  [
+    "51100",
+    "Depreciación de Terreno",
+    "Estos no se deprecian, lo que si afecta es el incremento o disminución de la plusvalía del terreno, dependiendo su ubicación donde se encuentre instalado el edificio de la organización.",
+    "Gasto",
+    95
+  ],
+  [
+    "51200",
+    "Depreciación de Edificios",
+    "Desgaste y perdida del valor que sufre un bien o un activo por el uso que se haga de el, o con el paso del tiempo, el tiempo estipulado para aplicar esta depreciación es de 40 años.",
+    "Gasto",
+    96
+  ],
+  [
+    "51300",
+    "Depreciación de Vehículos:",
+    "Desgaste y perdida del valor que sufre un bien o un activo por el uso que se haga de el, o con el paso del tiempo, el tiempo estipulado para aplicar esta depreciación es de 5 años.",
+    "Gasto",
+    97
+  ],
+  [
+    "51400",
+    "Depreciación Mobiliario y Equipo:",
+    "Desgaste y perdida del valor que sufre un bien o un activo por el uso que se haga de el, o con el paso del tiempo, el tiempo estipulado para aplicar esta depreciación es de 10 años.",
+    "Gasto",
+    98
+  ],
+  [
+    "51500",
+    "Depreciación Equipo de Cómputo:",
+    "Desgaste y perdida del valor que sufre un bien o un activo por el uso que se haga de el, o con el paso del tiempo, el tiempo estipulado para aplicar esta depreciación es de 5 años.",
+    "Gasto",
+    99
+  ],
+  [
+    "51600",
+    "Depreciación Equipo de Comunicaciones:",
+    "Desgaste y perdida del valor que sufre un bien o un activo por el uso que se haga de él, o con el paso del tiempo, el tiempo estipulado para aplicar esta depreciación es de 5 años.",
+    "Gasto",
+    100
+  ],
+  [
+    "51700",
+    "Depreciación Equipo Fotografía:",
+    "Desgaste y perdida del valor que sufre un bien o un activo por el uso que se haga de él, o con el paso del tiempo, el tiempo estipulado para aplicar esta depreciación es de 5 años.",
+    "Gasto",
+    101
+  ],
+  [
+    "51800",
+    "Perdida Activos fijos :",
+    "Desgaste y perdida  total del activo, una vez completada su vida útil de  un bien o un activo.",
+    "Gasto",
+    102
+  ],
+  [
+    "11412",
+    "Bancos de Occidente / PMA y  Proyecto Salud",
+    "",
+    "Balance",
+    1
+  ],
+  [
+    "1140601",
+    "Cuenta bancaria Occidente fondos PMA CTA-11-406-013677-0 ( Cheques )",
+    "",
+    "Balance",
+    2
+  ],
+  [
+    "1140607",
+    "Cuenta bancaria Occidente fondos DESENTRALIZADO DE SALUD  CTA-11-406-013682-7 ( Cheques )",
+    "",
+    "Balance",
+    3
+  ],
+  [
+    "114121",
+    "Bancos Occidente Cta bancaria-CTA-11-412-130485-6 ( Cheques y Ahorros )",
+    "",
+    "Balance",
+    4
+  ],
+  [
+    "1141211",
+    "FF-1001 Subsidios  CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    5
+  ],
+  [
+    "1141212",
+    "FF-2001  Regalos DFC'S   CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    6
+  ],
+  [
+    "1141213",
+    "FF-7001  Otros Socios   CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    7
+  ],
+  [
+    "1141214",
+    "FF-3002  NSP La Sidra   CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    8
+  ],
+  [
+    "1141215",
+    "FF-3003  NSP Respuesta a Emergencia    CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    9
+  ],
+  [
+    "1141216",
+    "FF-NSP Kit Educativos  CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    10
+  ],
+  [
+    "1141217",
+    "FF-1001 Subsidios Adicionales -2021  CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    11
+  ],
+  [
+    "1141218",
+    "FF-1002 Subsidios Adicionales -2022  CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    12
+  ],
+  [
+    "1141219",
+    "FF-3004 NSP-Proyecto de Agua Pueblo Nuevo  CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    13
+  ],
+  [
+    "1141220",
+    "FF-3005 NSP-2023 Proyecto Medios de Vida  CTA-11-412-130485-6 ( Cheques )",
+    "",
+    "Balance",
+    14
+  ],
+  [
+    "114122",
+    "Planillas ( Cuenta Puente )",
+    "",
+    "Balance",
+    15
+  ],
+  [
+    "21406",
+    "OCCIDENTE CUENTTA SOSTENIBILIDAD",
+    "",
+    "Balance",
+    16
+  ],
+  [
+    "214061",
+    "FF-3002 Bancos-Sosteniblidad -CTA-11-406-11939-0  ( Ahorros  )",
+    "",
+    "Balance",
+    17
+  ],
+  [
+    "214062",
+    "FF-7003 Bancos-GFC Fondo Global para Niñez -CTA-11-406-11939-0  ( Ahorros  )",
+    "",
+    "Balance",
+    18
+  ],
+  [
+    "214063",
+    "FF-7004 Bancos-I.R.C Comité Internacional de Rescate -CTA-11-406-11939-0  ( Ahorros  )",
+    "",
+    "Balance",
+    19
+  ],
+  [
+    "12100",
+    "Inventario de Activos",
+    "",
+    "Balance",
+    20
+  ],
+  [
+    "11100",
+    "Caja Chica",
+    "",
+    "Balance",
+    21
+  ],
+  [
+    "11101",
+    "Caja Chica",
+    "",
+    "Balance",
+    22
+  ],
+  [
+    "11102",
+    "Caja Chica Desentralizado",
+    "",
+    "Balance",
+    23
+  ],
+  [
+    "11200",
+    "Cuentas por Cobrar",
+    "",
+    "Balance",
+    24
+  ],
+  [
+    "11201",
+    "Cuentas por Cobrar varios",
+    "",
+    "Balance",
+    25
+  ],
+  [
+    "11202",
+    "Cuentas por Cobrar Proyecto Agua Segura P&G",
+    "",
+    "Balance",
+    26
+  ],
+  [
+    "11203",
+    "Cuentas por Cobrar Proyecto Desentralizado de Salud",
+    "",
+    "Balance",
+    27
+  ],
+  [
+    "11204",
+    "Cuentas por Cobrar PMA",
+    "",
+    "Balance",
+    28
+  ],
+  [
+    "11205",
+    "Cuentas por Cobrar Sostenibilidad",
+    "",
+    "Balance",
+    29
+  ],
+  [
+    "11206",
+    "Cuentas por Cobrar ChildFund",
+    "",
+    "Balance",
+    30
+  ],
+  [
+    "11207",
+    "Cuentas por Cobrar P&G",
+    "",
+    "Balance",
+    31
+  ],
+  [
+    "11208",
+    "Transferencias internas",
+    "",
+    "Balance",
+    32
+  ],
+  [
+    "11209",
+    "Cuentas por Cobrar I.R.C Comité de Rescate Internacional.",
+    "",
+    "Balance",
+    33
+  ],
+  [
+    "11210",
+    "Cuentas por Cobrar G.F.C",
+    "",
+    "Balance",
+    34
+  ],
+  [
+    "12400",
+    "Activos Fijos",
+    "",
+    "Balance",
+    35
+  ],
+  [
+    "12401",
+    "Terrenos",
+    "",
+    "Balance",
+    36
+  ],
+  [
+    "12402",
+    "Depreciacion Acumulada -Terrenos",
+    "",
+    "Balance",
+    37
+  ],
+  [
+    "12403",
+    "Edificios",
+    "",
+    "Balance",
+    38
+  ],
+  [
+    "12404",
+    "Depreciacion Acumulada -Edificios",
+    "",
+    "Balance",
+    39
+  ],
+  [
+    "12405",
+    "Vehiculos",
+    "",
+    "Balance",
+    40
+  ],
+  [
+    "12406",
+    "Depreciacion Acumulada -Vehiculos",
+    "",
+    "Balance",
+    41
+  ],
+  [
+    "12407",
+    "Mobiliario y Equipo",
+    "",
+    "Balance",
+    42
+  ],
+  [
+    "12408",
+    "Depreciacion Acumulada -Mobiliario y Equipo",
+    "",
+    "Balance",
+    43
+  ],
+  [
+    "12409",
+    "Equipo de computo e Informatica",
+    "",
+    "Balance",
+    44
+  ],
+  [
+    "12410",
+    "Depreciacion Acumulada -Equipo de Computo e Informatica.",
+    "",
+    "Balance",
+    45
+  ],
+  [
+    "12411",
+    "Equipo de Comunicaciones",
+    "",
+    "Balance",
+    46
+  ],
+  [
+    "12412",
+    "Depreciacion Acumulada -Equipo de Comunicaciones",
+    "",
+    "Balance",
+    47
+  ],
+  [
+    "12413",
+    "Equipo de Fotografia",
+    "",
+    "Balance",
+    48
+  ],
+  [
+    "12414",
+    "Depreciacion Acumulada -Equipo de Fotografia",
+    "",
+    "Balance",
+    49
+  ],
+  [
+    "12415",
+    "Ingresos por Activos",
+    "",
+    "Balance",
+    50
+  ],
+  [
+    "21100",
+    "Inventario de Activos",
+    "",
+    "Balance",
+    51
+  ],
+  [
+    "21100",
+    "Cuentas por Pagar",
+    "",
+    "Balance",
+    52
+  ],
+  [
+    "21101",
+    "Pasivo Laboral",
+    "",
+    "Balance",
+    53
+  ],
+  [
+    "21102",
+    "Cuentas por Pagar",
+    "",
+    "Balance",
+    54
+  ],
+  [
+    "21103",
+    "Cuentas por Pagar Desentralizado Proyecto Salud",
+    "",
+    "Balance",
+    55
+  ],
+  [
+    "21104",
+    "Cuentas por Pagar PMA",
+    "",
+    "Balance",
+    56
+  ],
+  [
+    "21105",
+    "Cuentas por Pagar FSA",
+    "",
+    "Balance",
+    57
+  ],
+  [
+    "21106",
+    "Retencion Diplomados",
+    "",
+    "Balance",
+    58
+  ],
+  [
+    "21107",
+    "Pasivo Laboral Desentralizado de Salud",
+    "",
+    "Balance",
+    59
+  ],
+  [
+    "21108",
+    "Cuentas por Pagar Sostenibilidad",
+    "",
+    "Balance",
+    60
+  ],
+  [
+    "21109",
+    "Retenciones varias a empleados",
+    "",
+    "Balance",
+    61
+  ],
+  [
+    "21110",
+    "Cuentas por Pagar ChilldFund",
+    "",
+    "Balance",
+    62
+  ],
+  [
+    "21111",
+    "Pasivo Laboral P&G",
+    "",
+    "Balance",
+    63
+  ],
+  [
+    "21112",
+    "Cuentas por Pagar-GFC",
+    "",
+    "Balance",
+    64
+  ],
+  [
+    "21200",
+    "IHSS",
+    "",
+    "Balance",
+    65
+  ],
+  [
+    "21201",
+    "IHSS empleados A.H",
+    "",
+    "Balance",
+    66
+  ],
+  [
+    "21202",
+    "IHSS Patronal  A.H",
+    "",
+    "Balance",
+    67
+  ],
+  [
+    "21205",
+    "IHSS empleados P&G",
+    "",
+    "Balance",
+    68
+  ],
+  [
+    "21206",
+    "IHSS Patronal  P&G",
+    "",
+    "Balance",
+    69
+  ],
+  [
+    "21900",
+    "IHSS -SALUD",
+    "",
+    "Balance",
+    70
+  ],
+  [
+    "21203",
+    "IHSS empleado Salud",
+    "",
+    "Balance",
+    71
+  ],
+  [
+    "21204",
+    "IHSS Patronal -Salud",
+    "",
+    "Balance",
+    72
+  ],
+  [
+    "21300",
+    "RAP Regimen de Aportaciones Privadas",
+    "",
+    "Balance",
+    73
+  ],
+  [
+    "21301",
+    "RAP Empleado A.H",
+    "",
+    "Balance",
+    74
+  ],
+  [
+    "21302",
+    "RAP Patronal  A.H",
+    "",
+    "Balance",
+    75
+  ],
+  [
+    "21303",
+    "RAP Prestamos",
+    "",
+    "Balance",
+    76
+  ],
+  [
+    "21304",
+    "RAP Empleados -SALUD",
+    "",
+    "Balance",
+    77
+  ],
+  [
+    "21305",
+    "RAP Patronal -SALUD",
+    "",
+    "Balance",
+    78
+  ],
+  [
+    "21306",
+    "RAP empleado   Ajuste",
+    "",
+    "Balance",
+    79
+  ],
+  [
+    "21307",
+    "RAP Patronal  Ajuste",
+    "",
+    "Balance",
+    80
+  ],
+  [
+    "21308",
+    "RAP Empleado P&G",
+    "",
+    "Balance",
+    81
+  ],
+  [
+    "21309",
+    "RAP Patronal  P&G",
+    "",
+    "Balance",
+    82
+  ],
+  [
+    "21500",
+    "Cooperativa Empleados",
+    "",
+    "Balance",
+    83
+  ],
+  [
+    "21501",
+    "Cooperativa CACEAL",
+    "",
+    "Balance",
+    84
+  ],
+  [
+    "21502",
+    "Cooperativa CACSA",
+    "",
+    "Balance",
+    85
+  ],
+  [
+    "21600",
+    "ISR por pagar",
+    "",
+    "Balance",
+    86
+  ],
+  [
+    "21601",
+    "ISR empleados y Consultorias",
+    "",
+    "Balance",
+    87
+  ],
+  [
+    "21700",
+    "INFOP Instituto Nacional de Formacion Profesional",
+    "",
+    "Balance",
+    88
+  ],
+  [
+    "21701",
+    "INFOP Patronal",
+    "",
+    "Balance",
+    89
+  ],
+  [
+    "21800",
+    "Seguro Atlantida",
+    "",
+    "Balance",
+    90
+  ],
+  [
+    "21801",
+    "Deduccion Seguro Atlantida",
+    "",
+    "Balance",
+    91
+  ],
+  [
+    "24000",
+    "Pasivos de nomina",
+    "",
+    "Balance",
+    92
+  ],
+  [
+    "30000",
+    "Pratrimonio Saldo inicial",
+    "",
+    "Balance",
+    93
+  ],
+  [
+    "32000",
+    "Activos netos sin restriccion",
+    "",
+    "Balance",
+    94
+  ]
+]

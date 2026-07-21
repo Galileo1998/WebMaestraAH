@@ -34,6 +34,8 @@ register_shutdown_function(function () {
 
 define('COMPRAS_ADMIN_DIR', __DIR__);
 require_once __DIR__ . '/includes/compras_helpers.php';
+require_once __DIR__ . '/includes/catalogo_cuentas_helpers.php';
+ensureAccountingCatalog($db);
 
 // El almacenamiento A/B/C se resuelve en cascada: columna existente, tabla auxiliar,
 // archivo local y finalmente sesión. La carga normal no ejecuta DDL ni depende de /tmp.
@@ -326,19 +328,16 @@ try{
 
 $poa_vigente_lines = [];
 $nombre_poa_vigente = 'Ninguno';
-$cuentas_maestras = [];
+$catalogo_cuentas = accountingCatalogOptions($db);
+$cuentasOptions = '';
+foreach ($catalogo_cuentas as $account) {
+    $label = accountingCatalogLabel($account);
+    $cuentasOptions .= '<option value="'.(int)$account['id'].'" data-type="'.h($account['tipo']).'">'.h($label).'</option>';
+}
 try {
     $st = $db->query("SELECT hash_id,nombre_poa,sector,sub_sector,marco_logico,ext,fuente_financiamiento,cuenta_contable,rubro_contable,presupuesto_anual,ejecutado FROM ah_poa WHERE is_active=1 ORDER BY id");
     $poa_vigente_lines = $st ? $st->fetchAll(PDO::FETCH_ASSOC) : [];
     if ($poa_vigente_lines) $nombre_poa_vigente = (string)$poa_vigente_lines[0]['nombre_poa'];
-    foreach ($poa_vigente_lines as $line) {
-        $cta = trim((string)$line['cuenta_contable']);
-        $rubro = trim((string)$line['rubro_contable']);
-        if ($rubro !== '' && stripos($cta,$rubro) === false) $cta .= ' - '.$rubro;
-        if ($cta !== '') $cuentas_maestras[$cta] = true;
-    }
-    $cuentas_maestras = array_keys($cuentas_maestras);
-    sort($cuentas_maestras);
 } catch (Throwable $e) {}
 
 /* ========================================================
@@ -414,6 +413,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $db->beginTransaction();
             $purchase=lockPurchase($db,$id);
             $affectedHashes=reverseCompraPoaExecution($db,$id,$purchase);
+            $db->prepare('DELETE FROM ah_compras_cuentas WHERE compra_poa_id IN (SELECT id FROM ah_compras_poa WHERE compra_id=?)')->execute([$id]);
             deleteCompraDatabaseTrail($db,$id);
             $db->commit();
             purgeCompraFallbackStores($id);
@@ -755,7 +755,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (!$poa) throw new RuntimeException('Una línea presupuestaria ya no pertenece al POA activo.');
                 $available=availableForPoa($db,$hash,$id);
                 if ($amount>$available+0.05) throw new RuntimeException('Fondos insuficientes en '.$poa['marco_logico'].'. Disponible: L. '.number_format($available,2));
-                $valid[]=['hash'=>$hash,'amount'=>$amount,'account'=>trim((string)($line['cuenta']??'')),'poa'=>$poa];
+                $catalogId=(int)($line['cuenta_id']??0);
+                $account=accountingCatalogAccount($db,$catalogId);
+                $valid[]=['hash'=>$hash,'amount'=>$amount,'catalog_id'=>$catalogId,'account'=>accountingCatalogLabel($account),'poa'=>$poa];
                 $sum+=$amount;
             }
             if (!$valid) throw new RuntimeException('Asigne al menos una línea del POA.');
@@ -764,6 +766,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if ($poa_movements_ready) {
                 $db->prepare("DELETE FROM ah_poa_movimientos WHERE compra_id=? AND tipo='COMPROMISO'")->execute([$id]);
             }
+            $db->prepare('DELETE FROM ah_compras_cuentas WHERE compra_poa_id IN (SELECT id FROM ah_compras_poa WHERE compra_id=?)')->execute([$id]);
             $db->prepare('DELETE FROM ah_compras_poa WHERE compra_id=?')->execute([$id]);
             $poaHasExecutionMonth = comprasColumnExists($db, 'ah_compras_poa', 'mes_ejecucion');
             if ($poaHasExecutionMonth) {
@@ -780,6 +783,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if ($poaHasExecutionMonth) $insertParams[]=$month;
                 $ins->execute($insertParams);
                 $cpId=(int)$db->lastInsertId();
+                savePurchaseAccountingLink($db,$cpId,$line['catalog_id'],(string)($p['cuenta_contable']??''));
                 if ($mov) $mov->execute([$id,$cpId,$line['hash'],$month,$line['amount'],0,0,currentUserLabel()]);
             }
             $db->prepare("UPDATE ah_compras SET banco=?,tipo_cuenta=?,cuenta_bancaria=?,tipo_transferencia=?,estado='4_Imputacion' WHERE id=?")->execute([trim((string)($_POST['banco']??'')),trim((string)($_POST['tipo_cuenta']??'')),trim((string)($_POST['cuenta_bancaria']??'')),trim((string)($_POST['tipo_transferencia']??'')),$id]);
@@ -942,7 +946,7 @@ if ($id>0) {
         $purchase['recibido_por'] = $recepcionMeta['recibido_por'];
         $purchase['notas_recepcion'] = $recepcionMeta['notas_recepcion'];
         $st=$db->prepare('SELECT * FROM ah_compras_detalles WHERE compra_id=? ORDER BY id'); $st->execute([$id]); $details=$st->fetchAll(PDO::FETCH_ASSOC);
-        $st=$db->prepare('SELECT cp.*, p.programa AS programa_poa, p.marco_logico AS marco_logico_poa FROM ah_compras_poa cp LEFT JOIN ah_poa p ON p.hash_id=cp.poa_hash WHERE cp.compra_id=? ORDER BY cp.id'); $st->execute([$id]); $poaDistribution=$st->fetchAll(PDO::FETCH_ASSOC);
+        $st=$db->prepare('SELECT cp.*, p.programa AS programa_poa, p.marco_logico AS marco_logico_poa, cc.catalogo_cuenta_id FROM ah_compras_poa cp LEFT JOIN ah_poa p ON p.hash_id=cp.poa_hash LEFT JOIN ah_compras_cuentas cc ON cc.compra_poa_id=cp.id WHERE cp.compra_id=? ORDER BY cp.id'); $st->execute([$id]); $poaDistribution=$st->fetchAll(PDO::FETCH_ASSOC);
         $purchaseFormat = (string)($purchase['formato_compra'] ?? 'A');
         if ($purchaseFormat === 'B') {
             if (!empty($quotes_component_db_ready)) {
@@ -1075,9 +1079,7 @@ $poaOptions='';
 foreach ($poa_vigente_lines as $line) {
     $available=availableForPoa($db,(string)$line['hash_id'],$id);
     $label=compactPoaLabel($line['marco_logico'] ?? '', $line['ext'] ?? '');
-    $cta=trim((string)$line['cuenta_contable']);
-    if (!empty($line['rubro_contable']) && stripos($cta,(string)$line['rubro_contable'])===false) $cta.=' - '.trim((string)$line['rubro_contable']);
-    $poaOptions.='<option value="'.h($line['hash_id']).'" data-cta="'.h($cta).'" data-disp="'.$available.'" title="'.h($line['marco_logico']).'">'.h($label).'</option>';
+    $poaOptions.='<option value="'.h($line['hash_id']).'" data-disp="'.$available.'" title="'.h($line['marco_logico']).'">'.h($label).'</option>';
 }
 ?>
 
