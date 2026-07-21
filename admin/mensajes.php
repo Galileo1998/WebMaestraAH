@@ -60,6 +60,8 @@ $mensajes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Bandeja de Entrada | Admin Acción Honduras</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/assets/css/table-ux.css?v=3">
+    <script src="/admin/assets/js/table-ux.js?v=3" defer></script>
     <style>
         /* Estilos Base */
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 30px 20px; }

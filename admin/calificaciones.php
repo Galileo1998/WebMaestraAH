@@ -97,6 +97,8 @@ while ($row = $stmt_prog->fetch(PDO::FETCH_ASSOC)) {
     <title>Cuadro de Calificaciones | Admin Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/admin/assets/css/table-ux.css?v=3">
+    <script src="/admin/assets/js/table-ux.js?v=3" defer></script>
     <style>
         :root { --ah-primary: #34859B; --ah-accent: #46B094; --bg: #f8fafc; --border: #e2e8f0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #1e293b; }

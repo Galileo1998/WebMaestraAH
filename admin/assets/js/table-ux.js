@@ -5,7 +5,7 @@
         'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
         'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
     ];
-    const SKIP_CLASSES = ['dynamic-table', 'no-border', 'thick-outer', 'receipt-head', 'receipt-body', 'receipt-signature'];
+    const SKIP_CLASSES = ['no-border', 'thick-outer', 'receipt-head', 'receipt-body', 'receipt-signature'];
     const SUM_HINTS = /cantidad|monto|total|saldo|meta|logro|program|cumpl|matr[ií]cula|poblaci[oó]n|archivos|hallazgos|actividades|estudiantes|beneficiarios|participantes|hombres|mujeres|femen|mascul/i;
     const AVERAGE_HINTS = /%|porcentaje|promedio|avance|desempeño|a tiempo|en forma/i;
     const NEVER_TOTAL = /(^|\b)(id|n[.º°]?|#|año|periodo|fecha|tel[eé]fono|identidad|c[oó]digo|folio)(\b|$)/i;
@@ -17,6 +17,20 @@
 
     function cleanText(value) {
         return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function controlValue(control) {
+        if (control.matches('select')) return control.options[control.selectedIndex]?.text || '';
+        return control.value ?? control.textContent ?? '';
+    }
+
+    function cellText(cell) {
+        const controls = Array.from(cell.querySelectorAll('input:not([type="hidden"]), select, textarea, [contenteditable="true"]'));
+        if (!controls.length) return cleanText(cell.textContent);
+        const clone = cell.cloneNode(true);
+        const clonedControls = clone.querySelectorAll('input:not([type="hidden"]), select, textarea, [contenteditable="true"]');
+        clonedControls.forEach((control, index) => control.replaceWith(document.createTextNode(controlValue(controls[index]))));
+        return cleanText(clone.textContent);
     }
 
     function parseNumber(value) {
@@ -56,7 +70,15 @@
         for (let index = 0; index < width; index += 1) {
             const header = columnHeader(table, index);
             if (NEVER_TOTAL.test(header)) continue;
-            const values = rows.map(row => row.cells[index] ? parseNumber(row.cells[index].textContent) : null);
+            const values = rows.map(row => {
+                const cell = row.cells[index];
+                if (!cell) return null;
+                const displayedTotal = cell.querySelector('.row-total, .total-display, [data-total-value]');
+                if (displayedTotal) return parseNumber(displayedTotal.textContent);
+                const numberInputs = cell.querySelectorAll('input[type="number"]');
+                if (numberInputs.length === 1) return parseNumber(numberInputs[0].value);
+                return parseNumber(cellText(cell));
+            });
             const numbers = values.filter(value => value !== null);
             if (!numbers.length || numbers.length / Math.max(rows.length, 1) < .7) continue;
             if (!SUM_HINTS.test(header) && !AVERAGE_HINTS.test(header)) continue;
@@ -157,9 +179,7 @@
             const clonedControls = clone.querySelectorAll('tbody input, tbody select, tbody textarea, tbody [contenteditable="true"]');
             clonedControls.forEach((control, index) => {
                 const originalControl = originalControls[index];
-                const value = originalControl?.matches('select')
-                    ? originalControl.options[originalControl.selectedIndex]?.text || ''
-                    : originalControl?.value ?? originalControl?.textContent ?? '';
+                const value = originalControl ? controlValue(originalControl) : '';
                 control.replaceWith(document.createTextNode(value));
             });
             Array.from(clone.tBodies).forEach(body => Array.from(body.rows).forEach((row, index) => {
@@ -184,11 +204,28 @@
         const forced = table.dataset.tableUx === 'on';
         if (!table.tBodies.length || !table.tHead || table.rows[0]?.cells.length < 2) return false;
         if (SKIP_CLASSES.some(className => table.classList.contains(className))) return false;
-        if (!forced && table.querySelector('tbody input, tbody select, tbody textarea, tbody [contenteditable="true"]')) return false;
         const semanticClass = /data-table|styled-table|centers-table|center-table|base-table|audit-table|table/.test(table.className);
         const context = table.closest('main, section, article, .card, .panel, .content, .main-content') || document;
         const hasFilters = !!context.querySelector('.filters, .filter-bar, [id*="filter" i], [id*="filtro" i], [id*="search" i], [id*="buscar" i], form[method="get" i]');
-        return forced || semanticClass || hasFilters;
+        return forced || semanticClass || hasFilters || table.tBodies.length > 0;
+    }
+
+    function addLocalSearch(table, tools, refresh) {
+        if (table.dataset.tableSearch === 'off') return;
+        const search = document.createElement('input');
+        search.type = 'search';
+        search.className = 'ah-table-search';
+        search.placeholder = 'Buscar en esta tabla…';
+        search.setAttribute('aria-label', 'Buscar en esta tabla');
+        search.addEventListener('input', () => {
+            const query = cleanText(search.value).toLocaleLowerCase('es');
+            Array.from(table.tBodies).flatMap(body => Array.from(body.rows)).forEach(row => {
+                if (row.classList.contains('empty')) return;
+                row.hidden = !!query && !Array.from(row.cells).some(cell => cellText(cell).toLocaleLowerCase('es').includes(query));
+            });
+            refresh();
+        });
+        tools.append(search);
     }
 
     function enhance(table) {
@@ -221,6 +258,13 @@
         exportButton.className = 'ah-table-export';
         exportButton.innerHTML = '<i class="fa-solid fa-file-excel" aria-hidden="true"></i> Exportar XLSX';
         exportButton.addEventListener('click', () => exportTable(table, exportButton));
+        const refresh = () => {
+            const width = Math.max(table.scrollWidth, table.offsetWidth);
+            topScroll.firstElementChild.style.width = `${width}px`;
+            topScroll.hidden = width <= body.clientWidth + 1;
+            updateTotals(table, count);
+        };
+        addLocalSearch(table, tools, refresh);
         tools.append(count);
         if (!existingExport) tools.append(exportButton);
         shell.before(tools);
@@ -244,12 +288,6 @@
             syncing = false;
         });
 
-        const refresh = () => {
-            const width = Math.max(table.scrollWidth, table.offsetWidth);
-            topScroll.firstElementChild.style.width = `${width}px`;
-            topScroll.hidden = width <= body.clientWidth + 1;
-            updateTotals(table, count);
-        };
         const scheduleRefresh = () => window.requestAnimationFrame(refresh);
         new MutationObserver(scheduleRefresh).observe(table, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
         if (window.ResizeObserver) new ResizeObserver(scheduleRefresh).observe(body);

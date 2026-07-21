@@ -944,7 +944,7 @@ function typeSlug(string $type): string {
             </div>
             <div class="table-wrap">
                 <?php if (!$isDemographic): ?>
-                <table class="centers-table" data-table-ux="on" data-type="<?php echo h($typeKey); ?>">
+                <table class="centers-table" data-table-ux="on" data-table-search="off" data-type="<?php echo h($typeKey); ?>">
                     <thead>
                         <tr>
                             <th style="width:125px">Tipo</th>
@@ -1006,7 +1006,7 @@ function typeSlug(string $type): string {
                     </tfoot>
                 </table>
                 <?php else: ?>
-                <table class="centers-table demographic" data-table-ux="on" data-type="<?php echo h($typeKey); ?>">
+                <table class="centers-table demographic" data-table-ux="on" data-table-search="off" data-type="<?php echo h($typeKey); ?>">
                     <thead>
                         <tr>
                             <th rowspan="2" style="width:120px">Tipo</th>
