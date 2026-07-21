@@ -15,6 +15,11 @@ $auth = new Auth($db);
 $auth->requireLogin();
 $auth->checkAccess(basename($_SERVER['PHP_SELF']), $db);
 
+if (empty($_SESSION['monitoreo_csrf'])) {
+    $_SESSION['monitoreo_csrf'] = bin2hex(random_bytes(32));
+}
+$monitoreoCsrf = (string)$_SESSION['monitoreo_csrf'];
+
 $msg = '';
 $tabla_poa = 'ah_poa';
 $col_id = 'id';
@@ -207,10 +212,11 @@ try {
         INDEX (tecnico),
         INDEX (base_asignada)
     )");
-    
+
     try { $db->exec("ALTER TABLE ah_poa_asignaciones ADD COLUMN base_asignada VARCHAR(150) NULL"); } catch (Throwable $e) {}
     try { $db->exec("ALTER TABLE ah_poa_asignaciones ADD COLUMN logro_asignado DECIMAL(10,2) DEFAULT 0"); } catch (Throwable $e) {}
     try { $db->exec("ALTER TABLE ah_poa_asignaciones ADD COLUMN lugares_json LONGTEXT NULL"); } catch (Throwable $e) {}
+    try { $db->exec("ALTER TABLE ah_poa ADD COLUMN operativo_oculto TINYINT(1) DEFAULT 0"); } catch (Throwable $e) {}
 
     $db->exec("CREATE TABLE IF NOT EXISTS ah_poa_etapas (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -256,6 +262,21 @@ $etapas_default = [
     ['codigo'=>'E-4', 'nombre'=>'Asistencia y Monitoreo de Actividad', 'descripcion'=>'Acompañar la actividad aplicando herramientas evaluativas a la calidad del proceso y el nivel de satisfacción de participantes.', 'dia'=>'last']
 ];
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_ocultar') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        $csrf = (string)($_POST['csrf'] ?? '');
+        if ($csrf === '' || !hash_equals($monitoreoCsrf, $csrf)) {
+            throw new RuntimeException('La sesión de seguridad venció. Recargue la página.');
+        }
+        $id = (int)$_POST['id_poa'];
+        $oculto = (int)$_POST['oculto'];
+        $db->prepare("UPDATE ah_poa SET operativo_oculto = ? WHERE id = ?")->execute([$oculto, $id]);
+        echo json_encode(['status'=>'ok']);
+    } catch(Throwable $e) { echo json_encode(['status'=>'error','msg'=>$e->getMessage()]); }
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'verify_metas_password') {
     header('Content-Type: application/json; charset=utf-8');
     try {
@@ -280,14 +301,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $value = trim($_POST['catalog_value'] ?? '');
     $prog = trim($_POST['programa'] ?? 'GENERAL');
     $etapa = trim($_POST['etapa'] ?? 'TODAS');
-    
+
     if ($value === '') { echo json_encode(['status'=>'error', 'msg'=>'Valor vacío']); exit; }
     $tableMap = ['responsable'=>'ah_cat_responsables', 'unidad'=>'ah_cat_unidades', 'verificacion'=>'ah_cat_verificaciones', 'lugar'=>'ah_cat_lugares'];
     $table = $tableMap[$type] ?? 'ah_cat_lugares';
-    
+
     try {
         if ($type === 'unidad' || $type === 'verificacion') {
-            // CORRECCIÓN: Quitamos el "updated_at" para que no dé error SQL
             $st = $db->prepare("INSERT INTO `$table` (programa, etapa, nombre, activo) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE activo=1");
             $st->execute([$prog, $etapa, $value]);
         } else {
@@ -304,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     try {
         $id_poa = (int)($_POST['id_poa'] ?? 0);
         if ($id_poa <= 0) throw new Exception('Actividad inválida.');
-        
+
         $lugaresRaw = $_POST['lugares'] ?? [];
         $lugares = [];
         foreach ((array)$lugaresRaw as $lugar) {
@@ -336,7 +356,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $metas = $row['metas'] ?? [];
             $logros = $row['logros'] ?? [];
             $meta_total = 0; $logro_total = 0; $meses = [];
-            
+
             foreach (['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'] as $m) {
                 $valM = (float)($metas[$m] ?? 0);
                 $valL = (float)($logros[$m] ?? 0);
@@ -359,9 +379,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $db->commit();
         saveActivitySnapshot($db, $id_poa, 'asignacion_equipo_masiva');
         echo json_encode(['status'=>'ok','lugares'=>$lugares]); exit;
-    } catch (Throwable $e) { 
+    } catch (Throwable $e) {
         if ($db->inTransaction()) $db->rollBack();
-        echo json_encode(['status'=>'error','msg'=>$e->getMessage()]); exit; 
+        echo json_encode(['status'=>'error','msg'=>$e->getMessage()]); exit;
     }
 }
 
@@ -388,7 +408,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $rowQualityVersion = (int)($rowData['quality_version'] ?? 0);
         $rowAtRaw = array_key_exists('a_tiempo', $rowData) ? (float)$rowData['a_tiempo'] : null;
         $rowEfRaw = array_key_exists('en_forma', $rowData) ? (float)$rowData['en_forma'] : null;
-        
+
         if ($rowQualityVersion < 2 && (($rowAtRaw === null && $rowEfRaw === null) || ((float)$rowAtRaw === 0.0 && $rowEfRaw === 0.0))) {
             $rowData['a_tiempo'] = 100;
             $rowData['en_forma'] = 100;
@@ -560,7 +580,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 $meses_keys = ['jul'=>'Jul','aug'=>'Ago','sep'=>'Sep','oct'=>'Oct','nov'=>'Nov','dec'=>'Dic','jan'=>'Ene','feb'=>'Feb','mar'=>'Mar','apr'=>'Abr','may'=>'May','jun'=>'Jun'];
-try { $tareas = $db->query("SELECT * FROM {$tabla_poa} ORDER BY id ASC LIMIT 2000")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas = []; }
+try { $tareas = $db->query("SELECT * FROM {$tabla_poa} WHERE operativo_oculto = 0 ORDER BY id ASC LIMIT 2000")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas = []; }
+try { $tareas_ocultas = $db->query("SELECT id, descripcion_actividad, marco_logico, codigo_maestro FROM {$tabla_poa} WHERE operativo_oculto = 1 ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas_ocultas = []; }
 try { $asignaciones_raw = $db->query("SELECT * FROM ah_poa_asignaciones")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $asignaciones_raw = []; }
 $asignaciones_map = [];
 foreach ($asignaciones_raw as $a) $asignaciones_map[$a['id_poa']][] = $a;
@@ -619,11 +640,13 @@ foreach ($tecnicos_list as $tn) {
 // -----------------------------------------------------------------------------
 try { $cat_responsables = $db->query("SELECT nombre FROM ah_cat_responsables ORDER BY id ASC")->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $e) { $cat_responsables = []; }
 try { $cat_lugares = $db->query("SELECT nombre FROM ah_cat_lugares ORDER BY id ASC")->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $e) { $cat_lugares = []; }
-try { $centros_catalogo = $db->query("SELECT id, tipo, nombre, comunidad_base, caserio, pob_total, pob_fem, pob_masc, pob_0_5, pob_6_17, pob_18_24 FROM ah_centros ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $centros_catalogo = []; }
+
+// CORRECCIÓN: Traemos TODA LA TABLA ah_centros para evitar perder las columnas pob_total, lideres_f, lideres_m
+try { $centros_catalogo = $db->query("SELECT * FROM ah_centros ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $centros_catalogo = []; }
 
 $cat_unidades_raw = [];
-try { 
-    $cat_unidades_raw = $db->query("SELECT nombre, programa, etapa FROM ah_cat_unidades WHERE activo=1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC); 
+try {
+    $cat_unidades_raw = $db->query("SELECT nombre, programa, etapa FROM ah_cat_unidades WHERE activo=1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
     try {
         $nombres = $db->query("SELECT nombre FROM ah_cat_unidades ORDER BY nombre ASC")->fetchAll(PDO::FETCH_COLUMN);
@@ -632,8 +655,8 @@ try {
 }
 
 $cat_verificaciones_raw = [];
-try { 
-    $cat_verificaciones_raw = $db->query("SELECT nombre, programa, etapa FROM ah_cat_verificaciones WHERE activo=1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC); 
+try {
+    $cat_verificaciones_raw = $db->query("SELECT nombre, programa, etapa FROM ah_cat_verificaciones WHERE activo=1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
     try {
         $nombres = $db->query("SELECT nombre FROM ah_cat_verificaciones ORDER BY nombre ASC")->fetchAll(PDO::FETCH_COLUMN);
@@ -667,7 +690,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px}.modal-content{background:white;width:96%;max-width:1660px;border-radius:16px;display:flex;flex-direction:column;height:95vh;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);overflow:hidden}.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 26px 0;flex-shrink:0}.modal-tabs{display:flex;gap:8px;padding:12px 26px 0;border-bottom:1px solid var(--border);background:white;flex-shrink:0}.modal-tab-btn{background:none;border:0;padding:10px 16px;font-size:.93rem;font-weight:800;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent}.modal-tab-btn.active{color:var(--ah-primary);border-bottom-color:var(--ah-primary)}.modal-body{padding:0;overflow-y:auto;flex-grow:1;background:#f8fafc}.modal-footer{padding:14px 26px;border-top:1px solid var(--border);background:white;text-align:right;flex-shrink:0}.modal-tab-content{display:none;padding:22px 26px}.modal-tab-content.active{display:block}
 .agenda-sticky{position:sticky;top:0;z-index:40;background:rgba(248,250,252,.98);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);padding:12px 26px 10px;box-shadow:0 8px 18px rgba(15,23,42,.06)}.agenda-sticky-inner{display:grid;grid-template-columns:1fr 240px 150px;gap:12px;align-items:center}.agenda-title{font-size:1rem;font-weight:800;margin:0;line-height:1.28}.agenda-status label{font-size:.68rem;text-transform:uppercase;font-weight:900;color:#0284c7;display:block;margin-bottom:3px}.agenda-status select{height:38px;font-weight:800;color:#075985}.agenda-meta{background:white;border:1px solid #bae6fd;border-left:4px solid var(--ah-primary);border-radius:10px;padding:8px 12px;text-align:center}.agenda-meta span{display:block;font-size:.68rem;color:#0284c7;font-weight:900;text-transform:uppercase}.agenda-meta strong{font-size:1.15rem;color:#0f172a}.agenda-meta.month-meta{border-left-color:#16a34a}.agenda-meta.month-meta span{color:#166534}
 .styled-table{width:100%;border-collapse:collapse;background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden}.styled-table th,.styled-table td{padding:11px 12px;text-align:left;border-bottom:1px solid #f1f5f9;vertical-align:middle}.styled-table th{background:#f8fafc;color:#475569;font-weight:800;font-size:.78rem;text-transform:uppercase;letter-spacing:.4px}.table-input{width:100%;padding:8px 10px;border:1px solid var(--border);background:white;border-radius:6px;font-size:.85rem;font-family:inherit;box-sizing:border-box}.table-input:focus{border-color:var(--ah-primary);outline:none;box-shadow:0 0 0 3px rgba(52,133,155,.1)}.stage-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:white;min-height:320px}.stage-main-row td{background:#fff}.stage-info{display:flex;gap:14px;align-items:flex-start}.stage-code{font-weight:900;color:#0f172a;min-width:42px}.stage-name{font-weight:900;color:#075985}.stage-desc{color:#475569;font-size:.88rem;line-height:1.35}.global-date-pill{display:inline-flex;align-items:center;gap:8px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:999px;padding:8px 12px;font-weight:900;font-size:.82rem}.date-input-compact{width:145px!important;padding:6px 8px!important;border-radius:999px!important}
-.custom-multiselect{position:relative;width:100%;min-width:180px}.multiselect-select-box{background:white;border:1px solid #cbd5e1;border-radius:6px;padding:6px 10px;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:36px;box-sizing:border-box;flex-wrap:wrap;gap:4px}.multiselect-select-box::after{content:'\f107';font-family:'Font Awesome 6 Free';font-weight:900;color:#64748b;margin-left:auto}.multi-tag{display:inline-block;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-size:.72rem;font-weight:900;border:1px solid #bae6fd}.multiselect-dropdown-panel{display:none;position:fixed;background:white;border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 10px 25px -5px rgba(0,0,0,.2);max-height:250px;overflow-y:auto;z-index:999999;padding:6px;box-sizing:border-box}.multiselect-option{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:.85rem;border-radius:4px;cursor:pointer;color:#334155;user-select:none}.multiselect-option:hover{background:#f1f5f9}.multiselect-add-new-btn{display:block;text-align:center;padding:8px;border-top:1px solid #e2e8f0;color:var(--ah-primary);font-weight:800;font-size:.8rem;text-decoration:none;margin-top:4px}
+.custom-multiselect{position:relative;width:100%;min-width:180px}.multiselect-select-box{background:white;border:1px solid #cbd5e1;border-radius:6px;padding:6px 10px;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:36px;box-sizing:border-box;flex-wrap:wrap;gap:4px}.multiselect-select-box::after{content:'\f107';font-family:'Font Awesome 6 Free';font-weight:900;color:#64748b;margin-left:auto}.multiselect-select-box > span { pointer-events: none; }.multi-tag{display:inline-block;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-size:.72rem;font-weight:900;border:1px solid #bae6fd}.multiselect-dropdown-panel{display:none;position:fixed;background:white;border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 10px 25px -5px rgba(0,0,0,.2);max-height:250px;overflow-y:auto;z-index:999999;padding:6px;box-sizing:border-box}.multiselect-option{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:.85rem;border-radius:4px;cursor:pointer;color:#334155;user-select:none}.multiselect-option:hover{background:#f1f5f9}.multiselect-add-new-btn{display:block;text-align:center;padding:8px;border-top:1px solid #e2e8f0;color:var(--ah-primary);font-weight:800;font-size:.8rem;text-decoration:none;margin-top:4px}
 .subgrid-wrapper{background:#f8fafc;border-top:2px dashed #cbd5e1;padding:12px 16px 18px}.subgrid-card{background:white;border:1px solid #dbeafe;border-radius:12px;box-shadow:0 4px 16px rgba(15,23,42,.04);overflow:hidden}.subgrid-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f0f9ff;border-bottom:1px solid #dbeafe}.subgrid-header h5{margin:0;font-size:.86rem;color:#075985;text-transform:uppercase;letter-spacing:.3px}.subgrid-table{width:100%;border-collapse:collapse}.subgrid-table th{background:#f8fafc;color:#334155;font-size:.76rem;font-weight:900;padding:9px 10px;text-transform:uppercase}.subgrid-table td{padding:9px 10px;border-top:1px solid #f1f5f9;font-size:.84rem}.inv-row-toggle{background:#eff6ff!important}.detail-centros-row td{padding:0!important;background:#f8fafc!important}.centros-detail-panel{width:100%;box-sizing:border-box;border-top:1px solid #bfdbfe;background:#fff}.centros-detail-toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f0f9ff;border-bottom:1px solid #dbeafe}.centros-detail-toolbar strong{color:#075985}.centros-detail-body{padding:14px;max-height:420px;overflow:auto;position:relative}.centros-table{width:100%;border-collapse:collapse;min-width:980px;table-layout:fixed}.centros-table th{background:#e0f2fe;color:#075985;font-size:.76rem;font-weight:900;padding:10px;text-align:left;position:static;top:auto;z-index:auto}.centros-table td{padding:9px 10px;border-bottom:1px solid #e2e8f0}.center-name{font-weight:900;color:#0f172a}.center-meta{font-size:.76rem;color:#64748b}.pct-badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:.76rem;font-weight:900;min-width:52px;text-align:center}.pct-red{background:#fee2e2;color:#991b1b}.pct-yellow{background:#fef3c7;color:#92400e}.pct-softgreen{background:#dcfce7;color:#166534}.pct-darkgreen{background:#14532d;color:#fff}.pct-gray{background:#f1f5f9;color:#64748b}.score-input{max-width:80px;text-align:center;font-weight:900}.a-lograr-input{max-width:95px;font-weight:900}.d-none{display:none!important}.autosave-indicator{display:none!important}
 .saved-flash{border-color:#16a34a!important;box-shadow:0 0 0 3px rgba(22,163,74,.16)!important;background:#f0fdf4!important;transition:all .25s ease}.saving-flash{border-color:#0284c7!important;box-shadow:0 0 0 3px rgba(2,132,199,.12)!important}.error-flash{border-color:#dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.16)!important;background:#fef2f2!important}.catalog-mini-modal{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:10500;display:none;align-items:center;justify-content:center}.catalog-mini-box{background:white;border-radius:12px;width:90%;max-width:420px;padding:25px;box-shadow:0 20px 25px -5px rgba(0,0,0,.15)}
 .team-month-col{text-align:center;border-left:1px solid #e2e8f0}.team-month-input{text-align:center;font-weight:900;border-radius:4px;margin:0 auto}.team-month-prog,.team-month-logro{width:55px}.team-total-row td{background:#f8fafc;font-weight:900;border-top:2px solid #94a3b8}.hidden-team-month{display:none!important}.avatar{width:30px;height:30px;border-radius:50%;background:#e0f2fe;color:#0284c7;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.75rem;flex-shrink:0}.base-badge{background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:800}
@@ -1273,24 +1296,29 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
     }
 }
 
-/* Efecto hover en el nuevo botón de guardar */
-#btn-force-save:hover {
-    background: #f0fdf4 !important;
-}
+#btn-force-save:hover { background: #f0fdf4 !important; }
+.btn-archive-toggle { background:#fff1f2; color:#991b1b; border-color:#fecaca; }
+.btn-archive-toggle:hover { background:#fee2e2; border-color:#fca5a5; }
 
 </style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
 <main class="main-wrapper">
-    <h1 style="margin:0 0 25px;color:var(--text-main);font-size:2rem;font-weight:900"><i class="fa-solid fa-compass" style="color:var(--ah-primary)"></i> Monitoreo Operativo General</h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px;">
+        <h1 style="margin:0;color:var(--text-main);font-size:2rem;font-weight:900"><i class="fa-solid fa-compass" style="color:var(--ah-primary)"></i> Monitoreo Operativo General</h1>
+        <button class="btn-action" onclick="$('#archiveModal').css('display','flex')"><i class="fa-solid fa-box-archive"></i> Ver Actividades Ocultas (<?php echo count($tareas_ocultas); ?>)</button>
+    </div>
+
     <?php echo $msg; ?>
+
     <div class="metrics-dashboard">
         <div class="metric-card"><div class="metric-icon" style="background:#e0f2fe;color:#0284c7"><i class="fa-solid fa-layer-group"></i></div><div class="metric-info"><h4>Líneas Visibles</h4><p id="count-total">0</p></div></div>
         <div class="metric-card"><div class="metric-icon" style="background:#dcfce7;color:#16a34a"><i class="fa-solid fa-check-double"></i></div><div class="metric-info"><h4>Completadas</h4><p id="count-comp">0</p></div></div>
         <div class="metric-card"><div class="metric-icon" style="background:#fef3c7;color:#d97706"><i class="fa-solid fa-person-digging"></i></div><div class="metric-info"><h4>En Proceso</h4><p id="count-proc">0</p></div></div>
         <div class="metric-card" style="border-left:5px solid var(--ah-primary)"><div class="metric-icon" style="background:#f1f5f9;color:var(--ah-primary)"><i class="fa-solid fa-chart-line"></i></div><div class="metric-info"><h4>Alcance Promedio</h4><p id="count-rend">0%</p></div></div>
     </div>
+
     <div class="filter-panel">
         <div class="filter-row">
             <div style="flex-grow:1;min-width:250px"><input type="search" id="filter-search" name="monitor_search_q_ignore" readonly class="form-control" placeholder="Buscar por actividad o palabra clave..." style="background:#f8fafc" autocomplete="off" autocapitalize="off" spellcheck="false" value=""></div>
@@ -1306,6 +1334,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
         </div>
         <div class="filter-row month-filters"><span><i class="fa-solid fa-filter"></i> Mostrar mes:</span><?php foreach($meses_keys as $k=>$nom): ?><label class="month-pill"><input type="checkbox" class="toggle-month" value="<?php echo $k; ?>"> <?php echo $nom; ?></label><?php endforeach; ?></div>
     </div>
+
     <div class="task-list" id="task-container">
     <?php if(count($tareas)>0): foreach($tareas as $t):
         $estado_actual = $t['operativo_estado'] ?? 'Pendiente';
@@ -1329,18 +1358,40 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
             <div class="task-main"><div class="code-corner"><?php if($codigo_visible): ?><span class="code-pill ml"><i class="fa-solid fa-hashtag"></i> <?php echo htmlspecialchars($codigo_visible); ?></span><?php endif; ?><?php if(trim($t['ext'] ?? '') !== ''): ?><span class="code-pill ext"><i class="fa-solid fa-code-branch"></i> EXT <?php echo htmlspecialchars(trim($t['ext'])); ?></span><?php endif; ?></div><h3 class="searchable-text"><?php echo htmlspecialchars($descripcion_principal); ?></h3><div><?php echo $html_months; ?></div><span class="prog-badge"><i class="fa-solid fa-tag"></i> <?php echo htmlspecialchars($t['programa'] ?? ''); ?></span><span class="prog-badge" style="background:#e0f2fe;color:#0284c7"><i class="fa-solid fa-layer-group"></i> <?php echo htmlspecialchars($t['sector'] ?? ''); ?></span></div>
             <div class="task-meta searchable-text"><div><i class="fa-solid fa-users"></i> Líder: <strong><?php echo htmlspecialchars($t['operativo_tecnico'] ?? 'Trabajo en Equipo'); ?></strong></div><div><i class="fa-solid fa-map-pin"></i> Base: <strong><?php echo htmlspecialchars($t['operativo_comunidad'] ?? 'General'); ?></strong></div><div><i class="fa-solid fa-calendar"></i> Periodo: <strong><?php echo htmlspecialchars($t['operativo_periodo'] ?? '-'); ?></strong></div></div>
             <div class="task-meta"><div style="color:var(--ah-primary)"><i class="fa-solid fa-person"></i> Público: <strong><?php echo htmlspecialchars($t['tipo_participante'] ?? ''); ?></strong></div><div><i class="fa-solid fa-clipboard-check"></i> Actividades: <strong><?php echo (float)($t['meta_actividades_alc'] ?? 0); ?> / <?php echo (float)($t['meta_actividades'] ?? 0); ?></strong></div><div><i class="fa-solid fa-user-check"></i> Alcanzados: <strong><?php echo (float)($t['operativo_meta_alc'] ?? 0); ?> / <?php echo (float)($t['operativo_meta_obj'] ?? 0); ?></strong></div></div>
-            <div style="display:flex;flex-direction:column;gap:10px;align-items:center"><span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($estado_actual); ?></span><button class="btn-action" data-task="<?php echo $task_json; ?>" onclick="openUpdateModal(this)"><i class="fa-solid fa-pen-to-square"></i> Detallar</button></div>
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+                <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($estado_actual); ?></span>
+                <button class="btn-action" data-task="<?php echo $task_json; ?>" onclick="openUpdateModal(this)"><i class="fa-solid fa-pen-to-square"></i> Detallar</button>
+                <button class="btn-action btn-mini btn-archive-toggle" onclick="toggleOcultar(<?php echo $t['id']; ?>, 1)"><i class="fa-solid fa-eye-slash"></i> Ocultar</button>
+            </div>
         </div>
     <?php endforeach; endif; ?>
     </div>
 </main>
+
 <div id="updateModal" class="modal-overlay"><div class="modal-content">
     <div class="modal-header"><h2 style="margin:0;font-size:1.35rem"><i class="fa-solid fa-sliders"></i> Panel de Ejecución Programática</h2><button type="button" onclick="closeModal('updateModal')" style="background:none;border:0;font-size:1.45rem;cursor:pointer;color:#64748b"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="modal-tabs"><button type="button" class="modal-tab-btn active" onclick="switchModalTab('tab-equipo', this)"><i class="fa-solid fa-map-location-dot"></i> Asignar Equipo</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-metas', this)"><i class="fa-solid fa-bullseye"></i> Metas y Meses</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-etapas', this)"><i class="fa-solid fa-diagram-project"></i> Agenda Técnico (Etapas)</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-notas', this)"><i class="fa-solid fa-file-word"></i> Notas y Materiales</button></div>
     <form method="POST" id="formUpdate" style="display:flex;flex-direction:column;overflow:hidden;flex-grow:1">
         <input type="hidden" name="action" value="update_task"><input type="hidden" name="task_id" id="upd_task_id"><input type="hidden" name="metas_authorized" id="metas_authorized" value="0">
         <div class="modal-body">
-            <div class="agenda-sticky" id="agendaSticky"><div class="agenda-sticky-inner"><div><div class="code-corner" style="margin-bottom:6px"><span class="code-pill ml" id="lbl_codigo_modal" style="display:none"><i class="fa-solid fa-hashtag"></i> <span></span></span><span class="code-pill ext" id="lbl_ext_modal" style="display:none"><i class="fa-solid fa-code-branch"></i> EXT <span></span></span><span class="code-pill month"><i class="fa-solid fa-calendar-days"></i> Mes en registro: <span id="lbl_mes_actual_modal">-</span></span><a id="btn-historial-actividad" class="btn-action btn-mini history-link" href="#" target="_blank" rel="noopener"><i class="fa-solid fa-clock-rotate-left"></i> Ver histórico</a></div><p class="agenda-title" id="lbl_actividad"></p></div><div class="agenda-status"><label>Estado de actividad</label><input type="hidden" name="estado" id="upd_estado" value="0%"><div id="lbl_estado_porcentaje" class="activity-pct-badge activity-red">0%</div></div><div class="agenda-meta month-meta"><span>Meta del mes</span><strong id="lbl_meta_mes_actual">0</strong></div><div class="agenda-meta"><span>Meta Global</span><strong id="lbl_meta_global">0</strong></div></div></div>
+            <div class="agenda-sticky" id="agendaSticky">
+                <div class="agenda-sticky-inner">
+                    <div>
+                        <div class="code-corner" style="margin-bottom:6px">
+                            <span class="code-pill ml" id="lbl_codigo_modal" style="display:none"><i class="fa-solid fa-hashtag"></i> <span></span></span>
+                            <span class="code-pill ext" id="lbl_ext_modal" style="display:none"><i class="fa-solid fa-code-branch"></i> EXT <span></span></span>
+                            <span class="code-pill month"><i class="fa-solid fa-calendar-days"></i> Mes en registro: <span id="lbl_mes_actual_modal">-</span></span>
+                            <a id="btn-historial-actividad" class="btn-action btn-mini history-link" href="#" target="_blank" rel="noopener"><i class="fa-solid fa-clock-rotate-left"></i> Ver histórico</a>
+                            <!-- NUEVO BOTÓN: Autollenar con mes anterior -->
+                            <button type="button" class="btn-action btn-mini" style="background:#fffbeb;color:#92400e;border-color:#fde68a" onclick="copiarMesAnterior()"><i class="fa-solid fa-clone"></i> Autollenar (mes ant.)</button>
+                        </div>
+                        <p class="agenda-title" id="lbl_actividad"></p>
+                    </div>
+                    <div class="agenda-status"><label>Estado de actividad</label><input type="hidden" name="estado" id="upd_estado" value="0%"><div id="lbl_estado_porcentaje" class="activity-pct-badge activity-red">0%</div></div>
+                    <div class="agenda-meta month-meta"><span>Meta del mes</span><strong id="lbl_meta_mes_actual">0</strong></div>
+                    <div class="agenda-meta"><span>Meta Global</span><strong id="lbl_meta_global">0</strong></div>
+                </div>
+            </div>
             <div id="tab-equipo" class="modal-tab-content active"><div class="team-global-toolbar"><div class="team-global-place-group"><span class="team-global-place-label"><i class="fa-solid fa-location-dot"></i> Lugar(es) para todo el equipo</span><div id="team-global-location-host"></div><span class="team-global-help">Al seleccionar tipos de centro, el PROG. del mes actual se calcula automáticamente para cada técnico según su base y la matrícula registrada en Gestión de Centros.</span></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn-action btn-xlsx" onclick="exportTableXlsx('#team-assign-table','asignacion_equipo')"><i class="fa-solid fa-file-excel"></i> XLSX</button><button type="button" class="btn-action" onclick="toggleTeamMonths()"><i class="fa-solid fa-calendar-days"></i> Ver todos los meses</button><button type="button" class="btn-action" onclick="toggleNoBaseTechs()"><i class="fa-solid fa-users-slash"></i> Mostrar/Ocultar técnicos sin base</button></div></div><div style="max-height:52vh;overflow:auto;border:1px solid var(--border);border-radius:12px;background:white"><table id="team-assign-table" class="styled-table team-table" style="margin:0;border:none"><thead><tr><th rowspan="2">✓</th><th rowspan="2">Técnico</th><th rowspan="2">Base</th><?php foreach($meses_keys as $k=>$n): ?><th colspan="4" class="team-month-col team-month-<?php echo $k; ?>"><?php echo $n; ?></th><?php endforeach; ?><th colspan="4">Total Anual</th></tr><tr><?php foreach($meses_keys as $k=>$n): ?><th class="team-month-col team-month-<?php echo $k; ?>">Prog.</th><th class="team-month-col team-month-<?php echo $k; ?>">Logr.</th><th class="team-month-col team-month-<?php echo $k; ?>">Dif.</th><th class="team-month-col team-month-<?php echo $k; ?>">%</th><?php endforeach; ?><th>Prog.</th><th>Logr.</th><th>Dif.</th><th>%</th></tr></thead><tbody id="tabla_tecnicos_body"></tbody></table></div></div>
             <div id="tab-metas" class="modal-tab-content">
 <div class="metas-lock-toolbar"><div><strong><i class="fa-solid fa-shield-halved"></i> Metas provenientes del POA</strong><div class="metas-lock-help">La programación mensual se carga directamente de <code>ah_poa</code>. Para modificarla debe validar la contraseña de su sesión.</div></div><button type="button" id="btn-unlock-metas" class="btn-action" onclick="openMetasPasswordModal()"><i class="fa-solid fa-lock"></i> Habilitar modificación</button><span id="metas-unlocked-badge" class="metas-unlocked-badge" style="display:none"><i class="fa-solid fa-lock-open"></i> Edición habilitada</span></div>
@@ -1372,6 +1423,32 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
     </form>
 </div></div>
 
+<!-- MODAL ACTIVIDADES ARCHIVADAS -->
+<div id="archiveModal" class="modal-overlay" onclick="if(event.target===this) $('#archiveModal').hide()">
+    <div class="modal-content" style="max-width:800px; height:auto; max-height:85vh">
+        <div class="modal-header">
+            <h2 style="margin:0;font-size:1.35rem"><i class="fa-solid fa-box-archive"></i> Actividades Ocultas</h2>
+            <button type="button" onclick="$('#archiveModal').hide()" style="background:none;border:0;font-size:1.45rem;cursor:pointer;color:#64748b"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" style="padding:20px">
+            <table class="styled-table">
+                <thead><tr><th>Código</th><th>Actividad</th><th style="width:120px;text-align:center">Acción</th></tr></thead>
+                <tbody>
+                    <?php if(empty($tareas_ocultas)): ?>
+                        <tr><td colspan="3" style="text-align:center;padding:30px;color:var(--text-muted)">No hay actividades ocultas.</td></tr>
+                    <?php else: foreach($tareas_ocultas as $to): ?>
+                        <tr>
+                            <td><span class="code-pill ml"><i class="fa-solid fa-hashtag"></i> <?php echo htmlspecialchars($to['codigo_maestro'] ?: poa_codigo_corto($to['marco_logico'])); ?></span></td>
+                            <td style="font-weight:700"><?php echo htmlspecialchars($to['descripcion_actividad'] ?: $to['marco_logico']); ?></td>
+                            <td style="text-align:center"><button class="btn-action btn-mini" onclick="toggleOcultar(<?php echo $to['id']; ?>, 0)"><i class="fa-solid fa-eye"></i> Restaurar</button></td>
+                        </tr>
+                    <?php endforeach; endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <div id="metasPasswordModal" class="catalog-mini-modal" onclick="if(event.target===this) closeMetasPasswordModal()"><div class="catalog-mini-box"><h3 style="margin-top:0"><i class="fa-solid fa-key" style="color:var(--ah-primary)"></i> Autorizar modificación de metas</h3><p style="color:#64748b;line-height:1.45">Ingrese la contraseña del usuario con el que inició sesión. La autorización permanecerá activa durante 15 minutos.</p>
     <form onsubmit="event.preventDefault(); verifyMetasPassword();">
         <label style="font-weight:800">Contraseña</label>
@@ -1391,7 +1468,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
         <input type="hidden" id="mini-modal-type">
         <input type="hidden" id="mini-modal-target-index">
         <input type="hidden" id="mini-modal-target-key">
-        
+
         <div id="mini-modal-prog-etapa" style="display:none;">
             <div style="margin-bottom:12px;">
                 <label style="font-size:0.8rem;font-weight:800;color:#475569;display:block;margin-bottom:4px;">Programa / Sector</label>
@@ -1466,13 +1543,10 @@ function getFilteredCatalog(catalogRaw, prog, stg) {
     const p = normalizeProg(prog);
     const s = normalizeStg(stg);
     const filtered = catalogRaw.filter(item => {
-        // Normalizamos lo que viene de la BD para que perdone discrepancias (Ej: MEAL -> ML_MONITOREO)
-        const itemP = normalizeProg(item.programa); 
+        const itemP = normalizeProg(item.programa);
         const itemS = normalizeStg(item.etapa);
-        
         const matchP = (itemP === 'GENERAL' || itemP === p);
         const matchS = (itemS === 'TODAS' || itemS === s);
-        
         return matchP && matchS;
     });
     return [...new Set(filtered.map(x => x.nombre))];
@@ -1483,6 +1557,42 @@ function normalizarTxt(v){return String(v||'').toLowerCase().normalize('NFD').re
 function formatNum(n){return (parseFloat(n)||0).toLocaleString('es-HN',{maximumFractionDigits:1});}
 function pctClass(p){p=parseFloat(p)||0;if(p<=0)return'pct-gray';if(p<50)return'pct-red';if(p<85)return'pct-yellow';if(p<100)return'pct-softgreen';return'pct-darkgreen';}
 function calcPct(aTiempo,enForma){return Math.max(0,Math.min(100,((parseFloat(aTiempo)||0)+(parseFloat(enForma)||0))/2));}
+
+function toggleOcultar(id, oculto) {
+    if(!confirm(oculto ? '¿Ocultar esta actividad del panel principal?' : '¿Restaurar esta actividad al panel principal?')) return;
+    $.post(window.location.pathname, {action:'toggle_ocultar', id_poa:id, oculto:oculto, csrf:<?php echo json_encode($monitoreoCsrf); ?>}, function(res){
+        if(res.status==='ok') location.reload();
+        else alert('Error: ' + res.msg);
+    });
+}
+
+function copiarMesAnterior() {
+    if (!confirm('¿Autollenar la programación con los datos del mes anterior?\n\nSe copiará lo programado en la pestaña "Asignar Equipo" y en "Metas y Meses" hacia el mes de ' + (mesesEquipo.find(x => x.k === currentTeamMonth)||{}).n + '.')) return;
+
+    let idx = mesesEquipo.findIndex(x => x.k === currentTeamMonth);
+    if (idx <= 0) { alert('No hay un mes anterior definido en el ciclo.'); return; }
+    let prevMonth = mesesEquipo[idx - 1].k;
+
+    // Metas
+    let m_act_prev = $(`input[name="op_act[${prevMonth}]"]`).val();
+    let m_part_prev = $(`input[name="op_part[${prevMonth}]"]`).val();
+    if(m_act_prev) $(`input[name="op_act[${currentTeamMonth}]"]`).val(m_act_prev).trigger('change');
+    if(m_part_prev) $(`input[name="op_part[${currentTeamMonth}]"]`).val(m_part_prev).trigger('change');
+
+    // Equipo
+    $('#tabla_tecnicos_body .team-row').each(function(){
+        let row = $(this);
+        let prevProg = parseFloat(row.find(`.team-month-prog[data-mes="${prevMonth}"]`).val()) || 0;
+        if (prevProg > 0) {
+            row.find(`.team-month-prog[data-mes="${currentTeamMonth}"]`).val(prevProg).trigger('change');
+            row.find('.team-selected').prop('checked', true);
+        }
+    });
+
+    recalcTeamRows();
+    autosaveFullForm(true);
+    showToast('Lógica del mes anterior aplicada.');
+}
 
 function qualityDataVersion(data){
     const version=parseInt(data && data.quality_version !== undefined ? data.quality_version : 0,10);
@@ -1575,7 +1685,7 @@ function updateSaveIndicator(state) {
     const btn = $('#btn-force-save');
     const icon = $('#save-icon');
     const txt = $('#save-text');
-    
+
     if (state === 'saving') {
         btn.css({ 'color': '#0284c7', 'background': '#e0f2fe' });
         icon.attr('class', 'fa-solid fa-cloud-arrow-up fa-fade');
@@ -1615,11 +1725,11 @@ async function closeModal(id){
             updateHiddenCentrosJsonFromDrawer();
             if(key!==''){
                 clearTimeout(centerRowAutosaveTimers[`${index}|${key}`]);
-                autosaveCenterRow(index,key); 
+                autosaveCenterRow(index,key);
             }
             closeCentrosDrawer(false);
         }
-        
+
         autosaveFullForm(true);
     } else {
         document.getElementById(id).style.display='none';
@@ -1638,7 +1748,7 @@ function updateCardVisuals() {
 
     card.find('.badge').text(estadoActual);
 
-    const metaContainer = card.find('.task-meta').eq(1); 
+    const metaContainer = card.find('.task-meta').eq(1);
     metaContainer.find('div').eq(1).html(`<i class="fa-solid fa-clipboard-check"></i> Actividades: <strong>${formatNum(actAlc)} / ${formatNum(actObj)}</strong>`);
     metaContainer.find('div').eq(2).html(`<i class="fa-solid fa-user-check"></i> Alcanzados: <strong>${formatNum(partAlc)} / ${formatNum(partObj)}</strong>`);
 
@@ -1678,6 +1788,7 @@ $(document).ready(function(){const monthKeys=['jan','feb','mar','apr','may','jun
     applySmartFilters();
 });
 function getFechaMaximaEtapa(index){let d=new Date(),y=d.getFullYear(),m=d.getMonth();if(index===0)return `${y}-${String(m+1).padStart(2,'0')}-03`;if(index===1)return `${y}-${String(m+1).padStart(2,'0')}-06`;if(index===2)return `${y}-${String(m+1).padStart(2,'0')}-20`;let last=new Date(y,m+1,0).getDate();return `${y}-${String(m+1).padStart(2,'0')}-${String(last).padStart(2,'0')}`;}
+
 function lugarToTipo(lugar){
     const l=normalizarTxt(Array.isArray(lugar)?lugar[0]:lugar);
     if(!l) return '';
@@ -1687,9 +1798,12 @@ function lugarToTipo(lugar){
     if(l.includes('centro educativo')||l.includes('educativo')||l.includes('basica')||l.includes('media')) return 'basica';
     return '';
 }
+
 function isCenterLugar(lugar){return lugarToTipo(lugar)!=='';}
+
 function getBasesByTecnico(tecnico){let bases=tecnicosBases.filter(x=>x.nombre===tecnico&&(x.nombre_base||'').trim()!=='').map(x=>x.nombre_base);bases=[...new Set(bases)];return bases.length?bases:[''];}
 function getBaseByTecnico(tecnico){let bases=getBasesByTecnico(tecnico).filter(Boolean);return bases.length?bases[0]:'';}
+
 function getCentrosPorTecnicoYLugar(baseTecnico,lugarRaw){
     const base=normalizarTxt(baseTecnico);
     const tipoReq=lugarToTipo(lugarRaw);
@@ -1706,10 +1820,60 @@ function getCentrosPorTecnicoYLugar(baseTecnico,lugarRaw){
     }).sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||''),'es',{sensitivity:'base'}));
 }
 
-// NUEVO PARAMETRO KEY EN OPTIONSCHECKBOXES
+// FUNCION DE POBLACION INTELIGENTE SEGÚN LA UNIDAD DE LA ETAPA 3
+// FUNCION DE POBLACION INTELIGENTE SEGÚN LA UNIDAD DE LA ETAPA 3
+function getUnidadTargetPopulation(c, unidad) {
+    let tipo = normalizarTxt(String(c.tipo || ''));
+    let total = parseFloat(c.pob_total) || 0;
+
+    // 1. Escuelas y Preescolares NO dependen de la unidad. Siempre traen su total de alumnos.
+    if (tipo.includes('preescolar') || tipo.includes('basica') || tipo.includes('educativo') || tipo.includes('media')) {
+        return total;
+    }
+
+    // 2. ADN y UAPS/CIS filtran por la unidad (Edades o Líderes)
+    let u = normalizarTxt(String(unidad || ''));
+
+    // Extracción limpia para evitar NaNs
+    let pm05f = parseFloat(c.pm_0_5_9_f); if(isNaN(pm05f)) pm05f = 0;
+    let pm05m = parseFloat(c.pm_0_5_9_m); if(isNaN(pm05m)) pm05m = 0;
+    let c_0_5 = pm05f + pm05m;
+    if (c_0_5 === 0) c_0_5 = parseFloat(c.pob_0_5) || 0;
+
+    let pm614f = parseFloat(c.pm_6_14_9_f); if(isNaN(pm614f)) pm614f = 0;
+    let pm614m = parseFloat(c.pm_6_14_9_m); if(isNaN(pm614m)) pm614m = 0;
+    let c_6_14 = pm614f + pm614m;
+
+    let pm1517f = parseFloat(c.pm_15_17_9_f); if(isNaN(pm1517f)) pm1517f = 0;
+    let pm1517m = parseFloat(c.pm_15_17_9_m); if(isNaN(pm1517m)) pm1517m = 0;
+    let c_15_17 = pm1517f + pm1517m;
+
+    let c_6_17 = (c_6_14 + c_15_17) > 0 ? (c_6_14 + c_15_17) : (parseFloat(c.pob_6_17) || 0);
+
+    let pm1824f = parseFloat(c.pm_18_24_f); if(isNaN(pm1824f)) pm1824f = 0;
+    let pm1824m = parseFloat(c.pm_18_24_m); if(isNaN(pm1824m)) pm1824m = 0;
+    let c_18_24 = pm1824f + pm1824m;
+    if (c_18_24 === 0) c_18_24 = parseFloat(c.pob_18_24) || 0;
+
+    let pmlidf = parseFloat(c.pm_lideres_f); if(isNaN(pmlidf)) pmlidf = 0;
+    let pmlidm = parseFloat(c.pm_lideres_m); if(isNaN(pmlidm)) pmlidm = 0;
+    let c_lideres = pmlidf + pmlidm;
+    if (c_lideres === 0) c_lideres = (parseFloat(c.lideres_f) || 0) + (parseFloat(c.lideres_m) || 0);
+
+    // Búsqueda inteligente de Unidades
+    if (u.includes('lider')) return c_lideres;
+    if (u.includes('infante') || u.includes('0 a 5')) return c_0_5;
+    if (u.includes('nino') || u.includes('nina') || u.includes('6 a 14') || u.includes('nnaj')) return c_6_14 > 0 ? c_6_14 : c_6_17;
+    if (u.includes('adolescente') || u.includes('15 a 17')) return c_15_17 > 0 ? c_15_17 : 0;
+    if (u.includes('joven') || u.includes('18 a 24')) return c_18_24;
+
+    return total;
+}
+
+// PARAMETRO KEY EN OPTIONSCHECKBOXES
 function optionsCheckboxes(options,selected,name,index,type,isMain=false, key=''){
     let panelClass=`panel-${type}-box`,selectedArr=Array.isArray(selected)?selected:(selected?[selected]:[]);
-    let html=`<div class="custom-multiselect ${panelClass}" data-index="${index}" data-type="${type}" data-name="${escHtml(name)}"><div class="multiselect-select-box" draggable="true" ondragstart="dragFillStart(event,this)" ondragover="dragFillOver(event,this)" ondragleave="dragFillLeave(this)" ondrop="dragFillDrop(event,this)" onclick="event.stopPropagation();toggleDropdownPanel(this)"><span class="multi-label">Seleccione...</span><span class="fill-drag-handle" title="Arrastrar este valor hacia otro combo"><i class="fa-solid fa-grip-vertical"></i></span></div><div class="multiselect-dropdown-panel" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()">`;
+    let html=`<div class="custom-multiselect ${panelClass}" data-index="${index}" data-type="${type}" data-name="${escHtml(name)}"><div class="multiselect-select-box" draggable="true" ondragstart="dragFillStart(event,this)" ondragenter="dragFillOver(event,this)" ondragover="dragFillOver(event,this)" ondragleave="dragFillLeave(this)" ondrop="dragFillDrop(event,this)" onclick="event.stopPropagation();toggleDropdownPanel(this)"><span class="multi-label">Seleccione...</span><span class="fill-drag-handle" title="Arrastrar este valor hacia otro combo"><i class="fa-solid fa-grip-vertical"></i></span></div><div class="multiselect-dropdown-panel" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()">`;
     options.forEach(v=>{
         let chk=selectedArr.includes(v)?'checked':'';
         html+=`<label class="multiselect-option" onclick="event.stopPropagation()"><input type="checkbox" name="${name}" value="${escHtml(v)}" ${chk}> ${escHtml(v)}</label>`;
@@ -1734,51 +1898,83 @@ function toggleDropdownPanel(box){
     }
 }
 
-function updateMultiselectText(panelDOM){let panel=$(panelDOM),box=panel.prev('.multiselect-select-box'),checked=panel.find('input:checked').map(function(){return $(this).val();}).get();let content=checked.length?checked.slice(0,4).map(v=>`<span class="multi-tag">${escHtml(v)}</span>`).join('')+(checked.length>4?`<span class="multi-tag">+${checked.length-4}</span>`:''):'Seleccione...';box.find('.multi-label').html(content);} 
+function updateMultiselectText(panelDOM){let panel=$(panelDOM),box=panel.prev('.multiselect-select-box'),checked=panel.find('input:checked').map(function(){return $(this).val();}).get();let content=checked.length?checked.slice(0,4).map(v=>`<span class="multi-tag">${escHtml(v)}</span>`).join('')+(checked.length>4?`<span class="multi-tag">+${checked.length-4}</span>`:''):'Seleccione...';box.find('.multi-label').html(content);}
 let dragFillPayload=null;
 function dragFillStart(ev,box){let panel=$(box).next('.multiselect-dropdown-panel');dragFillPayload={type:$(box).closest('.custom-multiselect').data('type'),values:panel.find('input:checked').map(function(){return $(this).val();}).get()};ev.dataTransfer.setData('text/plain',JSON.stringify(dragFillPayload));}
-function dragFillOver(ev,box){ev.preventDefault();$(box).addClass('drag-over');}
-function dragFillLeave(box){$(box).removeClass('drag-over');}
+function dragFillOver(ev,box){
+    ev.preventDefault();
+    ev.stopPropagation();
+    if(ev.dataTransfer) ev.dataTransfer.dropEffect = 'copy';
+    $(box).addClass('drag-over');
+}
+function dragFillLeave(box){
+    $(box).removeClass('drag-over');
+}
+
+function refreshStage1RowFromPlaces(row) {
+    let b = String(row.data('base')||'').split('|').filter(x=>String(x||'').trim()!=='');
+    let lc = row.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get().filter(isCenterLugar);
+    let lr = lc.length ? lc : window.lastGlobalCenterPlaces;
+    if (lr && lr.length) {
+        let ce = centrosByBasesYLugares(b, lr);
+        row.find('input[name^="inv_alograr"]').val(ce.length);
+        const prog = ce.length;
+        const cum = parseFloat(row.find('input[name^="inv_cumplido"]').val()) || 0;
+        const at = parseFloat(row.find('input[name^="inv_a_tiempo"]').val()) || 0;
+        const ef = parseFloat(row.find('input[name^="inv_en_forma"]').val()) || 0;
+        row.find('.pct-cell').html(badgePct(calcRowPct(prog,cum,at,ef)));
+    }
+    captureCurrentInvData(1);
+    updateActivityProgress();
+}
+
 function dragFillDrop(ev,box){
     ev.preventDefault();
+    ev.stopPropagation();
     $(box).removeClass('drag-over');
 
-    let payload=dragFillPayload;
-    try{
-        payload=JSON.parse(ev.dataTransfer.getData('text/plain'))||payload;
-    }catch(e){}
+    let payload = dragFillPayload;
+    try {
+        let data = ev.dataTransfer.getData('text/plain');
+        if (data) payload = JSON.parse(data) || payload;
+    } catch(e) {}
 
-    if(!payload) return;
+    if(!payload || !payload.values) return;
 
-    let target=$(box).closest('.custom-multiselect');
-    if(target.data('type')!==payload.type) return;
+    let target = $(box).closest('.custom-multiselect');
+    if(target.data('type') !== payload.type) return;
 
-    let panel=target.find('.multiselect-dropdown-panel');
-    panel.find('input').prop('checked',false);
+    let panel = target.find('.multiselect-dropdown-panel');
+    panel.find('input[type="checkbox"]').prop('checked', false);
 
-    let idx=target.data('index');
+    let idx = target.data('index');
 
-    payload.values.forEach(v=>{
-        panel.find(`input[value="${String(v).replace(/"/g,'\\"')}"]`).prop('checked',true);
-        
-        if (target.data('type') === 'responsable') {
-            $(`#subgrid-${idx} .deleted-inv-holder`).filter(function(){
-                return $(this).find(`input[name^="inv_persona"]`).val() === v;
-            }).remove();
-        } else if (target.data('type') === 'unidad') {
-            $(`#subgrid-${idx} .deleted-inv-holder`).filter(function(){
-                return $(this).find(`input[name^="inv_unidad"]`).val() === v;
-            }).remove();
+    payload.values.forEach(v => {
+        let checkbox = panel.find('input[type="checkbox"]').filter(function(){ return this.value === String(v); });
+
+        if(checkbox.length === 0){
+            let nameAttr = panel.find('input[type="checkbox"]').first().attr('name') || '';
+            if(!nameAttr){
+                let pKey = target.closest('.inv-row').data('key') || '';
+                if(payload.type === 'verific_sub') nameAttr = `inv_verifics[${idx}][${pKey}][]`;
+                else if(payload.type === 'lugar_sub') nameAttr = `inv_lugar[${idx}][${pKey}][]`;
+            }
+            let newLabel = `<label class="multiselect-option" onclick="event.stopPropagation()"><input type="checkbox" name="${nameAttr}" value="${escHtml(v)}"> ${escHtml(v)}</label>`;
+            panel.find('.multiselect-add-new-btn').before(newLabel);
+            checkbox = panel.find('input[type="checkbox"]').filter(function(){ return this.value === String(v); });
         }
 
+        checkbox.prop('checked', true);
+
+        if (target.data('type') === 'responsable') {
+            $(`#subgrid-${idx} .deleted-inv-holder`).filter(function(){ return $(this).find(`input[name^="inv_persona"]`).val() === v; }).remove();
+        } else if (target.data('type') === 'unidad') {
+            $(`#subgrid-${idx} .deleted-inv-holder`).filter(function(){ return $(this).find(`input[name^="inv_unidad"]`).val() === v; }).remove();
+        }
         if(window.savedInvData[idx]) {
             for (let k in window.savedInvData[idx]) {
-                if (target.data('type') === 'responsable' && window.savedInvData[idx][k].persona === v) {
-                    window.savedInvData[idx][k].deleted = false;
-                }
-                if (target.data('type') === 'unidad' && window.savedInvData[idx][k].unidad === v) {
-                    window.savedInvData[idx][k].deleted = false;
-                }
+                if (target.data('type') === 'responsable' && window.savedInvData[idx][k].persona === v) window.savedInvData[idx][k].deleted = false;
+                if (target.data('type') === 'unidad' && window.savedInvData[idx][k].unidad === v) window.savedInvData[idx][k].deleted = false;
             }
         }
     });
@@ -1788,10 +1984,18 @@ function dragFillDrop(ev,box){
     if(payload.type==='responsable'||payload.type==='unidad'){
         triggerAgendaRebuild(idx);
     }else if(payload.type==='lugar_sub'){
-        refreshStage3RowFromPlaces(target.closest('.inv-row'), true);
+        const msBox = target;
+        const row = msBox.closest('.inv-row');
+        const rowIdx = Number(row.data('index'));
+        if(rowIdx === 2){
+            refreshStage3RowFromPlaces(row, true);
+        }else if(rowIdx === 1){
+            refreshStage1RowFromPlaces(row);
+        }else{
+            captureCurrentInvData(idx);
+        }
     }else if(payload.type==='team_global_lugar'||payload.type==='team_lugar'){
-        // CORRECCIÓN: Llamamos a la función de cálculo antes de guardar
-        applyGlobalTeamPlaces(true, box);
+        applyGlobalTeamPlaces(true, target.find('.multiselect-select-box')[0]);
         return;
     }else{
         captureCurrentInvData(idx);
@@ -1799,7 +2003,6 @@ function dragFillDrop(ev,box){
 
     scheduleFullAutosave();
 }
-
 $(document).on('mousedown click','.custom-multiselect,.multiselect-dropdown-panel,.multiselect-option,.multiselect-add-new-btn',function(e){e.stopPropagation();});
 
 $(document).on('change','.multiselect-dropdown-panel input',function(e){
@@ -1809,10 +2012,10 @@ $(document).on('change','.multiselect-dropdown-panel input',function(e){
     const ms=panel.closest('.custom-multiselect');
     const type=ms.data('type');
     const idx=ms.data('index');
-    
+
     if (this.checked) {
         let val = $(this).val();
-        
+
         if (type === 'responsable') {
             $(`#subgrid-${idx} .deleted-inv-holder`).filter(function(){
                 return $(this).find(`input[name^="inv_persona"]`).val() === val;
@@ -1834,58 +2037,21 @@ $(document).on('change','.multiselect-dropdown-panel input',function(e){
             }
         }
     }
-    
+
     if(type==='responsable' || type==='unidad'){
         try{ triggerAgendaRebuild(idx); }catch(ex){}
     }else if(type==='lugar_sub'){
         const row=ms.closest('.inv-row');
-        if(Number(row.data('index'))===2){
+        const rowIdx = Number(row.data('index'));
+        if(rowIdx===2){
             refreshStage3RowFromPlaces(row,true);
+        }else if(rowIdx === 1){
+            refreshStage1RowFromPlaces(row);
         }else{
             captureCurrentInvData(idx);
         }
     }else if(type==='team_global_lugar' || type==='team_lugar'){
-        // CORRECCIÓN: Llamamos a la función de cálculo antes de guardar
         applyGlobalTeamPlaces(true, ms.find('.multiselect-select-box')[0]);
-        return;
-    }else{
-        captureCurrentInvData(idx);
-    }
-    scheduleFullAutosave();
-});
-$(document).on('mousedown click','.custom-multiselect,.multiselect-dropdown-panel,.multiselect-option,.multiselect-add-new-btn',function(e){e.stopPropagation();});
-$(document).on('change','.multiselect-dropdown-panel input',function(e){
-    e.stopPropagation();
-    const panel=$(this).closest('.multiselect-dropdown-panel');
-    updateMultiselectText(panel[0]);
-    const ms=panel.closest('.custom-multiselect');
-    const type=ms.data('type');
-    const idx=ms.data('index');
-    
-    // Si se activa el check, revivimos combinaciones eliminadas asociadas
-    if (this.checked && window.savedInvData[idx]) {
-        let val = $(this).val();
-        for (let k in window.savedInvData[idx]) {
-            if (type === 'responsable' && window.savedInvData[idx][k].persona === val) {
-                window.savedInvData[idx][k].deleted = false;
-            }
-            if (type === 'unidad' && window.savedInvData[idx][k].unidad === val) {
-                window.savedInvData[idx][k].deleted = false;
-            }
-        }
-    }
-    
-    if(type==='responsable' || type==='unidad'){
-        try{ triggerAgendaRebuild(idx); }catch(ex){}
-    }else if(type==='lugar_sub'){
-        const row=ms.closest('.inv-row');
-        if(Number(row.data('index'))===2){
-            refreshStage3RowFromPlaces(row,true);
-        }else{
-            captureCurrentInvData(idx);
-        }
-    }else if(type==='team_global_lugar' || type==='team_lugar'){
-        autosaveTeamTable(ms.find('.multiselect-select-box')[0]);
         return;
     }else{
         captureCurrentInvData(idx);
@@ -1897,7 +2063,7 @@ function selectedFromPanel(selector){return $(selector).find('input:checked').ma
 
 function captureCurrentInvData(index){
     if(!window.savedInvData[index]) window.savedInvData[index]={};
-    
+
     // 1. Capturar las líneas visibles
     $(`#subgrid-${index} tr.inv-row`).each(function(){
         let row=$(this),key=row.data('key');
@@ -2055,7 +2221,7 @@ function refreshParentStage3Totals(index,key,centersPayload,changeProgramado=tru
     row.find('.pct-cell').html(badgePct(calcRowPct(prog,cumplido,at,ef)));
 }
 
-function mergeSelectedCentersIntoMemory(index,key,centros){
+function mergeSelectedCentersIntoMemory(index,key,centros,unidad=''){
     const row=$(`tr.inv-row[data-index="${index}"][data-key="${key}"]`);
     const existing=Object.assign({},getSaved(index,key).centros||{},readHiddenCenters(index,key)||{});
     (centros||[]).forEach(c=>{
@@ -2072,7 +2238,7 @@ function mergeSelectedCentersIntoMemory(index,key,centros){
             pob_0_5:parseFloat(c.pob_0_5)||parseFloat(prev.pob_0_5)||0,
             pob_6_17:parseFloat(c.pob_6_17)||parseFloat(prev.pob_6_17)||0,
             pob_18_24:parseFloat(c.pob_18_24)||parseFloat(prev.pob_18_24)||0,
-            a_lograr:parseFloat(c.pob_total)||0,
+            a_lograr:getUnidadTargetPopulation(c, unidad),
             cumplido:parseFloat(prev.cumplido)||0,
             a_tiempo:defaultQualityValue(prev,'a_tiempo'),
             en_forma:defaultQualityValue(prev,'en_forma'),
@@ -2104,11 +2270,12 @@ function refreshStage3RowFromPlaces(rowOrTarget,autosaveNow=false){
 
     const index=Number(row.data('index'));
     const key=String(row.data('key'));
+    const unidad=row.find('input[name^="inv_unidad"]').val();
     const bases=String(row.data('base')||'').split('|').filter(b=>String(b||'').trim()!=='');
     const todosLugares=row.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get();
     const lugaresCentro=todosLugares.filter(isCenterLugar);
     const centrosActivos=centrosByBasesYLugares(bases,lugaresCentro);
-    const allMemory=mergeSelectedCentersIntoMemory(index,key,centrosActivos);
+    const allMemory=mergeSelectedCentersIntoMemory(index,key,centrosActivos,unidad);
     const activePayload={};
     centrosActivos.forEach(c=>{const id=String(c.id);if(allMemory[id])activePayload[id]=allMemory[id];});
 
@@ -2175,20 +2342,20 @@ function buildEtapasTable(taskData){
     let etapas=Array.isArray(taskData.etapas)&&taskData.etapas.length?taskData.etapas:etapasDefault.map((e,i)=>({codigo_etapa:e.codigo,nombre_etapa:e.nombre,descripcion_etapa:e.descripcion,unidad_medida:'[]',responsable:'[]',involucrados_json:'{}',fecha_recepcion:getFechaMaximaEtapa(i)}));
     let html='';
     let currentProg = (taskData.programa || '') + ' ' + (taskData.sector || '');
-    
+
     etapas.forEach((e,i)=>{
         let resps=[],unis=[];
         try{resps=JSON.parse(e.responsable||'[]')}catch(ex){if(e.responsable)resps=[e.responsable]}
         try{unis=JSON.parse(e.unidad_medida||'[]')}catch(ex){if(e.unidad_medida)unis=[e.unidad_medida]}
         try{window.savedInvData[i]=JSON.parse(e.involucrados_json||'{}')}catch(ex){window.savedInvData[i]={}}
-        
+
         let fecha=e.fecha_recepcion||getFechaMaximaEtapa(i);
         let filteredUnis = getFilteredCatalog(masterUnidadesRaw, currentProg, `E-${i+1}`);
         let rowUnis = [...new Set([...filteredUnis, ...unis])];
 
         html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" style="display:none"></div></td></tr>`;
     });
-    
+
     $('#tabla_etapas_body').html(html);
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
     etapas.forEach((e,i)=>{
@@ -2204,9 +2371,10 @@ function buildSubgrid(index,resps,unidades){
     let currentProg = currentTaskData ? ((currentTaskData.programa || '') + ' ' + (currentTaskData.sector || '')) : '';
     let filteredVerifs = getFilteredCatalog(masterVerificacionesRaw, currentProg, `E-${index+1}`);
 
+
     let html=`<div class="subgrid-wrapper"><div class="subgrid-card"><div class="subgrid-header subgrid-toolbar"><h5><i class="fa-solid fa-users-viewfinder"></i> Programación por responsable y unidad</h5><div style="display:flex;align-items:center;gap:8px"><span class="sticky-mini-note"><i class="fa-solid fa-calendar-days"></i> Mes actual: <b>${escHtml((mesesEquipo.find(x=>x.k===currentTeamMonth)||{}).n||currentTeamMonth)}</b></span><button type="button" class="btn-action btn-mini btn-xlsx" onclick="exportClosestTable(this,'etapa_${index+1}_responsables')"><i class="fa-solid fa-file-excel"></i></button></div></div><table class="subgrid-table"><thead><tr><th style="width:22%">Responsable</th><th style="width:10%">Unidad</th><th style="width:9%">PROG.</th><th style="width:9%">CUMPL.</th><th style="width:9%">A tiempo (%)</th><th style="width:9%">En forma (%)</th><th style="width:8%">%</th><th style="width:15%">Medios verificación</th><th style="width:11%">Lugar</th><th style="width:86px">Acción</th>${index===2?'<th style="width:92px">Detalle</th>':''}</tr></thead><tbody>`;
-    
-    let hiddenHoldersHtml = ''; 
+
+    let hiddenHoldersHtml = '';
 
     resps.forEach(p=>{
         let bases=getBasesByTecnico(p);
@@ -2214,15 +2382,15 @@ function buildSubgrid(index,resps,unidades){
         unidades.forEach(u=>{
             let key=rowKey(p+'|__ALLBASES',u);
             let d=getSaved(index,key);
-            
+
             let isDeleted = false;
             if(d && d.deleted === true) {
                 isDeleted = true;
-            } else if(!d || Object.keys(d).length===0) { 
-                d=combineSavedForBases(index,p,bases,u); 
+            } else if(!d || Object.keys(d).length===0) {
+                d=combineSavedForBases(index,p,bases,u);
                 if(d && d.deleted === true) isDeleted = true;
             }
-            
+
             // Si está borrado, lo agregamos como input oculto pero NO dibujamos la fila
             if (isDeleted) {
                 hiddenHoldersHtml += `<div class="deleted-inv-holder" style="display:none"><input type="hidden" name="inv_persona[${index}][${key}]" value="${escHtml(p)}"><input type="hidden" name="inv_base[${index}][${key}]" value="${escHtml(bases.join('|'))}"><input type="hidden" name="inv_unidad[${index}][${key}]" value="${escHtml(u)}"><input type="hidden" name="inv_mes[${index}][${key}]" value="${escHtml(currentTeamMonth)}"><input type="hidden" name="inv_deleted[${index}][${key}]" value="1"><input type="hidden" name="inv_alograr[${index}][${key}]" value="0"></div>`;
@@ -2233,7 +2401,21 @@ function buildSubgrid(index,resps,unidades){
             let lugar=Array.isArray(d.lugar)?d.lugar:[];
             let lugaresCentro=lugar.filter(isCenterLugar);
             let centrosEstimados=(index===2&&lugaresCentro.length)?centrosByBasesYLugares(bases,lugaresCentro):[];
-            let programadoDefault=(index===2&&lugaresCentro.length)?sumMatriculaCentros(centrosEstimados):(d.a_lograr||'');
+
+            let programadoDefault = parseFloat(d.a_lograr) || 0;
+            if (index === 2 && lugaresCentro.length) {
+                let sumU = 0;
+                centrosEstimados.forEach(c => sumU += getUnidadTargetPopulation(c, u));
+                programadoDefault = sumU;
+            } else if (index === 1) {
+                let lugaresParaConteo = lugaresCentro.length ? lugaresCentro : (window.lastGlobalCenterPlaces || []);
+                if (lugaresParaConteo.length) {
+                    let centrosEtapa2 = centrosByBasesYLugares(bases, lugaresParaConteo);
+                    if (centrosEtapa2.length > 0) programadoDefault = centrosEtapa2.length;
+                }
+            }
+            if (programadoDefault === 0 && (!d.a_lograr || parseFloat(d.a_lograr) === 0)) programadoDefault = '';
+
             let cumplidoDefault=d.cumplido||0;
             let aTiempoDefault=defaultQualityValue(d,'a_tiempo');
             let enFormaDefault=defaultQualityValue(d,'en_forma');
@@ -2244,7 +2426,7 @@ function buildSubgrid(index,resps,unidades){
             html+=`<tr class="inv-row" data-index="${index}" data-key="${key}" data-persona="${escHtml(p)}" data-base="${escHtml(bases.join('|'))}"><td><input type="hidden" name="inv_centros_json[${index}][${key}]" value="${escHtml(JSON.stringify(d.centros||{}))}"><input type="hidden" name="inv_persona[${index}][${key}]" value="${escHtml(p)}"><input type="hidden" name="inv_base[${index}][${key}]" value="${escHtml(bases.join('|'))}"><input type="hidden" name="inv_deleted[${index}][${key}]" value="0"><input type="hidden" name="inv_mes[${index}][${key}]" value="${escHtml(currentTeamMonth)}"><input type="hidden" name="inv_quality_initialized[${index}][${key}]" value="1"><input type="hidden" name="inv_quality_version[${index}][${key}]" value="2"><div class="resp-cell"><i class="fa-solid fa-user-check resp-icon"></i>${splitResponsibleNameHtml(p)}</div>${baseLabels}</td><td><span class="code-pill ext">${escHtml(u)}</span><input type="hidden" name="inv_unidad[${index}][${key}]" value="${escHtml(u)}"></td><td><input type="number" step="0.01" name="inv_alograr[${index}][${key}]" value="${escHtml(programadoDefault)}" class="table-input a-lograr-input auto-full-save"></td><td><input type="number" step="0.01" name="inv_cumplido[${index}][${key}]" value="${escHtml(cumplidoDefault)}" class="table-input cumplido-input auto-full-save"></td><td><input type="number" min="0" max="100" step="1" name="inv_a_tiempo[${index}][${key}]" value="${escHtml(aTiempoDefault)}" class="table-input score-input inv-score auto-full-save"></td><td><input type="number" min="0" max="100" step="1" name="inv_en_forma[${index}][${key}]" value="${escHtml(enFormaDefault)}" class="table-input score-input inv-score auto-full-save"></td><td class="pct-cell">${badgePct(pct)}</td><td>${optionsCheckboxes(rowVerifs,Array.isArray(d.verifics)?d.verifics:[],`inv_verifics[${index}][${key}][]`,index,'verific_sub',false,key)}</td><td>${optionsCheckboxes(masterLugares,lugar,`inv_lugar[${index}][${key}][]`,index,'lugar_sub',false,key)}</td><td><button type="button" class="btn-action btn-mini btn-delete-row" onclick="deleteInvRow(${index}, '${key}')"><i class="fa-solid fa-trash"></i></button></td>${index===2?`<td><button type="button" class="btn-action btn-mini btn-eye" onclick="toggleDetalleCentros(${index}, '${key}', this)"><i class="fa-solid fa-eye"></i> Ver</button></td>`:''}</tr><tr id="detalle-centros-${index}-${key}" class="detail-centros-row d-none"><td colspan="${index===2?11:10}"></td></tr>`;
         });
     });
-    
+
     html+='</tbody></table>' + hiddenHoldersHtml + '</div></div>';
     cont.html(html).show();
     cont.find('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
@@ -2252,31 +2434,31 @@ function buildSubgrid(index,resps,unidades){
 }
 function deleteInvRow(index,key){
     if(!window.savedInvData[index]) window.savedInvData[index]={};
-    
+
     let row = $(`tr.inv-row[data-index="${index}"][data-key="${key}"]`);
     let persona = row.find(`input[name^="inv_persona"]`).val() || '';
     let unidad = row.find(`input[name^="inv_unidad"]`).val() || '';
     let base = row.find(`input[name^="inv_base"]`).val() || '';
-    
+
     // Lo guardamos explícitamente en memoria como deleted
     window.savedInvData[index][key] = {
-        ...(window.savedInvData[index][key]||{}), 
+        ...(window.savedInvData[index][key]||{}),
         persona, base, unidad, deleted:true, mes:currentTeamMonth
     };
 
     // Agregar el holder invisible de respaldo antes de borrar
     $(`#subgrid-${index}`).append(`<div class="deleted-inv-holder" style="display:none"><input type="hidden" name="inv_persona[${index}][${key}]" value="${escHtml(persona)}"><input type="hidden" name="inv_base[${index}][${key}]" value="${escHtml(base)}"><input type="hidden" name="inv_unidad[${index}][${key}]" value="${escHtml(unidad)}"><input type="hidden" name="inv_mes[${index}][${key}]" value="${escHtml(currentTeamMonth)}"><input type="hidden" name="inv_deleted[${index}][${key}]" value="1"><input type="hidden" name="inv_alograr[${index}][${key}]" value="0"></div>`);
-    
+
     // Lo borramos del DOM visual
     row.next('.detail-centros-row').remove();
     row.remove();
-    
+
     // Evaluar si le quedan otras unidades activas a esa persona en esta etapa
     if (persona !== '') {
         let activeForPersona = $(`#subgrid-${index} tr.inv-row`).filter(function() {
             return $(this).find(`input[name^="inv_persona"]`).val() === persona;
         }).length;
-        
+
         // Si no quedan unidades, desmarcamos a la persona del Dropdown original
         if (activeForPersona === 0) {
             let respPanel = $(`.panel-responsable-box[data-index="${index}"] .multiselect-dropdown-panel`);
@@ -2287,13 +2469,13 @@ function deleteInvRow(index,key){
             }
         }
     }
-    
+
     // Evaluar si le quedan otros responsables a esa unidad en esta etapa
     if (unidad !== '') {
         let activeForUnidad = $(`#subgrid-${index} tr.inv-row`).filter(function() {
             return $(this).find(`input[name^="inv_unidad"]`).val() === unidad;
         }).length;
-        
+
         // Si no quedan responsables para esta unidad, la desmarcamos del Dropdown
         if (activeForUnidad === 0) {
             let uniPanel = $(`.panel-unidad-box[data-index="${index}"] .multiselect-dropdown-panel`);
@@ -2377,11 +2559,10 @@ function updateHiddenCentrosJsonFromDrawer(){
 
 function renderCenterTable(index,key,centros,savedCentros,showAges){
     const ageHeaders=showAges?'<th class="col-age">0-5</th><th class="col-age">6-17</th><th class="col-age">18-24</th>':'';
-    let html=`<div class="centros-detail-body"><table class="centros-table ${showAges?'with-ages':'without-ages'}"><thead><tr><th class="col-type">Tipo</th><th class="col-center">Centro</th><th class="col-community">Comunidad</th><th class="col-caserio">Caserío</th><th class="col-prog">Matrícula / PROG.</th><th class="col-cumpl">CUMPL.</th>${ageHeaders}<th class="col-score">A tiempo (%)</th><th class="col-score">En forma (%)</th><th class="col-pct">%</th></tr></thead><tbody>`;
+    let html=`<div class="centros-detail-body"><table class="centros-table ${showAges?'with-ages':'without-ages'}"><thead><tr><th class="col-type">Tipo</th><th class="col-center">Centro</th><th class="col-community">Comunidad</th><th class="col-caserio">Caserío</th><th class="col-prog">PROG.</th><th class="col-cumpl">CUMPL.</th>${ageHeaders}<th class="col-score">A tiempo (%)</th><th class="col-score">En forma (%)</th><th class="col-pct">%</th></tr></thead><tbody>`;
     centros.forEach(c=>{
-        const total=parseFloat(c.pob_total)||0;
         const sc=savedCentros[String(c.id)]||{};
-        const prog=Object.prototype.hasOwnProperty.call(sc,'a_lograr')?(parseFloat(sc.a_lograr)||0):total;
+        const prog=parseFloat(sc.a_lograr)||0;
         const cum=parseFloat(sc.cumplido)||0;
         const at=defaultQualityValue(sc,'a_tiempo');
         const ef=defaultQualityValue(sc,'en_forma');
@@ -2403,11 +2584,13 @@ function toggleDetalleCentros(index,key,btn){
 
     const invRow=$(`tr.inv-row[data-key="${key}"][data-index="${index}"]`);
     const persona=invRow.data('persona');
+    const unidad=invRow.find('input[name^="inv_unidad"]').val();
     let bases=String(invRow.data('base')||'').split('|').filter(b=>String(b||'').trim()!=='');
     if(!bases.length) bases=[''];
     const todosLugares=invRow.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get();
     const lugares=todosLugares.filter(isCenterLugar);
-    const savedCentros=mergeSelectedCentersIntoMemory(index,key,centrosByBasesYLugares(bases,lugares));
+    // Pasamos la "unidad" para que el merge cruce la población exacta (Infantes, Jóvenes, Líderes, etc.)
+    const savedCentros=mergeSelectedCentersIntoMemory(index,key,centrosByBasesYLugares(bases,lugares), unidad);
     let totalMatricula=0,headerCount=0,sections='';
 
     lugares.forEach(lugar=>{
@@ -2417,7 +2600,8 @@ function toggleDetalleCentros(index,key,btn){
             const centros=getCentrosPorTecnicoYLugar(base,lugar);
             if(!centros.length) return;
             headerCount+=centros.length;
-            totalMatricula+=sumMatriculaCentros(centros);
+            // Sumamos lo que requiere esta unidad específicamente para esta fila
+            centros.forEach(c => totalMatricula += getUnidadTargetPopulation(c, unidad));
             sections+=`<div class="detail-base-section"><div class="detail-base-title"><span><i class="fa-solid fa-building"></i> ${escHtml(lugar)} · <i class="fa-solid fa-location-dot"></i> Base: ${escHtml(base||'Sin base')}</span><span style="display:flex;align-items:center;gap:8px"><span class="count">${centros.length} centros</span><button type="button" class="btn-action btn-mini btn-xlsx" onclick="exportClosestTable(this,'centros_${sanitizeExportName(lugar)}_${sanitizeExportName(base||'sin_base')}')"><i class="fa-solid fa-file-excel"></i></button></span></div>${renderCenterTable(index,key,centros,savedCentros,showAges)}</div>`;
         });
     });
@@ -2430,7 +2614,7 @@ function toggleDetalleCentros(index,key,btn){
     }else body=sections;
 
     $('#centrosDrawerTitle').html(`<i class="fa-solid fa-building-columns"></i> Centros de ${escHtml(persona||'')}`);
-    $('#centrosDrawerSub').html(`Lugar(es): <b>${escHtml(lugares.join(', ')||'Sin centros')}</b> · Registros: <b>${headerCount}</b> · Matrícula: <b>${formatNum(totalMatricula)}</b> · Mes: <b>${escHtml((mesesEquipo.find(x=>x.k===currentTeamMonth)||{}).n||currentTeamMonth)}</b>`);
+    $('#centrosDrawerSub').html(`Lugar(es): <b>${escHtml(lugares.join(', ')||'Sin centros')}</b> · Unidad (Población): <b>${escHtml(unidad||'General')}</b> · Centros: <b>${headerCount}</b> · PROG Total: <b>${formatNum(totalMatricula)}</b>`);
     $('#centrosDrawerBody').html(body);
     drawer.data('index',index).data('key',key).addClass('open').attr('aria-hidden','false');
     $(btn).addClass('active').html('<i class="fa-solid fa-eye-slash"></i> Ocultar');
@@ -2464,7 +2648,6 @@ function syncAgendaStickyMini(taskData){
     $('#agenda_mes_mini').text((mesesEquipo.find(x=>x.k===currentTeamMonth)||{}).n||currentTeamMonth);
 }
 
-// NUEVA FUNCION: Calcula totales y sincroniza visuales
 function updateActivityProgress(){
     let totalEtapas = 4;
     let suma = 0;
@@ -2484,7 +2667,7 @@ function updateActivityProgress(){
     }
     let total = suma / totalEtapas;
     let porcentaje = Math.round(total)+'%';
-    
+
     $('#lbl_estado_porcentaje').attr('class','activity-pct-badge '+activityPctClass(total)).text(porcentaje);
     $('#upd_estado').val(porcentaje);
 
@@ -2569,20 +2752,12 @@ function selectedGlobalTeamPlaces(){
 }
 
 function calculateTeamProgramado(row,places=null){
-    // 1. Obtiene la base de la fila actual (Ej: EL NARANJO)
     const base = row.find('.team-base').val() || '';
-    
-    // 2. Filtra solo los lugares que son de tipo centro educativo/salud
     const lugares = (places || selectedGlobalTeamPlaces()).filter(isCenterLugar);
-    
-    // 3. Cruza la base con los lugares en el catálogo general de centros
     const centros = centrosByBasesYLugares(base ? [base] : [], lugares);
-    
-    // 4. Suma la población total de los centros encontrados
     return { lugares, centros, total: sumMatriculaCentros(centros) };
 }
 
-// Usamos window. para evitar el choque de declaración duplicada que rompía el modal
 window.lastGlobalCenterPlaces = window.lastGlobalCenterPlaces || [];
 function updateCurrentTaskGlobalPlaces(){
     if(!currentTaskData) return;
@@ -2616,38 +2791,48 @@ function updateCurrentTaskAssignmentFromRow(row){
 function applyGlobalTeamPlaces(autosave=true, target=null){
     const allPlaces = selectedGlobalTeamPlaces();
     const centerPlaces = allPlaces.filter(isCenterLugar);
-    
-    // Si hay centros seleccionados o si se acaba de quitar uno, debemos recalcular
     const mustRecalculate = centerPlaces.length > 0 || window.lastGlobalCenterPlaces.length > 0;
-    
+
     updateCurrentTaskGlobalPlaces();
 
     $('#tabla_tecnicos_body .team-row').each(function(){
         const row = $(this);
-        
         if(mustRecalculate){
             const result = calculateTeamProgramado(row, centerPlaces);
-            
-            // Inyectamos la suma de la matrícula automáticamente en el campo PROG del mes actual
             row.find(`.team-month-prog[data-mes="${currentTeamMonth}"]`).val(result.total);
-            
             const logro = parseFloat(row.find(`.team-month-logro[data-mes="${currentTeamMonth}"]`).val()) || 0;
-            
-            // Si el resultado es mayor a 0, marcamos al técnico automáticamente
             if(result.total > 0){
                 row.find('.team-selected').prop('checked', true);
             } else if(centerPlaces.length > 0 && logro <= 0){
                 row.find('.team-selected').prop('checked', false);
             }
         }
-        
         row.toggleClass('row-selected', row.find('.team-selected').is(':checked'));
         updateCurrentTaskAssignmentFromRow(row);
     });
 
     window.lastGlobalCenterPlaces = centerPlaces.slice();
     recalcTeamRows();
-    
+
+    $(`#subgrid-1 tr.inv-row`).each(function(){
+        let r = $(this);
+        let b = String(r.data('base')||'').split('|').filter(x=>String(x||'').trim()!=='');
+        let lc = r.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get().filter(isCenterLugar);
+        let lr = lc.length ? lc : window.lastGlobalCenterPlaces;
+        if (lr && lr.length) {
+            let ce = centrosByBasesYLugares(b, lr);
+            r.find('input[name^="inv_alograr"]').val(ce.length);
+        }
+        const prog = parseFloat(r.find('input[name^="inv_alograr"]').val()) || 0;
+        const cum = parseFloat(r.find('input[name^="inv_cumplido"]').val()) || 0;
+        const at = parseFloat(r.find('input[name^="inv_a_tiempo"]').val()) || 0;
+        const ef = parseFloat(r.find('input[name^="inv_en_forma"]').val()) || 0;
+        r.find('.pct-cell').html(badgePct(calcRowPct(prog,cum,at,ef)));
+    });
+
+    captureCurrentInvData(1);
+    updateActivityProgress();
+
     if(autosave) autosaveTeamTable(target || $('#team-global-location-host .multiselect-select-box')[0]);
 }
 
@@ -2745,7 +2930,7 @@ function autosaveTeamTable(editedEl = null, silent = false) {
 
     const target = editedEl || $('#team-global-location-host .multiselect-select-box')[0];
     if (!silent) flashSaving(target);
-    
+
     return enqueueAutosave(async () => {
         const r = await fetch(window.location.pathname, { method: 'POST', body: fd });
         const res = await r.json();
@@ -2767,7 +2952,7 @@ let pendingFullSaveTarget=null;
 function snapshotCurrentTaskFromForm(){
     if(!currentTaskData) return;
     if(typeof tinymce!=='undefined'&&tinymce.get('upd_info_adicional')) tinymce.get('upd_info_adicional').save();
-    
+
     currentTaskData.info_adicional=$('#upd_info_adicional').val()||'';
     currentTaskData.estado=$('#upd_estado').val()||'0%';
     currentTaskData.m_act_obj=parseFloat($('#upd_m_act_obj').val())||0;
@@ -2776,9 +2961,9 @@ function snapshotCurrentTaskFromForm(){
     currentTaskData.m_part_alc=parseFloat($('#upd_m_part_alc').val())||0;
     currentTaskData.op_act=currentTaskData.op_act||{};
     currentTaskData.op_part=currentTaskData.op_part||{};
-    
+
     mesesEquipo.forEach(m=>{currentTaskData.op_act[m.k]=parseFloat($(`input[name="op_act[${m.k}]"]`).val())||0;currentTaskData.op_part[m.k]=parseFloat($(`input[name="op_part[${m.k}]"]`).val())||0;});
-    
+
     const etapas=[];
     $('#tabla_etapas_body tr.stage-main-row').each(function(i){
         captureCurrentInvData(i);
@@ -2793,7 +2978,7 @@ function snapshotCurrentTaskFromForm(){
             fecha_recepcion:row.find('input[name="etapa_fecha_recepcion[]"]').val()||''
         });
     });
-    
+
     currentTaskData.etapas=etapas;
     if(currentTaskButton) $(currentTaskButton).attr('data-task',JSON.stringify(currentTaskData));
 
@@ -2858,6 +3043,8 @@ $(document).on('input change','#formUpdate input,#formUpdate textarea,#formUpdat
 
         if(index===2 && field.closest('.panel-lugar_sub-box').length){
             refreshStage3RowFromPlaces(row,true);
+        }else if(index === 1 && field.closest('.panel-lugar_sub-box').length){
+            refreshStage1RowFromPlaces(row);
         }else{
             const prog=parseFloat(row.find('input[name^="inv_alograr"]').val())||0;
             const cum=parseFloat(row.find('input[name^="inv_cumplido"]').val())||0;
@@ -2883,8 +3070,7 @@ function openCatalogModal(type,index,label,key=''){
     $('#mini-modal-target-key').val(key);
     $('#mini-modal-title span').text(label);
     $('#mini-modal-input').val('');
-    
-    // Si es unidad o medio de verificación, pedimos también el programa y etapa
+
     if (type === 'responsable' || type === 'lugar_sub') {
         $('#mini-modal-prog-etapa').hide();
     } else {
@@ -2893,7 +3079,7 @@ function openCatalogModal(type,index,label,key=''){
         $('#mini-modal-prog').val(currentProg);
         $('#mini-modal-stg').val(`E-${index+1}`);
     }
-    
+
     $('#catalogMiniModal').css('display','flex');
 }
 
@@ -2902,12 +3088,11 @@ function submitNewCatalogItem(){
         index=$('#mini-modal-target-index').val(),
         key=$('#mini-modal-target-key').val(),
         val=$('#mini-modal-input').val().trim();
-        
+
     if(!val)return;
 
     let list=type==='responsable'?masterResponsables:(type==='unidad'?masterUnidadesRaw:(type==='verific_sub'?masterVerificacionesRaw:masterLugares));
-    
-    // CORRECCIÓN: Aseguramos que la palabra clave llegue correcta al backend
+
     let catalogTypePHP = type.replace('_sub','');
     if (catalogTypePHP === 'verific') catalogTypePHP = 'verificacion';
 
@@ -2928,10 +3113,9 @@ function submitNewCatalogItem(){
             list.push({nombre:val, programa:p, etapa:e});
         }
     }
-    
+
     $('#catalogMiniModal').hide();
 
-    // Inyectar el nuevo valor en los menús desplegables sin borrar lo que ya está en pantalla
     let panelSelector = `.panel-${type}-box .multiselect-dropdown-panel`;
 
     $(panelSelector).each(function() {
@@ -2948,7 +3132,7 @@ function submitNewCatalogItem(){
                 let pType = parentBox.data('type');
                 let pIdx = parentBox.data('index');
                 let pKey = parentBox.closest('.inv-row').data('key') || '';
-                
+
                 if (pType === 'unidad') nameAttr = `etapa_unidades[${pIdx}][]`;
                 else if (pType === 'responsable') nameAttr = `etapa_resps[${pIdx}][]`;
                 else if (pType === 'verific_sub') nameAttr = `inv_verifics[${pIdx}][${pKey}][]`;
@@ -2968,16 +3152,18 @@ function submitNewCatalogItem(){
     }
 
     if (originPanel && originPanel.length) {
-        let chk = originPanel.find(`input[value="${escHtml(val).replace(/"/g,'\\"')}"]`);
+        let chk = originPanel.find('input[type="checkbox"]').filter(function(){ return this.value === String(val); });
         if (chk.length) {
-            chk.prop('checked', true); 
-            updateMultiselectText(originPanel[0]); 
-            
+            chk.prop('checked', true);
+            updateMultiselectText(originPanel[0]);
+
             if (type === 'responsable' || type === 'unidad') {
                 triggerAgendaRebuild(index);
             } else if (type === 'lugar_sub') {
                 let row = originPanel.closest('.inv-row');
-                if(Number(row.data('index')) === 2) refreshStage3RowFromPlaces(row, true);
+                const rowIdx = Number(row.data('index'));
+                if(rowIdx === 2) refreshStage3RowFromPlaces(row, true);
+                else if(rowIdx === 1) refreshStage1RowFromPlaces(row);
                 else captureCurrentInvData(index);
             } else {
                 captureCurrentInvData(index);
@@ -2985,7 +3171,6 @@ function submitNewCatalogItem(){
         }
     }
 
-    // Enviamos forzadamente la información al servidor de BD y autoguardamos la pantalla
     scheduleFullAutosave();
     fetch(window.location.pathname,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:reqData});
 }

@@ -33,7 +33,7 @@ return [
         'icon' => 'fa-diagram-project',
         'items' => [
             'dashboard_programatico.php' => ['label' => 'Panel programático', 'icon' => 'fa-chart-pie', 'sidebar' => true],
-            'monitoreo.php' => ['label' => 'Monitoreo y tareas', 'icon' => 'fa-list-check', 'sidebar' => true],
+            'monitoreo.php' => ['label' => 'Gestión programática', 'icon' => 'fa-list-check', 'sidebar' => true],
             'catalogos_monitoreo.php' => ['label' => 'Catálogos de monitoreo', 'icon' => 'fa-tags', 'sidebar' => true],
             'panel_tecnico.php' => ['label' => 'Panel técnico', 'icon' => 'fa-screwdriver-wrench', 'sidebar' => true],
             'gestor_centros.php' => ['label' => 'Gestor de centros', 'icon' => 'fa-school', 'sidebar' => true],

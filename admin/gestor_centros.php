@@ -37,31 +37,17 @@ function jsonOut(array $payload, int $status = 200): void {
 }
 
 function tableExists(PDO $db, string $table): bool {
-    // Validación estricta del identificador para poder consultarlo directamente.
     if (!preg_match('/^[A-Za-z0-9_]+$/', $table)) return false;
-
-    // La prueba más confiable: intentar leer directamente la tabla con el
-    // mismo usuario y la misma conexión que utilizará la importación.
     try {
         $db->query("SELECT 1 FROM `{$table}` LIMIT 0");
         return true;
-    } catch (Throwable $directError) {
-        // Continúa con verificaciones de catálogo por compatibilidad.
-    }
-
+    } catch (Throwable $directError) {}
     try {
-        $st = $db->prepare(
-            'SELECT COUNT(*) FROM information_schema.tables '
-            . 'WHERE table_schema = DATABASE() AND table_name = ?'
-        );
+        $st = $db->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
         $st->execute([$table]);
         if ((int)$st->fetchColumn() > 0) return true;
-    } catch (Throwable $catalogError) {
-        // Algunos hostings restringen information_schema.
-    }
-
+    } catch (Throwable $catalogError) {}
     try {
-        // No se usa LIKE porque los guiones bajos del nombre serían comodines.
         $quoted = $db->quote($table);
         $st = $db->query("SHOW TABLES WHERE Tables_in_" . $db->query('SELECT DATABASE()')->fetchColumn() . " = {$quoted}");
         return $st && (bool)$st->fetchColumn();
@@ -167,6 +153,8 @@ function demographicFromRow(array $row): array {
         'pob_15_17_9_m' => ['pob_15_17_9_m', 'pob_15_17.9_m', '15_17_9_m', '15_17.9_m'],
         'pob_18_24_f'   => ['pob_18_24_f', '18_24_f'],
         'pob_18_24_m'   => ['pob_18_24_m', '18_24_m'],
+        'lideres_f'     => ['lideres_f', 'lideres_fem', 'lideres_mujeres'],
+        'lideres_m'     => ['lideres_m', 'lideres_masc', 'lideres_hombres'],
     ];
 
     $data = [];
@@ -174,9 +162,13 @@ function demographicFromRow(array $row): array {
         $data[$field] = int_clean(val_any($row, $aliases, 0));
     }
 
+    // CORRECCIÓN: Volvemos a mantener Femenino y Masculino exclusivamente para niños/jóvenes
     $data['pob_fem'] = $data['pob_0_5_9_f'] + $data['pob_6_14_9_f'] + $data['pob_15_17_9_f'] + $data['pob_18_24_f'];
     $data['pob_masc'] = $data['pob_0_5_9_m'] + $data['pob_6_14_9_m'] + $data['pob_15_17_9_m'] + $data['pob_18_24_m'];
-    $data['pob_total'] = $data['pob_fem'] + $data['pob_masc'];
+
+    // Y el total suma la población base más la nueva población de líderes
+    $data['pob_total'] = $data['pob_fem'] + $data['pob_masc'] + $data['lideres_f'] + $data['lideres_m'];
+
     $data['pob_0_5'] = $data['pob_0_5_9_f'] + $data['pob_0_5_9_m'];
     $data['pob_6_17'] = $data['pob_6_14_9_f'] + $data['pob_6_14_9_m'] + $data['pob_15_17_9_f'] + $data['pob_15_17_9_m'];
     $data['pob_18_24'] = $data['pob_18_24_f'] + $data['pob_18_24_m'];
@@ -198,19 +190,15 @@ function findCentro(PDO $db, string $tipo, string $nombre, string $base, string 
 }
 
 function createCentro(PDO $db, string $tipo, string $nombre, string $municipio, string $base, string $caserio): int {
-    // El municipio no se almacena en ah_centros. Se obtiene siempre desde
-    // ah_bases_geograficas mediante comunidad_base = nombre_base.
     $st = $db->prepare(
-        'INSERT INTO ah_centros (tipo,nombre,comunidad_base,caserio,pob_total,pob_fem,pob_masc,pob_0_5,pob_6_17,pob_18_24)
-         VALUES (?,?,?,?,0,0,0,0,0,0)'
+        'INSERT INTO ah_centros (tipo,nombre,comunidad_base,caserio,pob_total,pob_fem,pob_masc,pob_0_5,pob_6_17,pob_18_24,lideres_f,lideres_m)
+         VALUES (?,?,?,?,0,0,0,0,0,0,0,0)'
     );
     $st->execute([$tipo, $nombre, $base, $caserio]);
     return (int)$db->lastInsertId();
 }
 
 function updateCentroLocation(PDO $db, int $id, string $tipo, string $nombre, string $municipio, string $base, string $caserio): void {
-    // El parámetro municipio se conserva por compatibilidad con las llamadas,
-    // pero la fuente oficial es ah_bases_geograficas.
     $st = $db->prepare('UPDATE ah_centros SET tipo=?,nombre=?,comunidad_base=?,caserio=? WHERE id=?');
     $st->execute([$tipo, $nombre, $base, $caserio, $id]);
 }
@@ -218,7 +206,7 @@ function updateCentroLocation(PDO $db, int $id, string $tipo, string $nombre, st
 function syncLegacyPopulation(PDO $db, int $centroId, array $population): void {
     $st = $db->prepare(
         'UPDATE ah_centros
-         SET pob_total=?,pob_fem=?,pob_masc=?,pob_0_5=?,pob_6_17=?,pob_18_24=?
+         SET pob_total=?,pob_fem=?,pob_masc=?,pob_0_5=?,pob_6_17=?,pob_18_24=?,lideres_f=?,lideres_m=?
          WHERE id=?'
     );
     $st->execute([
@@ -228,6 +216,8 @@ function syncLegacyPopulation(PDO $db, int $centroId, array $population): void {
         (int)$population['pob_0_5'],
         (int)$population['pob_6_17'],
         (int)$population['pob_18_24'],
+        (int)$population['lideres_f'],
+        (int)$population['lideres_m'],
         $centroId,
     ]);
 }
@@ -235,8 +225,8 @@ function syncLegacyPopulation(PDO $db, int $centroId, array $population): void {
 function saveMonthlyPopulation(PDO $db, int $centroId, string $period, array $population): void {
     $st = $db->prepare(
         'INSERT INTO ah_centros_poblacion_mensual
-        (centro_id,periodo,pob_0_5_9_f,pob_0_5_9_m,pob_6_14_9_f,pob_6_14_9_m,pob_15_17_9_f,pob_15_17_9_m,pob_18_24_f,pob_18_24_m,pob_fem,pob_masc,pob_total)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+        (centro_id,periodo,pob_0_5_9_f,pob_0_5_9_m,pob_6_14_9_f,pob_6_14_9_m,pob_15_17_9_f,pob_15_17_9_m,pob_18_24_f,pob_18_24_m,lideres_f,lideres_m,pob_fem,pob_masc,pob_total)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ON DUPLICATE KEY UPDATE
             pob_0_5_9_f=VALUES(pob_0_5_9_f),
             pob_0_5_9_m=VALUES(pob_0_5_9_m),
@@ -246,6 +236,8 @@ function saveMonthlyPopulation(PDO $db, int $centroId, string $period, array $po
             pob_15_17_9_m=VALUES(pob_15_17_9_m),
             pob_18_24_f=VALUES(pob_18_24_f),
             pob_18_24_m=VALUES(pob_18_24_m),
+            lideres_f=VALUES(lideres_f),
+            lideres_m=VALUES(lideres_m),
             pob_fem=VALUES(pob_fem),
             pob_masc=VALUES(pob_masc),
             pob_total=VALUES(pob_total),
@@ -262,6 +254,8 @@ function saveMonthlyPopulation(PDO $db, int $centroId, string $period, array $po
         $population['pob_15_17_9_m'],
         $population['pob_18_24_f'],
         $population['pob_18_24_m'],
+        $population['lideres_f'],
+        $population['lideres_m'],
         $population['pob_fem'],
         $population['pob_masc'],
         $population['pob_total'],
@@ -274,6 +268,7 @@ function getMonthlyPopulation(PDO $db, int $centroId, string $period): array {
         'pob_6_14_9_f'=>0, 'pob_6_14_9_m'=>0,
         'pob_15_17_9_f'=>0, 'pob_15_17_9_m'=>0,
         'pob_18_24_f'=>0, 'pob_18_24_m'=>0,
+        'lideres_f'=>0, 'lideres_m'=>0,
         'pob_fem'=>0, 'pob_masc'=>0, 'pob_total'=>0,
     ];
     $st = $db->prepare('SELECT * FROM ah_centros_poblacion_mensual WHERE centro_id=? AND periodo=? LIMIT 1');
@@ -299,6 +294,8 @@ try {
         pob_0_5 INT DEFAULT 0,
         pob_6_17 INT DEFAULT 0,
         pob_18_24 INT DEFAULT 0,
+        lideres_f INT DEFAULT 0,
+        lideres_m INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_centros_base (comunidad_base),
@@ -311,6 +308,8 @@ try {
     addColIfNotExists($db, 'ah_centros', 'pob_0_5', 'INT DEFAULT 0');
     addColIfNotExists($db, 'ah_centros', 'pob_6_17', 'INT DEFAULT 0');
     addColIfNotExists($db, 'ah_centros', 'pob_18_24', 'INT DEFAULT 0');
+    addColIfNotExists($db, 'ah_centros', 'lideres_f', 'INT DEFAULT 0');
+    addColIfNotExists($db, 'ah_centros', 'lideres_m', 'INT DEFAULT 0');
 
     $db->exec("CREATE TABLE IF NOT EXISTS ah_centros_poblacion_mensual (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -324,6 +323,8 @@ try {
         pob_15_17_9_m INT NOT NULL DEFAULT 0,
         pob_18_24_f INT NOT NULL DEFAULT 0,
         pob_18_24_m INT NOT NULL DEFAULT 0,
+        lideres_f INT NOT NULL DEFAULT 0,
+        lideres_m INT NOT NULL DEFAULT 0,
         pob_fem INT NOT NULL DEFAULT 0,
         pob_masc INT NOT NULL DEFAULT 0,
         pob_total INT NOT NULL DEFAULT 0,
@@ -333,6 +334,9 @@ try {
         INDEX idx_poblacion_periodo (periodo),
         INDEX idx_poblacion_centro (centro_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    addColIfNotExists($db, 'ah_centros_poblacion_mensual', 'lideres_f', 'INT NOT NULL DEFAULT 0');
+    addColIfNotExists($db, 'ah_centros_poblacion_mensual', 'lideres_m', 'INT NOT NULL DEFAULT 0');
 
     $monthlySchemaReady = tableExists($db, 'ah_centros_poblacion_mensual');
     if (!$monthlySchemaReady) {
@@ -357,12 +361,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $id = (int)($_POST['id'] ?? 0);
             $field = (string)($_POST['campo'] ?? '');
             $value = $_POST['valor'] ?? '';
-            $allowed = ['nombre','comunidad_base','caserio','tipo','pob_total','pob_fem','pob_masc'];
+            $allowed = ['nombre','comunidad_base','caserio','tipo','pob_total','pob_fem','pob_masc','lideres_f','lideres_m'];
+
             if ($id <= 0 || !in_array($field, $allowed, true)) {
                 throw new RuntimeException('Campo no permitido o identificador inválido.');
             }
 
-            if (in_array($field, ['pob_total','pob_fem','pob_masc'], true)) {
+            if (in_array($field, ['pob_total','pob_fem','pob_masc','lideres_f','lideres_m'], true)) {
                 $value = int_clean($value);
             } elseif ($field === 'tipo') {
                 $value = normalize_tipo($value);
@@ -374,11 +379,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $st->execute([$value, $id]);
 
             $total = null;
-            if (in_array($field, ['pob_fem','pob_masc'], true)) {
-                $st = $db->prepare('SELECT pob_fem,pob_masc FROM ah_centros WHERE id=?');
+            if (in_array($field, ['pob_fem','pob_masc','lideres_f','lideres_m'], true)) {
+                $st = $db->prepare('SELECT pob_fem,pob_masc,lideres_f,lideres_m FROM ah_centros WHERE id=?');
                 $st->execute([$id]);
-                $row = $st->fetch(PDO::FETCH_ASSOC) ?: ['pob_fem'=>0,'pob_masc'=>0];
-                $total = (int)$row['pob_fem'] + (int)$row['pob_masc'];
+                $row = $st->fetch(PDO::FETCH_ASSOC) ?: ['pob_fem'=>0,'pob_masc'=>0,'lideres_f'=>0,'lideres_m'=>0];
+
+                // CORRECCIÓN: Los líderes se suman al total
+                $total = (int)$row['pob_fem'] + (int)$row['pob_masc'] + (int)$row['lideres_f'] + (int)$row['lideres_m'];
                 $db->prepare('UPDATE ah_centros SET pob_total=? WHERE id=?')->execute([$total, $id]);
             }
 
@@ -396,7 +403,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $field = (string)($_POST['campo'] ?? '');
             $allowed = [
                 'pob_0_5_9_f','pob_0_5_9_m','pob_6_14_9_f','pob_6_14_9_m',
-                'pob_15_17_9_f','pob_15_17_9_m','pob_18_24_f','pob_18_24_m'
+                'pob_15_17_9_f','pob_15_17_9_m','pob_18_24_f','pob_18_24_m',
+                'lideres_f','lideres_m'
             ];
             if ($id <= 0 || !validPeriod($period) || !in_array($field, $allowed, true)) {
                 throw new RuntimeException('Datos de actualización mensual inválidos.');
@@ -407,9 +415,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $db->prepare('INSERT IGNORE INTO ah_centros_poblacion_mensual (centro_id,periodo) VALUES (?,?)')->execute([$id,$period]);
             $db->prepare("UPDATE ah_centros_poblacion_mensual SET `{$field}`=? WHERE centro_id=? AND periodo=?")->execute([$value,$id,$period]);
             $population = getMonthlyPopulation($db, $id, $period);
+
+            // CORRECCIÓN: Femenino y Masculino solo suman niños/jóvenes, y el Total suma ambos géneros + líderes
             $population['pob_fem'] = (int)$population['pob_0_5_9_f'] + (int)$population['pob_6_14_9_f'] + (int)$population['pob_15_17_9_f'] + (int)$population['pob_18_24_f'];
             $population['pob_masc'] = (int)$population['pob_0_5_9_m'] + (int)$population['pob_6_14_9_m'] + (int)$population['pob_15_17_9_m'] + (int)$population['pob_18_24_m'];
-            $population['pob_total'] = $population['pob_fem'] + $population['pob_masc'];
+            $population['pob_total'] = $population['pob_fem'] + $population['pob_masc'] + (int)$population['lideres_f'] + (int)$population['lideres_m'];
+
             $population['pob_0_5'] = (int)$population['pob_0_5_9_f'] + (int)$population['pob_0_5_9_m'];
             $population['pob_6_17'] = (int)$population['pob_6_14_9_f'] + (int)$population['pob_6_14_9_m'] + (int)$population['pob_15_17_9_f'] + (int)$population['pob_15_17_9_m'];
             $population['pob_18_24'] = (int)$population['pob_18_24_f'] + (int)$population['pob_18_24_m'];
@@ -497,7 +508,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         $population['pob_0_5_9_f'],$population['pob_0_5_9_m'],
                         $population['pob_6_14_9_f'],$population['pob_6_14_9_m'],
                         $population['pob_15_17_9_f'],$population['pob_15_17_9_m'],
-                        $population['pob_18_24_f'],$population['pob_18_24_m']
+                        $population['pob_18_24_f'],$population['pob_18_24_m'],
+                        $population['lideres_f'],$population['lideres_m']
                     ]) > 0 || $isMonthly;
 
                     if ($hasDetail && $monthlySchemaReady) {
@@ -508,10 +520,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 } else {
                     $female = int_clean(val_any($row, ['Matricula_F','Matrícula_F','matricula_fem','femenino','mujeres','f']));
                     $male = int_clean(val_any($row, ['Matricula_M','Matrícula_M','matricula_masc','masculino','hombres','m']));
+                    $lideres_f = int_clean(val_any($row, ['lideres_f', 'lideres_fem', 'lideres_mujeres'], 0));
+                    $lideres_m = int_clean(val_any($row, ['lideres_m', 'lideres_masc', 'lideres_hombres'], 0));
+
                     $total = int_clean(val_any($row, ['Matricula','Matrícula','matricula_total','pob_total','total']));
-                    if ($total === 0 && ($female + $male) > 0) $total = $female + $male;
-                    $st = $db->prepare('UPDATE ah_centros SET pob_total=?,pob_fem=?,pob_masc=? WHERE id=?');
-                    $st->execute([$total,$female,$male,$id]);
+                    // CORRECCIÓN: Aseguramos que la importación también sume los líderes al total de matrícula
+                    if ($total === 0 && ($female + $male + $lideres_f + $lideres_m) > 0) {
+                        $total = $female + $male + $lideres_f + $lideres_m;
+                    }
+
+                    $st = $db->prepare('UPDATE ah_centros SET pob_total=?,pob_fem=?,pob_masc=?,lideres_f=?,lideres_m=? WHERE id=?');
+                    $st->execute([$total,$female,$male,$lideres_f,$lideres_m,$id]);
                 }
             }
 
@@ -571,12 +590,15 @@ try {
              COALESCE(pm.pob_15_17_9_m,0) AS pob_15_17_9_m,
              COALESCE(pm.pob_18_24_f,0) AS pob_18_24_f,
              COALESCE(pm.pob_18_24_m,0) AS pob_18_24_m,
+             COALESCE(pm.lideres_f,0) AS mensual_lideres_f,
+             COALESCE(pm.lideres_m,0) AS mensual_lideres_m,
              COALESCE(pm.pob_fem,0) AS mensual_fem,
              COALESCE(pm.pob_masc,0) AS mensual_masc,
              COALESCE(pm.pob_total,0) AS mensual_total"
         : ", NULL AS poblacion_periodo,
              0 AS pob_0_5_9_f,0 AS pob_0_5_9_m,0 AS pob_6_14_9_f,0 AS pob_6_14_9_m,
              0 AS pob_15_17_9_f,0 AS pob_15_17_9_m,0 AS pob_18_24_f,0 AS pob_18_24_m,
+             0 AS mensual_lideres_f,0 AS mensual_lideres_m,
              0 AS mensual_fem,0 AS mensual_masc,0 AS mensual_total";
 
     $sql = "SELECT c.*, {$municipalityExpr} AS municipio_vista,
@@ -601,10 +623,14 @@ foreach ($centers as $center) {
         $center['display_total'] = (int)$center['mensual_total'];
         $center['display_fem'] = (int)$center['mensual_fem'];
         $center['display_masc'] = (int)$center['mensual_masc'];
+        $center['display_lideres_f'] = (int)$center['mensual_lideres_f'];
+        $center['display_lideres_m'] = (int)$center['mensual_lideres_m'];
     } else {
         $center['display_total'] = (int)$center['pob_total'];
         $center['display_fem'] = (int)$center['pob_fem'];
         $center['display_masc'] = (int)$center['pob_masc'];
+        $center['display_lideres_f'] = (int)($center['lideres_f'] ?? 0);
+        $center['display_lideres_m'] = (int)($center['lideres_m'] ?? 0);
     }
 
     $byType[$type][] = $center;
@@ -704,9 +730,9 @@ function typeSlug(string $type): string {
         .table-heading { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:13px 16px; border-bottom:1px solid var(--border); background:#fbfcfe; }
         .table-heading strong { font-size:.92rem; }
         .table-heading span { color:var(--muted); font-size:.78rem; font-weight:700; }
-        .table-wrap { overflow:auto; max-height:66vh; }
-        table.centers-table { width:100%; border-collapse:separate; border-spacing:0; min-width:1120px; }
-        table.centers-table.demographic { min-width:1740px; }
+        .table-wrap { overflow:auto; max-height:96vh; }
+        table.centers-table { width:100%; border-collapse:separate; border-spacing:0; min-width:1300px; }
+        table.centers-table.demographic { min-width:1860px; }
         .centers-table th, .centers-table td { border-bottom:1px solid #e9eef4; border-right:1px solid #edf1f5; padding:10px 11px; vertical-align:middle; background:white; }
         .centers-table th:last-child, .centers-table td:last-child { border-right:0; }
         .centers-table thead th { position:sticky; top:0; z-index:8; background:#eef3f8; color:#3e4d62; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; font-weight:900; text-align:left; }
@@ -734,6 +760,11 @@ function typeSlug(string $type): string {
         .saved-field { animation:savedPulse .9s ease; }
         @keyframes savedPulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)} 100%{box-shadow:0 0 0 7px rgba(34,197,94,0)} }
 
+        /* Nuevas columnas: Líderes Comunitarios */
+        .lider-input { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+        .lider-input:focus { border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.15); }
+        .lider-header { background:#fef3c7 !important; color:#92400e !important; }
+
         @media (max-width:1250px) {
             .metrics-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
             .import-grid { grid-template-columns:1fr; }
@@ -745,6 +776,53 @@ function typeSlug(string $type): string {
             .metrics-grid, .monthly-toolbar, .filter-panel { grid-template-columns:1fr; }
             .page-head { flex-direction:column; }
         }
+
+        /* =======================================================
+           NUEVAS COLUMNAS: LÍDERES F Y M (Clases dinámicas)
+           ======================================================= */
+        .centros-table { min-width: 1680px !important; }
+        .centros-drawer .centros-table { min-width: 1100px !important; }
+
+        .centros-table .col-type { width: 110px !important; min-width: 110px !important; max-width: 110px !important; }
+        .centros-table .col-center { width: 260px !important; min-width: 260px !important; max-width: 260px !important; }
+        .centros-table .col-community { width: 150px !important; min-width: 150px !important; max-width: 150px !important; }
+        .centros-table .col-caserio { width: 160px !important; min-width: 160px !important; max-width: 160px !important; }
+        .centros-table .col-prog { width: 140px !important; min-width: 140px !important; max-width: 140px !important; text-align:center !important; }
+        .centros-table .col-cumpl { width: 110px !important; min-width: 110px !important; max-width: 110px !important; text-align:center !important; }
+        .centros-table .col-age { width: 65px !important; min-width: 65px !important; max-width: 65px !important; text-align:center !important; }
+        .centros-table .col-lideres { width: 75px !important; min-width: 75px !important; max-width: 75px !important; text-align:center !important; }
+        .centros-table .col-score { width: 120px !important; min-width: 120px !important; max-width: 120px !important; text-align:center !important; }
+        .centros-table .col-pct { width: 80px !important; min-width: 80px !important; max-width: 80px !important; text-align:center !important; }
+
+        .centros-drawer .centros-table.without-ages .col-type { width: 8% !important; }
+        .centros-drawer .centros-table.without-ages .col-center { width: 22% !important; }
+        .centros-drawer .centros-table.without-ages .col-community { width: 12% !important; }
+        .centros-drawer .centros-table.without-ages .col-caserio { width: 12% !important; }
+        .centros-drawer .centros-table.without-ages .col-prog { width: 10% !important; }
+        .centros-drawer .centros-table.without-ages .col-cumpl { width: 8% !important; }
+        .centros-drawer .centros-table.without-ages .col-lideres { width: 7% !important; }
+        .centros-drawer .centros-table.without-ages .col-score { width: 8% !important; }
+        .centros-drawer .centros-table.without-ages .col-pct { width: 5% !important; }
+
+        .centros-drawer .centros-table.with-ages .col-type { width: 7% !important; }
+        .centros-drawer .centros-table.with-ages .col-center { width: 18% !important; }
+        .centros-drawer .centros-table.with-ages .col-community { width: 10% !important; }
+        .centros-drawer .centros-table.with-ages .col-caserio { width: 10% !important; }
+        .centros-drawer .centros-table.with-ages .col-prog { width: 9% !important; }
+        .centros-drawer .centros-table.with-ages .col-cumpl { width: 8% !important; }
+        .centros-drawer .centros-table.with-ages .col-age { width: 4.5% !important; }
+        .centros-drawer .centros-table.with-ages .col-lideres { width: 6% !important; }
+        .centros-drawer .centros-table.with-ages .col-score { width: 6.5% !important; }
+        .centros-drawer .centros-table.with-ages .col-pct { width: 5% !important; }
+
+        .centro-lideres-input {
+            width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+            height: 38px !important; text-align: center !important; font-weight: 900 !important;
+            padding: 6px !important; font-size: .95rem !important;
+            background: #fffbeb !important; border: 1px solid #fcd34d !important; color: #92400e !important;
+            border-radius: 6px !important;
+        }
+        .centro-lideres-input:focus { border-color: #f59e0b !important; box-shadow: 0 0 0 3px rgba(245,158,11,0.15) !important; outline: none; }
     </style>
 </head>
 <body>
@@ -806,8 +884,8 @@ function typeSlug(string $type): string {
             <p class="monthly-note">
                 <strong>Columnas requeridas:</strong> Tipo, Nombre_Centro_Educativo, Municipio, Comunidad_Base, Caserio,
                 pob_0_5.9_f, pob_0_5.9_m, pob_6_14.9_f, pob_6_14.9_m,
-                pob_15_17.9_f, pob_15_17.9_m, pob_18_24_f y pob_18_24_m.
-                La columna <strong>Matrícula / Pob.</strong> se calcula automáticamente como la suma de los ocho campos.
+                pob_15_17.9_f, pob_15_17.9_m, pob_18_24_f, pob_18_24_m, lideres_f y lideres_m.
+                La columna <strong>Matrícula / Pob.</strong> se calcula automáticamente como la suma de los campos anteriores.
             </p>
         </div>
     </section>
@@ -874,13 +952,15 @@ function typeSlug(string $type): string {
                             <th style="width:320px">Ubicación y equipo</th>
                             <th class="center" style="width:110px">Femenino</th>
                             <th class="center" style="width:110px">Masculino</th>
+                            <th class="center" style="width:85px">Líd. F</th>
+                            <th class="center" style="width:85px">Líd. M</th>
                             <th class="center" style="width:130px">Matrícula / Pob.</th>
                             <th class="center" style="width:70px">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
                     <?php if (empty($byType[$typeKey])): ?>
-                        <tr class="empty"><td colspan="7" class="empty-row"><i class="fa-solid fa-folder-open"></i><br>No hay registros.</td></tr>
+                        <tr class="empty"><td colspan="9" class="empty-row"><i class="fa-solid fa-folder-open"></i><br>No hay registros.</td></tr>
                     <?php else: foreach ($byType[$typeKey] as $center):
                         $search = mb_strtolower(trim(
                             ($center['nombre'] ?? '') . ' ' . ($center['comunidad_base'] ?? '') . ' ' .
@@ -906,6 +986,8 @@ function typeSlug(string $type): string {
                             </td>
                             <td class="center"><input type="number" min="0" class="num-input legacy-input" data-field="pob_fem" data-id="<?php echo (int)$center['id']; ?>" value="<?php echo (int)$center['display_fem']; ?>"></td>
                             <td class="center"><input type="number" min="0" class="num-input legacy-input" data-field="pob_masc" data-id="<?php echo (int)$center['id']; ?>" value="<?php echo (int)$center['display_masc']; ?>"></td>
+                            <td class="center"><input type="number" min="0" class="num-input legacy-input lider-input" data-field="lideres_f" data-id="<?php echo (int)$center['id']; ?>" value="<?php echo (int)$center['display_lideres_f']; ?>"></td>
+                            <td class="center"><input type="number" min="0" class="num-input legacy-input lider-input" data-field="lideres_m" data-id="<?php echo (int)$center['id']; ?>" value="<?php echo (int)$center['display_lideres_m']; ?>"></td>
                             <td class="center"><span class="total-display row-total"><?php echo number_format((int)$center['display_total']); ?></span></td>
                             <td class="center"><button type="button" class="btn-delete" data-id="<?php echo (int)$center['id']; ?>"><i class="fa-solid fa-trash-can"></i></button></td>
                         </tr>
@@ -916,6 +998,8 @@ function typeSlug(string $type): string {
                             <td colspan="3">Totales visibles · <span data-total-field="centers">0</span> centros</td>
                             <td class="center" data-total-field="pob_fem">0</td>
                             <td class="center" data-total-field="pob_masc">0</td>
+                            <td class="center" data-total-field="lideres_f">0</td>
+                            <td class="center" data-total-field="lideres_m">0</td>
                             <td class="center" data-total-field="pob_total">0</td>
                             <td></td>
                         </tr>
@@ -932,16 +1016,17 @@ function typeSlug(string $type): string {
                             <th colspan="2" class="center">6–14.9 años</th>
                             <th colspan="2" class="center">15–17.9 años</th>
                             <th colspan="2" class="center">18–24 años</th>
+                            <th colspan="2" class="center lider-header">Líderes Com.</th>
                             <th rowspan="2" class="center" style="width:135px">Matrícula / Pob.</th>
                             <th rowspan="2" class="center" style="width:70px">Acción</th>
                         </tr>
                         <tr>
-                            <th>F</th><th>M</th><th>F</th><th>M</th><th>F</th><th>M</th><th>F</th><th>M</th>
+                            <th>F</th><th>M</th><th>F</th><th>M</th><th>F</th><th>M</th><th>F</th><th>M</th><th class="lider-header">F</th><th class="lider-header">M</th>
                         </tr>
                     </thead>
                     <tbody>
                     <?php if (empty($byType[$typeKey])): ?>
-                        <tr class="empty"><td colspan="13" class="empty-row"><i class="fa-solid fa-folder-open"></i><br>No hay registros.</td></tr>
+                        <tr class="empty"><td colspan="15" class="empty-row"><i class="fa-solid fa-folder-open"></i><br>No hay registros.</td></tr>
                     <?php else: foreach ($byType[$typeKey] as $center):
                         $search = mb_strtolower(trim(
                             ($center['nombre'] ?? '') . ' ' . ($center['comunidad_base'] ?? '') . ' ' .
@@ -972,6 +1057,8 @@ function typeSlug(string $type): string {
                             <?php foreach (['pob_0_5_9_f','pob_0_5_9_m','pob_6_14_9_f','pob_6_14_9_m','pob_15_17_9_f','pob_15_17_9_m','pob_18_24_f','pob_18_24_m'] as $field): ?>
                                 <td class="center"><input type="number" min="0" class="num-input monthly-input" data-field="<?php echo h($field); ?>" data-id="<?php echo (int)$center['id']; ?>" value="<?php echo (int)$center[$field]; ?>"></td>
                             <?php endforeach; ?>
+                            <td class="center"><input type="number" min="0" class="num-input monthly-input lider-input" data-field="lideres_f" data-id="<?php echo (int)$center['id']; ?>" value="<?php echo (int)$center['display_lideres_f']; ?>"></td>
+                            <td class="center"><input type="number" min="0" class="num-input monthly-input lider-input" data-field="lideres_m" data-id="<?php echo (int)$center['id']; ?>" value="<?php echo (int)$center['display_lideres_m']; ?>"></td>
                             <td class="center"><span class="total-display row-total"><?php echo number_format((int)$center['display_total']); ?></span></td>
                             <td class="center"><button type="button" class="btn-delete" data-id="<?php echo (int)$center['id']; ?>"><i class="fa-solid fa-trash-can"></i></button></td>
                         </tr>
@@ -988,6 +1075,8 @@ function typeSlug(string $type): string {
                             <td class="center" data-total-field="pob_15_17_9_m">0</td>
                             <td class="center" data-total-field="pob_18_24_f">0</td>
                             <td class="center" data-total-field="pob_18_24_m">0</td>
+                            <td class="center" data-total-field="lideres_f">0</td>
+                            <td class="center" data-total-field="lideres_m">0</td>
                             <td class="center" data-total-field="pob_total">0</td>
                             <td></td>
                         </tr>
@@ -1152,6 +1241,7 @@ function numberValue(element) {
     return Math.max(0, parseInt(element?.value || '0', 10) || 0);
 }
 
+// CORRECCIÓN: Quitamos el ":not" para que JavaScript ahora sí sume a los líderes en el total visual de la fila
 function recalculateRowTotal(row) {
     const monthlyInputs = row.querySelectorAll('.monthly-input');
     let total = 0;
@@ -1160,7 +1250,9 @@ function recalculateRowTotal(row) {
     } else {
         const female = row.querySelector('[data-field="pob_fem"]');
         const male = row.querySelector('[data-field="pob_masc"]');
-        total = numberValue(female) + numberValue(male);
+        const lidF = row.querySelector('[data-field="lideres_f"]');
+        const lidM = row.querySelector('[data-field="lideres_m"]');
+        total = numberValue(female) + numberValue(male) + numberValue(lidF) + numberValue(lidM);
     }
     row.dataset.total = String(total);
     const display = row.querySelector('.row-total');
@@ -1173,10 +1265,13 @@ function recalculateTableFooter(section) {
     const table = section.querySelector('table.centers-table');
     if (!table) return;
     const rows = [...table.querySelectorAll('tbody .center-row')].filter(row => row.style.display !== 'none');
-    const totals = {centers:rows.length, pob_total:0, pob_fem:0, pob_masc:0};
+    const totals = {centers:rows.length, pob_total:0, pob_fem:0, pob_masc:0, lideres_f:0, lideres_m:0};
+
+    // CORRECCIÓN: Los líderes ahora son tomados en cuenta en el conteo automático de todas las sumatorias
     const monthlyFields = [
         'pob_0_5_9_f','pob_0_5_9_m','pob_6_14_9_f','pob_6_14_9_m',
-        'pob_15_17_9_f','pob_15_17_9_m','pob_18_24_f','pob_18_24_m'
+        'pob_15_17_9_f','pob_15_17_9_m','pob_18_24_f','pob_18_24_m',
+        'lideres_f', 'lideres_m'
     ];
     monthlyFields.forEach(field => totals[field] = 0);
 
@@ -1191,6 +1286,8 @@ function recalculateTableFooter(section) {
         } else {
             totals.pob_fem += numberValue(row.querySelector('[data-field="pob_fem"]'));
             totals.pob_masc += numberValue(row.querySelector('[data-field="pob_masc"]'));
+            totals.lideres_f += numberValue(row.querySelector('[data-field="lideres_f"]'));
+            totals.lideres_m += numberValue(row.querySelector('[data-field="lideres_m"]'));
         }
     });
 

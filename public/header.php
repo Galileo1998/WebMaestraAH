@@ -14,8 +14,8 @@ $db = $database->getConnection();
 // =======================================================
 $menu_items = [];
 try {
-    $query_menu = "SELECT label, url FROM menu_items ORDER BY id ASC"; 
-    
+    $query_menu = "SELECT label, url FROM menu_items ORDER BY id ASC";
+
     $stmt_menu = $db->query($query_menu);
     if ($stmt_menu) {
         $menu_items = $stmt_menu->fetchAll(PDO::FETCH_ASSOC);
@@ -55,14 +55,14 @@ if (!empty($current_slug)) {
     $stmt_og = $db->prepare("SELECT title, meta_description, meta_image FROM pages WHERE slug = :slug LIMIT 1");
     $stmt_og->execute(['slug' => $current_slug]);
     $page_og = $stmt_og->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($page_og) {
         $og_title = $page_og['title'] . " | Acción Honduras";
-        
+
         if (!empty($page_og['meta_description'])) {
             $og_description = $page_og['meta_description'];
         }
-        
+
         if (!empty($page_og['meta_image'])) {
             $clean_page_img = ltrim($page_og['meta_image'], '/');
             $og_image = $base_url . "/" . $clean_page_img;
@@ -72,7 +72,7 @@ if (!empty($current_slug)) {
     $stmt_og = $db->prepare("SELECT name, description, logo_url FROM partners WHERE id = :id LIMIT 1");
     $stmt_og->execute(['id' => (int)$_GET['socio_id']]);
     $partner_og = $stmt_og->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($partner_og) {
         $og_title = "Impacto y Proyectos con " . $partner_og['name'] . " | Acción Honduras";
         $og_description = !empty($partner_og['description']) ? $partner_og['description'] : "Conoce nuestras zonas de intervención junto a " . $partner_og['name'];
@@ -224,7 +224,7 @@ if (rtrim($current_url, '/') !== rtrim($base_url, '/')) {
     <header class="main-header" style="background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; width: 100%; z-index: 99999;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
             <div class="header-content" style="display: flex; justify-content: space-between; align-items: center; height: 80px; width: 100%; position: relative;">
-                
+
                 <a href="/" class="logo-link" aria-label="Acción Honduras, inicio" style="display: flex; align-items: center;">
                     <img src="/uploads/images/logo.png" alt="Acción Honduras" width="65" height="50" decoding="async" class="logo" style="max-height: 50px; width: auto;">
                 </a>
@@ -235,13 +235,13 @@ if (rtrim($current_url, '/') !== rtrim($base_url, '/')) {
                         <a href="/?slug=noticia" style="color: #1e293b;">Noticias</a>
                     <?php else: ?>
                         <?php foreach($menu_items as $item): ?>
-                            <?php 
+                            <?php
                                 $item_slug = str_replace('?slug=', '', $item['url']);
-                                $item_slug = str_replace('index.php', '', $item_slug); 
+                                $item_slug = str_replace('index.php', '', $item_slug);
                                 $is_active = ($current_slug === $item_slug);
-                                $color = $is_active ? '#34859B' : '#1e293b'; 
+                                $color = $is_active ? '#34859B' : '#1e293b';
                             ?>
-                            <a href="<?php echo htmlspecialchars($item['url']); ?>" 
+                            <a href="<?php echo htmlspecialchars($item['url']); ?>"
                                class="<?php echo $is_active ? 'active' : ''; ?>"
                                style="color: <?php echo $color; ?>;">
                                 <?php echo htmlspecialchars($item['label']); ?>
@@ -250,12 +250,12 @@ if (rtrim($current_url, '/') !== rtrim($base_url, '/')) {
                     <?php endif; ?>
                 <ul class="nav-menu">
 
-                    <?php 
+                    <?php
                     // Asegúrate de que la sesión esté iniciada al principio del archivo
                     if (session_status() === PHP_SESSION_NONE) { session_start(); }
-                
+
                     // Condicional: Solo mostrar si el usuario ha iniciado sesión
-                    if (isset($_SESSION['user_id'])): 
+                    if (isset($_SESSION['user_id'])):
                     ?>
                         <li>
                             <a href="logout.php" style="color: #ef4444; font-weight: bold;">
@@ -263,7 +263,7 @@ if (rtrim($current_url, '/') !== rtrim($base_url, '/')) {
                             </a>
                         </li>
                     <?php else: ?>
-                 
+
                     <?php endif; ?>
                 </ul>
                                 </nav>
@@ -315,7 +315,7 @@ if (rtrim($current_url, '/') !== rtrim($base_url, '/')) {
         }
 
         .public-breadcrumbs { background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-        .public-breadcrumbs ol { max-width: 1200px; margin: 0 auto; padding: 10px 20px; list-style: none; display: flex; align-items: center; gap: 8px; font-size: 0.86rem; color: #64748b; overflow-x: auto; white-space: nowrap; }
+        .public-breadcrumbs ol { max-width: 1200px; margin: 0 auto; padding: 10px 20px; list-style: none; display: none; align-items: center; gap: 8px; font-size: 0.86rem; color: #64748b; overflow-x: auto; white-space: nowrap; }
         .public-breadcrumbs li { display: inline-flex; align-items: center; gap: 8px; }
         .public-breadcrumbs a { color: #34859B; text-decoration: none; font-weight: 700; }
         .public-breadcrumbs a:hover { text-decoration: underline; }
@@ -355,7 +355,7 @@ if (rtrim($current_url, '/') !== rtrim($base_url, '/')) {
             }
 
             .ah-impact-label, .ah-badge, .ah-pillar-tag { font-size: 0.875rem !important; }
-            
+
             .main-nav {
                 position: fixed;
                 top: 0;
@@ -400,7 +400,7 @@ if (rtrim($current_url, '/') !== rtrim($base_url, '/')) {
                 pubToggleBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const isOpen = pubMainNav.classList.toggle('active');
-                    
+
                     if (isOpen) {
                         pubMenuIcon.className = 'fa-solid fa-xmark';
                         pubToggleBtn.setAttribute('aria-label', 'Cerrar menú');
