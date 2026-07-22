@@ -1322,6 +1322,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 /* Evita calcular el diseño de subtablas que aún están fuera de pantalla. */
 .subgrid-wrapper{content-visibility:auto;contain-intrinsic-size:400px}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
+.stage-main-row.stage-collapsible{cursor:pointer}.stage-main-row.stage-collapsible:hover td{background:#f0f9ff}.stage-main-row.stage-open td{background:#e0f2fe}.stage-main-row.stage-collapsible .stage-code::after{content:' Abrir';display:block;font-size:.62rem;color:#0284c7;margin-top:4px}.stage-main-row.stage-open .stage-code::after{content:' Cerrar'}
 .monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
 </style>
 </head>
@@ -2476,7 +2477,14 @@ function buildEtapasTable(taskData){
 
     $('#tabla_etapas_body').html(html);
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
-    scheduleStageSubgrids(etapas.length);
+    $('#tabla_etapas_body .stage-main-row').each(function(index){
+        $(this).addClass('stage-collapsible').attr({'role':'button','tabindex':'0'}).on('click keydown',function(event){
+            if(event.type==='keydown'&&event.key!=='Enter'&&event.key!==' ')return;
+            if($(event.target).closest('input,button,a,.custom-multiselect').length)return;
+            event.preventDefault();toggleStagePanel(index);
+        });
+        $(this).next('tr').hide().find(`#subgrid-${index}`).empty();
+    });
 }
 
 function loadStageSubgrid(index){
@@ -2488,10 +2496,15 @@ function loadStageSubgrid(index){
     buildSubgrid(index,resps,unis);
 }
 
-function scheduleStageSubgrids(total,index=0){
-    if(index>=total)return;
-    const run=()=>{if(!modalEtapasBuilt)return;loadStageSubgrid(index);setTimeout(()=>scheduleStageSubgrids(total,index+1),0);};
-    if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:350});else setTimeout(run,20);
+function toggleStagePanel(index){
+    const mainRows=$('#tabla_etapas_body .stage-main-row'),target=mainRows.eq(index),detail=target.next('tr'),cont=$(`#subgrid-${index}`),wasOpen=target.hasClass('stage-open');
+    mainRows.removeClass('stage-open').each(function(){$(this).next('tr').hide();});
+    if(wasOpen)return;
+    target.addClass('stage-open');detail.show();
+    if(cont.attr('data-built')!=='1'){
+        cont.html('<div style="padding:18px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando programación...</div>');
+        requestAnimationFrame(()=>loadStageSubgrid(index));
+    }
 }
 
 function buildSubgrid(index,resps,unidades){
