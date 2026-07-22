@@ -1315,6 +1315,8 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 
 /* Evita calcular el diseño de subtablas que aún están fuera de pantalla. */
 .subgrid-wrapper{content-visibility:auto;contain-intrinsic-size:400px}
+.data-card.filtered-out,.data-card.paged-out{display:none!important}
+.monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
 </style>
 </head>
 <body>
@@ -1381,6 +1383,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
         </div>
     <?php endforeach; endif; ?>
     </div>
+    <div id="monitor-pagination" class="monitor-pagination" aria-label="Paginación de actividades"></div>
 </main>
 
 <div id="updateModal" class="modal-overlay"><div class="modal-content">
@@ -1796,11 +1799,14 @@ function updateCardVisuals() {
 }
 
 function updateDynamicMetrics(metrics){
-    if(!metrics){metrics={total:0,comp:0,proc:0,sum:0,count:0};document.querySelectorAll('.data-card:not([hidden])').forEach(card=>{const est=card.dataset.est||'',mo=parseFloat(card.dataset.metap)||0,ma=parseFloat(card.dataset.alcp)||0;metrics.total++;if(est==='Completado')metrics.comp++;if(est==='En Proceso')metrics.proc++;if(mo>0){metrics.sum+=Math.min((ma/mo)*100,100);metrics.count++;}});}
+    if(!metrics){metrics={total:0,comp:0,proc:0,sum:0,count:0};document.querySelectorAll('.data-card:not(.filtered-out)').forEach(card=>{const est=card.dataset.est||'',mo=parseFloat(card.dataset.metap)||0,ma=parseFloat(card.dataset.alcp)||0;metrics.total++;if(est==='Completado')metrics.comp++;if(est==='En Proceso')metrics.proc++;if(mo>0){metrics.sum+=Math.min((ma/mo)*100,100);metrics.count++;}});}
     $('#count-total').text(metrics.total);$('#count-comp').text(metrics.comp);$('#count-proc').text(metrics.proc);$('#count-rend').text(metrics.count?(metrics.sum/metrics.count).toFixed(1)+'%':'0%');
 }
 function normalizeFilterText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_');}
 let monitorSearchTouched = false;
+let monitorPage=1;
+const monitorPageSize=20;
+let monitorMatchedCards=[];
 function getSafeMonitorSearch(){
     const $search = $('#filter-search');
     let value = String($search.val() || '').trim();
@@ -1810,17 +1816,35 @@ function getSafeMonitorSearch(){
     }
     return value.toLowerCase();
 }
-function applySmartFilters(){
+function renderMonitorPage(){
+    const total=monitorMatchedCards.length,pages=Math.max(1,Math.ceil(total/monitorPageSize));
+    monitorPage=Math.min(Math.max(1,monitorPage),pages);
+    const start=(monitorPage-1)*monitorPageSize,end=start+monitorPageSize;
+    monitorMatchedCards.forEach((card,index)=>card.classList.toggle('paged-out',index<start||index>=end));
+    const host=document.getElementById('monitor-pagination');
+    if(!host)return;
+    if(total<=monitorPageSize){host.innerHTML=total?`<span class="monitor-pagination-info">Mostrando ${total} actividad${total===1?'':'es'}</span>`:'';return;}
+    let html=`<button type="button" data-page="${monitorPage-1}" ${monitorPage===1?'disabled':''}>‹ Anterior</button>`;
+    const from=Math.max(1,monitorPage-2),to=Math.min(pages,monitorPage+2);
+    for(let p=from;p<=to;p++)html+=`<button type="button" data-page="${p}" class="${p===monitorPage?'active':''}">${p}</button>`;
+    html+=`<button type="button" data-page="${monitorPage+1}" ${monitorPage===pages?'disabled':''}>Siguiente ›</button><span class="monitor-pagination-info">${start+1}-${Math.min(end,total)} de ${total}</span>`;
+    host.innerHTML=html;
+}
+function applySmartFilters(resetPage=true){
     const search=getSafeMonitorSearch(),filterRaw=$('#filter-prog').val()||'',tec=$('#filter-tec').val(),estFilter=$('#filter-est').val(),hideAdmin=$('#toggle-admin').is(':checked'),hideZero=$('#toggle-zero').is(':checked'),onlyMain=$('#toggle-main-progs').is(':checked');
     const months=Array.from(document.querySelectorAll('.toggle-month:checked'),el=>el.value),parts=filterRaw.split(':'),filterType=parts.length>1?parts[0]:'',filterValue=normalizeFilterText(parts.length>1?parts.slice(1).join(':'):filterRaw),metrics={total:0,comp:0,proc:0,sum:0,count:0};
-    document.querySelectorAll('.data-card').forEach(card=>{const d=card.dataset,prog=normalizeFilterText(d.prog||''),sec=normalizeFilterText(d.sec||''),meta=parseFloat(d.metap)||0,meses=String(d.meses||'').split(',').filter(Boolean),text=card.dataset.search||card.textContent.toLowerCase();if(!card.dataset.search)card.dataset.search=text;let matchCategory=true;if(filterType==='programa')matchCategory=prog.includes(filterValue);else if(filterType==='sector')matchCategory=sec.includes(filterValue);else if(filterValue)matchCategory=prog.includes(filterValue)||sec.includes(filterValue);const ok=(search===''||text.includes(search))&&matchCategory&&(tec===''||d.tec===tec)&&(estFilter===''||d.est===estFilter)&&(filterType==='sector'||!hideAdmin||(!sec.includes('z_administracion')&&!sec.includes('z_gastos')&&!sec.includes('administra')))&&(!hideZero||meta>0)&&(!(onlyMain&&!filterRaw)||prog.includes('crecer')||prog.includes('redes')||prog.includes('tejiendo'))&&(months.length===0||months.some(m=>meses.includes(m)));card.hidden=!ok;if(ok){metrics.total++;if(d.est==='Completado')metrics.comp++;if(d.est==='En Proceso')metrics.proc++;if(meta>0){metrics.sum+=Math.min(((parseFloat(d.alcp)||0)/meta)*100,100);metrics.count++;}}});
+    monitorMatchedCards=[];
+    document.querySelectorAll('.data-card').forEach(card=>{const d=card.dataset,prog=normalizeFilterText(d.prog||''),sec=normalizeFilterText(d.sec||''),meta=parseFloat(d.metap)||0,meses=String(d.meses||'').split(',').filter(Boolean),text=card.dataset.search||card.textContent.toLowerCase();if(!card.dataset.search)card.dataset.search=text;let matchCategory=true;if(filterType==='programa')matchCategory=prog.includes(filterValue);else if(filterType==='sector')matchCategory=sec.includes(filterValue);else if(filterValue)matchCategory=prog.includes(filterValue)||sec.includes(filterValue);const ok=(search===''||text.includes(search))&&matchCategory&&(tec===''||d.tec===tec)&&(estFilter===''||d.est===estFilter)&&(filterType==='sector'||!hideAdmin||(!sec.includes('z_administracion')&&!sec.includes('z_gastos')&&!sec.includes('administra')))&&(!hideZero||meta>0)&&(!(onlyMain&&!filterRaw)||prog.includes('crecer')||prog.includes('redes')||prog.includes('tejiendo'))&&(months.length===0||months.some(m=>meses.includes(m)));card.classList.toggle('filtered-out',!ok);if(ok){monitorMatchedCards.push(card);metrics.total++;if(d.est==='Completado')metrics.comp++;if(d.est==='En Proceso')metrics.proc++;if(meta>0){metrics.sum+=Math.min(((parseFloat(d.alcp)||0)/meta)*100,100);metrics.count++;}}});
+    if(resetPage)monitorPage=1;
+    renderMonitorPage();
     updateDynamicMetrics(metrics);
 }
 $(document).ready(function(){const monthKeys=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];const currentMonthKey=monthKeys[new Date().getMonth()];const $search=$('#filter-search');
     $search.val('').attr({'autocomplete':'new-password','readonly':'readonly'});
     $search.on('pointerdown focus',function(){this.removeAttribute('readonly');});
     $search.on('keydown paste',function(){monitorSearchTouched=true;});
-    $search.on('input',function(e){if(e.originalEvent && e.originalEvent.isTrusted){monitorSearchTouched=true;} applySmartFilters();});
+    let searchTimer=null;
+    $search.on('input',function(e){if(e.originalEvent&&e.originalEvent.isTrusted)monitorSearchTouched=true;clearTimeout(searchTimer);searchTimer=setTimeout(()=>applySmartFilters(true),180);});
     $('#filter-prog').val('programa:crecer');$('#filter-tec,#filter-est').val('');
     $('.toggle-month').prop('checked',false).closest('label').removeClass('active');
     $(`.toggle-month[value="${currentMonthKey}"]`).prop('checked',true).closest('label').addClass('active');
@@ -1830,6 +1854,7 @@ $(document).ready(function(){const monthKeys=['jan','feb','mar','apr','may','jun
     $('#toggle-admin,#toggle-zero,#toggle-main-progs').on('change',function(){$(this).closest('label').toggleClass('active-toggle',$(this).is(':checked'));applySmartFilters();});
     $('.toggle-month').on('change',function(){$(this).closest('label').toggleClass('active',$(this).is(':checked'));applySmartFilters();});
     $('#btn-show-all').on('click',function(){monitorSearchTouched=false;$('#toggle-admin,#toggle-zero,#toggle-main-progs').prop('checked',false).closest('label').removeClass('active-toggle');$('.toggle-month').prop('checked',false).closest('label').removeClass('active');$search.val('');$('#filter-prog,#filter-tec,#filter-est').val('');applySmartFilters();});
+    $('#monitor-pagination').on('click','button[data-page]',function(){if(this.disabled)return;monitorPage=parseInt(this.dataset.page,10)||1;renderMonitorPage();document.getElementById('task-container').scrollIntoView({behavior:'smooth',block:'start'});});
     applySmartFilters();
 });
 function getFechaMaximaEtapa(index){let d=new Date(),y=d.getFullYear(),m=d.getMonth();if(index===0)return `${y}-${String(m+1).padStart(2,'0')}-03`;if(index===1)return `${y}-${String(m+1).padStart(2,'0')}-06`;if(index===2)return `${y}-${String(m+1).padStart(2,'0')}-20`;let last=new Date(y,m+1,0).getDate();return `${y}-${String(m+1).padStart(2,'0')}-${String(last).padStart(2,'0')}`;}
