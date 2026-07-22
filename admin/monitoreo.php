@@ -1969,8 +1969,10 @@ function getUnidadTargetPopulation(c, unidad) {
 // PARAMETRO KEY EN OPTIONSCHECKBOXES
 function optionsCheckboxes(options,selected,name,index,type,isMain=false, key=''){
     let panelClass=`panel-${type}-box`,selectedArr=Array.isArray(selected)?selected:(selected?[selected]:[]);
-    let html=`<div class="custom-multiselect ${panelClass}" data-index="${index}" data-type="${type}" data-name="${escHtml(name)}"><div class="multiselect-select-box" draggable="true" ondragstart="dragFillStart(event,this)" ondragenter="dragFillOver(event,this)" ondragover="dragFillOver(event,this)" ondragleave="dragFillLeave(this)" ondrop="dragFillDrop(event,this)" onclick="event.stopPropagation();toggleDropdownPanel(this)"><span class="multi-label">Seleccione...</span><span class="fill-drag-handle" title="Arrastrar este valor hacia otro combo"><i class="fa-solid fa-grip-vertical"></i></span></div><div class="multiselect-dropdown-panel" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()">`;
-    options.forEach(v=>{
+    const lazyOptions=type==='verific_sub'||type==='lugar_sub';
+    const renderedOptions=lazyOptions?selectedArr:options;
+    let html=`<div class="custom-multiselect ${panelClass}" data-index="${index}" data-type="${type}" data-name="${escHtml(name)}"><div class="multiselect-select-box" draggable="true" ondragstart="dragFillStart(event,this)" ondragenter="dragFillOver(event,this)" ondragover="dragFillOver(event,this)" ondragleave="dragFillLeave(this)" ondrop="dragFillDrop(event,this)" onclick="event.stopPropagation();toggleDropdownPanel(this)"><span class="multi-label">Seleccione...</span><span class="fill-drag-handle" title="Arrastrar este valor hacia otro combo"><i class="fa-solid fa-grip-vertical"></i></span></div><div class="multiselect-dropdown-panel" data-lazy-options="${lazyOptions?'1':'0'}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()">`;
+    renderedOptions.forEach(v=>{
         let chk=selectedArr.includes(v)?'checked':'';
         html+=`<label class="multiselect-option" onclick="event.stopPropagation()"><input type="checkbox" name="${name}" value="${escHtml(v)}" ${chk}> ${escHtml(v)}</label>`;
     });
@@ -1978,8 +1980,21 @@ function optionsCheckboxes(options,selected,name,index,type,isMain=false, key=''
     return html;
 }
 
+function hydrateLazyOptions(panel){
+    if(panel.attr('data-lazy-options')!=='1')return;
+    panel.attr('data-lazy-options','0');
+    const ms=panel.closest('.custom-multiselect'),type=ms.data('type'),index=Number(ms.data('index'));
+    const currentProg=currentTaskData?`${currentTaskData.programa||''} ${currentTaskData.sector||''}`:'';
+    const options=type==='verific_sub'?getFilteredCatalog(masterVerificacionesRaw,currentProg,`E-${index+1}`):masterLugares;
+    const existing=new Set(panel.find('input[type="checkbox"]').map(function(){return this.value;}).get());
+    let html='';
+    options.forEach(v=>{if(!existing.has(String(v)))html+=`<label class="multiselect-option" onclick="event.stopPropagation()"><input type="checkbox" name="${escHtml(ms.data('name')||'')}" value="${escHtml(v)}"> ${escHtml(v)}</label>`;});
+    panel.find('.multiselect-add-new-btn').before(html);
+}
+
 function toggleDropdownPanel(box){
     let panel=$(box).next('.multiselect-dropdown-panel');
+    hydrateLazyOptions(panel);
     let isVisible=panel.is(':visible');
     $('.multiselect-dropdown-panel').hide();
     if(!isVisible){
@@ -2456,23 +2471,27 @@ function buildEtapasTable(taskData){
         let rowUnis = [...new Set([...filteredUnis, ...unis])];
 
         const savedJson=JSON.stringify(window.savedInvData[i]||{});
-        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"><input type="hidden" name="etapa_involucrados_json[]" data-etapa-json="${i}" value="${escHtml(savedJson)}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" data-built="0"><div style="padding:12px;text-align:center"><button type="button" class="btn-action" onclick="loadStageSubgrid(${i},this)"><i class="fa-solid fa-table-list"></i> Mostrar programación de esta etapa</button></div></div></td></tr>`;
+        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"><input type="hidden" name="etapa_involucrados_json[]" data-etapa-json="${i}" value="${escHtml(savedJson)}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" data-built="0"><div style="padding:12px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando programación...</div></div></td></tr>`;
     });
 
     $('#tabla_etapas_body').html(html);
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
+    scheduleStageSubgrids(etapas.length);
 }
 
-function loadStageSubgrid(index,button){
+function loadStageSubgrid(index){
     const cont=$(`#subgrid-${index}`);
     if(cont.attr('data-built')==='1')return;
     cont.attr('data-built','1');
-    if(button)$(button).prop('disabled',true).html('<i class="fa-solid fa-spinner fa-spin"></i> Cargando...');
-    requestAnimationFrame(()=>{
-        const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
-        const unis=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
-        buildSubgrid(index,resps,unis);
-    });
+    const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
+    const unis=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
+    buildSubgrid(index,resps,unis);
+}
+
+function scheduleStageSubgrids(total,index=0){
+    if(index>=total)return;
+    const run=()=>{if(!modalEtapasBuilt)return;loadStageSubgrid(index);setTimeout(()=>scheduleStageSubgrids(total,index+1),0);};
+    if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:350});else setTimeout(run,20);
 }
 
 function buildSubgrid(index,resps,unidades){
