@@ -15,13 +15,13 @@
   }
 
   function renderPages(){const totalPages=Math.max(1,Math.ceil(state.total/state.perPage)),from=Math.max(1,state.page-2),to=Math.min(totalPages,state.page+2);let html='';for(let p=from;p<=to;p++)html+=`<button data-page="${p}" class="${p===state.page?'active':''}">${p}</button>`;pages.innerHTML=html;}
-  function parseRows(value){try{const parsed=JSON.parse(value||'{}');return parsed&&typeof parsed==='object'?Object.values(parsed):[];}catch(_){return[];}}
+  function parseRows(value){try{const parsed=JSON.parse(value||'{}');return parsed&&typeof parsed==='object'?Object.entries(parsed).map(([key,row])=>({key,...row})):[];}catch(_){return[];}}
   async function openDetail(id){
     const modal=document.getElementById('v2-modal'),detail=document.getElementById('v2-detail');modal.hidden=false;detail.innerHTML='<div class="v2-empty">Cargando detalle...</div>';
     const response=await fetch(`monitoreo_api.php?action=task_detail&id=${encodeURIComponent(id)}`,{headers:{Accept:'application/json'}}),data=await response.json();
     if(!response.ok||data.status!=='ok')throw new Error(data.msg||'No se pudo cargar la actividad.');
     const task=data.task;document.getElementById('v2-code').textContent=task.codigo||`#${task.id}`;document.getElementById('v2-title').textContent=task.actividad;
-    const stages=(task.etapas||[]).map((stage,index)=>{const rows=parseRows(stage.involucrados_json).filter(row=>!row.deleted).slice(0,20);return `<section class="v2-stage"><header><h3>${esc(stage.codigo_etapa||`E-${index+1}`)} · ${esc(stage.nombre_etapa||'Etapa')}</h3><p>${esc(stage.descripcion_etapa||'')}</p></header>${rows.length?`<table class="v2-stage-table"><thead><tr><th>Responsable</th><th>Unidad</th><th>Programado</th><th>Cumplido</th><th>A tiempo</th><th>En forma</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(row.persona||'')}</td><td>${esc(row.unidad||'')}</td><td>${esc(row.a_lograr||0)}</td><td>${esc(row.cumplido||0)}</td><td>${esc(row.a_tiempo??100)}%</td><td>${esc(row.en_forma??100)}%</td></tr>`).join('')}</tbody></table>`:'<div class="v2-empty">Sin líneas registradas en esta etapa.</div>'}</section>`;}).join('');
+    const stages=(task.etapas||[]).map((stage,index)=>{const rows=parseRows(stage.involucrados_json).filter(row=>!row.deleted).slice(0,20);return `<section class="v2-stage"><header><h3>${esc(stage.codigo_etapa||`E-${index+1}`)} · ${esc(stage.nombre_etapa||'Etapa')}</h3><p>${esc(stage.descripcion_etapa||'')}</p></header>${rows.length?`<table class="v2-stage-table"><thead><tr><th>Responsable</th><th>Unidad</th><th>Programado</th><th>Cumplido</th><th>A tiempo</th><th>En forma</th><th>Guardado</th></tr></thead><tbody>${rows.map(row=>`<tr class="v2-edit-row" data-task="${task.id}" data-stage="${stage.id}" data-key="${esc(row.key)}"><td>${esc(row.persona||'')}</td><td>${esc(row.unidad||'')}</td><td><input data-field="a_lograr" type="number" min="0" step="0.01" value="${esc(row.a_lograr||0)}"></td><td><input data-field="cumplido" type="number" min="0" step="0.01" value="${esc(row.cumplido||0)}"></td><td><input data-field="a_tiempo" type="number" min="0" max="100" step="1" value="${esc(row.a_tiempo??100)}"></td><td><input data-field="en_forma" type="number" min="0" max="100" step="1" value="${esc(row.en_forma??100)}"></td><td class="v2-save-state">—</td></tr>`).join('')}</tbody></table>`:'<div class="v2-empty">Sin líneas registradas en esta etapa.</div>'}</section>`;}).join('');
     detail.innerHTML=`<div class="v2-summary"><div><small>Programa</small><strong>${esc(task.programa)}</strong></div><div><small>Sector</small><strong>${esc(task.sector)}</strong></div><div><small>Meta global</small><strong>${esc(task.m_part_obj)}</strong></div><div><small>Alcanzado</small><strong>${esc(task.m_part_alc)}</strong></div></div>${stages}`;
   }
 
@@ -30,6 +30,13 @@
   list.addEventListener('click',event=>{const button=event.target.closest('.v2-open');if(button)openDetail(button.dataset.id).catch(showError);});
   pages.addEventListener('click',event=>{const button=event.target.closest('button[data-page]');if(button)loadList(Number(button.dataset.page)).catch(showError);});
   document.getElementById('v2-close').addEventListener('click',()=>document.getElementById('v2-modal').hidden=true);
+  const saveTimers=new WeakMap();
+  document.getElementById('v2-detail').addEventListener('input',event=>{const input=event.target.closest('.v2-edit-row input[data-field]');if(!input)return;const row=input.closest('.v2-edit-row');clearTimeout(saveTimers.get(row));row.querySelector('.v2-save-state').textContent='Pendiente';saveTimers.set(row,setTimeout(()=>saveStageRow(row),450));});
+  async function saveStageRow(row){
+    const fd=new FormData();fd.append('action','save_stage_row');fd.append('csrf',document.querySelector('meta[name="monitoreo-v2-csrf"]').content);fd.append('id_poa',row.dataset.task);fd.append('stage_id',row.dataset.stage);fd.append('row_key',row.dataset.key);
+    row.querySelectorAll('input[data-field]').forEach(input=>fd.append(input.dataset.field,input.value));const cell=row.querySelector('.v2-save-state');cell.textContent='Guardando…';
+    try{const response=await fetch('monitoreo_api.php',{method:'POST',body:fd,headers:{Accept:'application/json'}}),data=await response.json();if(!response.ok||data.status!=='ok')throw new Error(data.msg||'No se pudo guardar.');cell.textContent='Guardado';cell.className='v2-save-state saved';}catch(error){cell.textContent='Error';cell.className='v2-save-state error';}
+  }
   function showError(error){status.textContent=error.message;status.style.color='#b91c1c';}
   loadList().catch(showError);
 })();

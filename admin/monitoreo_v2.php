@@ -7,11 +7,13 @@ $db = (new Database())->getConnection();
 $auth = new Auth($db);
 $auth->requireLogin();
 $auth->checkAccess('monitoreo.php', $db);
+if (empty($_SESSION['monitoreo_v2_csrf'])) $_SESSION['monitoreo_v2_csrf'] = bin2hex(random_bytes(32));
 ?><!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="monitoreo-v2-csrf" content="<?php echo htmlspecialchars((string)$_SESSION['monitoreo_v2_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
 <title>Monitoreo Operativo V2 | Acción Honduras</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="../assets/css/monitoreo-v2.css?v=2">

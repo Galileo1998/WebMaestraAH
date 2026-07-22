@@ -14,7 +14,46 @@ try {
     $auth->requireLogin();
     $auth->checkAccess('monitoreo.php', $db);
 
-    $action = (string)($_GET['action'] ?? '');
+    $action = (string)($_REQUEST['action'] ?? '');
+    if ($action === 'save_stage_row' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $csrf = (string)($_POST['csrf'] ?? '');
+        if (empty($_SESSION['monitoreo_v2_csrf']) || !hash_equals((string)$_SESSION['monitoreo_v2_csrf'], $csrf)) {
+            http_response_code(403);
+            echo json_encode(['status'=>'error','msg'=>'Sesión de edición vencida.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $taskId = (int)($_POST['id_poa'] ?? 0);
+        $stageId = (int)($_POST['stage_id'] ?? 0);
+        $rowKey = (string)($_POST['row_key'] ?? '');
+        $db->beginTransaction();
+        $stmt = $db->prepare('SELECT involucrados_json FROM ah_poa_etapas WHERE id=? AND id_poa=? LIMIT 1 FOR UPDATE');
+        $stmt->execute([$stageId, $taskId]);
+        $json = $stmt->fetchColumn();
+        if ($json === false || $rowKey === '') {
+            $db->rollBack();
+            http_response_code(404);
+            echo json_encode(['status'=>'error','msg'=>'Línea de agenda no encontrada.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $rows = json_decode((string)$json, true);
+        if (!is_array($rows) || !isset($rows[$rowKey]) || !is_array($rows[$rowKey])) {
+            $db->rollBack();
+            http_response_code(404);
+            echo json_encode(['status'=>'error','msg'=>'La línea ya no existe.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $rows[$rowKey]['a_lograr'] = max(0, (float)($_POST['a_lograr'] ?? 0));
+        $rows[$rowKey]['cumplido'] = max(0, (float)($_POST['cumplido'] ?? 0));
+        $rows[$rowKey]['a_tiempo'] = max(0, min(100, (float)($_POST['a_tiempo'] ?? 100)));
+        $rows[$rowKey]['en_forma'] = max(0, min(100, (float)($_POST['en_forma'] ?? 100)));
+        $rows[$rowKey]['quality_initialized'] = true;
+        $rows[$rowKey]['quality_version'] = 2;
+        $stmt = $db->prepare('UPDATE ah_poa_etapas SET involucrados_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND id_poa=?');
+        $stmt->execute([json_encode($rows, JSON_UNESCAPED_UNICODE), $stageId, $taskId]);
+        $db->commit();
+        echo json_encode(['status'=>'ok','row'=>$rows[$rowKey]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
     if ($action === 'task_list') {
         $page = max(1, (int)($_GET['page'] ?? 1));
         $perPage = min(50, max(10, (int)($_GET['per_page'] ?? 20)));
@@ -109,6 +148,7 @@ try {
         'asignaciones' => $assignments,
     ]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
+    if (isset($db) && $db instanceof PDO && $db->inTransaction()) $db->rollBack();
     http_response_code(500);
     echo json_encode(['status' => 'error', 'msg' => 'No se pudo cargar la actividad.'], JSON_UNESCAPED_UNICODE);
 }
