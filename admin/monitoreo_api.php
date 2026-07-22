@@ -218,11 +218,12 @@ try {
         $count = $db->prepare("SELECT COUNT(*) FROM ah_poa WHERE {$whereSql}");
         $count->execute($params);
         $total = (int)$count->fetchColumn();
+        $metricStmt=$db->prepare("SELECT COUNT(*) total,SUM(operativo_estado='Completado') completed,SUM(operativo_estado='En Proceso') in_progress,COALESCE(AVG(CASE WHEN operativo_meta_obj>0 THEN LEAST((operativo_meta_alc/operativo_meta_obj)*100,100) END),0) average_reach FROM ah_poa WHERE {$whereSql}");$metricStmt->execute($params);$metrics=$metricStmt->fetch(PDO::FETCH_ASSOC)?:['total'=>0,'completed'=>0,'in_progress'=>0,'average_reach'=>0];
         $sql = "SELECT id,codigo_maestro,descripcion_actividad,marco_logico,programa,sector,operativo_tecnico,operativo_comunidad,operativo_estado,meta_actividades,meta_actividades_alc,operativo_meta_obj,operativo_meta_alc FROM ah_poa WHERE {$whereSql} ORDER BY id ASC LIMIT {$perPage} OFFSET {$offset}";
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode(['status'=>'ok','rows'=>$rows,'total'=>$total,'page'=>$page,'per_page'=>$perPage], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        echo json_encode(['status'=>'ok','rows'=>$rows,'total'=>$total,'page'=>$page,'per_page'=>$perPage,'metrics'=>$metrics], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
     if ($action === 'catalogs') {
