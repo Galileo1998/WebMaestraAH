@@ -1318,7 +1318,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .agenda-sticky{backdrop-filter:none!important;background:#f8fafc!important;box-shadow:none!important}
 .modal-body{overscroll-behavior:contain;scrollbar-gutter:stable;transform:none!important}
 #tab-etapas .stage-scroll{contain:none!important;overscroll-behavior:auto}
-#tab-etapas .subgrid-wrapper{content-visibility:auto!important;contain-intrinsic-size:auto 520px!important}
+#tab-etapas .subgrid-wrapper{content-visibility:visible!important;contain:none!important}
 #tab-etapas .subgrid-card{box-shadow:none!important}
 .subgrid-card{box-shadow:none!important}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
@@ -1967,7 +1967,7 @@ function getUnidadTargetPopulation(c, unidad) {
 // PARAMETRO KEY EN OPTIONSCHECKBOXES
 function optionsCheckboxes(options,selected,name,index,type,isMain=false, key=''){
     let panelClass=`panel-${type}-box`,selectedArr=Array.isArray(selected)?selected:(selected?[selected]:[]);
-    const lazyOptions=type==='verific_sub'||type==='lugar_sub';
+    const lazyOptions=isMain||type==='verific_sub'||type==='lugar_sub';
     const renderedOptions=lazyOptions?selectedArr:options;
     let html=`<div class="custom-multiselect ${panelClass}" data-index="${index}" data-type="${type}" data-name="${escHtml(name)}"><div class="multiselect-select-box" draggable="true" ondragstart="dragFillStart(event,this)" ondragenter="dragFillOver(event,this)" ondragover="dragFillOver(event,this)" ondragleave="dragFillLeave(this)" ondrop="dragFillDrop(event,this)" onclick="event.stopPropagation();toggleDropdownPanel(this)"><span class="multi-label">Seleccione...</span><span class="fill-drag-handle" title="Arrastrar este valor hacia otro combo"><i class="fa-solid fa-grip-vertical"></i></span></div><div class="multiselect-dropdown-panel" data-lazy-options="${lazyOptions?'1':'0'}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()">`;
     renderedOptions.forEach(v=>{
@@ -1983,7 +1983,11 @@ function hydrateLazyOptions(panel){
     panel.attr('data-lazy-options','0');
     const ms=panel.closest('.custom-multiselect'),type=ms.data('type'),index=Number(ms.data('index'));
     const currentProg=currentTaskData?`${currentTaskData.programa||''} ${currentTaskData.sector||''}`:'';
-    const options=type==='verific_sub'?getFilteredCatalog(masterVerificacionesRaw,currentProg,`E-${index+1}`):masterLugares;
+    let options=[];
+    if(type==='verific_sub')options=getFilteredCatalog(masterVerificacionesRaw,currentProg,`E-${index+1}`);
+    else if(type==='lugar_sub')options=masterLugares;
+    else if(type==='responsable')options=masterResponsables;
+    else if(type==='unidad')options=getFilteredCatalog(masterUnidadesRaw,currentProg,`E-${index+1}`);
     const existing=new Set(panel.find('input[type="checkbox"]').map(function(){return this.value;}).get());
     let html='';
     options.forEach(v=>{if(!existing.has(String(v)))html+=`<label class="multiselect-option" onclick="event.stopPropagation()"><input type="checkbox" name="${escHtml(ms.data('name')||'')}" value="${escHtml(v)}"> ${escHtml(v)}</label>`;});
