@@ -601,12 +601,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $meses_keys = ['jul'=>'Jul','aug'=>'Ago','sep'=>'Sep','oct'=>'Oct','nov'=>'Nov','dec'=>'Dic','jan'=>'Ene','feb'=>'Feb','mar'=>'Mar','apr'=>'Abr','may'=>'May','jun'=>'Jun'];
 try { $tareas = $db->query("SELECT * FROM {$tabla_poa} WHERE operativo_oculto = 0 ORDER BY id ASC LIMIT 2000")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas = []; }
 try { $tareas_ocultas = $db->query("SELECT id, descripcion_actividad, marco_logico, codigo_maestro FROM {$tabla_poa} WHERE operativo_oculto = 1 ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas_ocultas = []; }
-try { $asignaciones_raw = $db->query("SELECT a.* FROM ah_poa_asignaciones a INNER JOIN ah_poa p ON p.id=a.id_poa WHERE p.is_active=1")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $asignaciones_raw = []; }
-$asignaciones_map = [];
-foreach ($asignaciones_raw as $a) $asignaciones_map[$a['id_poa']][] = $a;
-try { $etapas_raw = $db->query("SELECT e.* FROM ah_poa_etapas e INNER JOIN ah_poa p ON p.id=e.id_poa WHERE p.is_active=1 ORDER BY e.id_poa ASC, e.orden ASC, e.id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $etapas_raw = []; }
-$etapas_map = [];
-foreach ($etapas_raw as $e) $etapas_map[$e['id_poa']][] = $e;
 try { $tecnicos_list = $db->query("SELECT nombre FROM ah_tecnicos WHERE activo=1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $e) { $tecnicos_list = []; }
 
 // Técnico multibase robusto: genera una fila por cada relación técnico-base, sin perder técnicos sin base.
@@ -1323,7 +1317,6 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .subgrid-wrapper{content-visibility:auto;contain-intrinsic-size:400px}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
 .stage-grid-pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-top:1px solid #e2e8f0}.stage-grid-pagination button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}.stage-grid-pagination button:disabled{opacity:.4;cursor:not-allowed}.stage-grid-pagination span{font-size:.78rem;color:#64748b;font-weight:800}
-.agenda-stage-tabs{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-bottom:0;border-radius:10px 10px 0 0}.agenda-stage-tabs span{font-size:.78rem;font-weight:900;color:#64748b;margin-right:4px}.agenda-stage-tab{border:1px solid #bae6fd;background:#fff;color:#075985;border-radius:999px;padding:7px 13px;font-weight:900;cursor:pointer}.agenda-stage-tab.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}
 .monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
 </style>
 </head>
@@ -1369,15 +1362,6 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
         foreach($meses_keys as $k=>$nom){ if((float)($t['op_act_'.$k]??0)>0 || (float)($t['op_part_'.$k]??0)>0){ $active_months[]=$k; $html_months.="<span class='month-mini-badge'>$nom</span>"; } }
         $descripcion_principal = trim($t['descripcion_actividad'] ?? '') ?: trim($t['marco_logico'] ?? 'Actividad');
         $codigo_visible = trim($t['codigo_maestro'] ?? '') ?: poa_codigo_corto($t['marco_logico'] ?? '');
-        $task_json = htmlspecialchars(json_encode([
-            'id'=>$t[$col_id], 'actividad'=>$descripcion_principal, 'codigo'=>$codigo_visible, 'extension'=>trim($t['ext'] ?? ''), 'marco_logico'=>$t['marco_logico'] ?? '',
-            'programa'=>$t['programa'] ?? '', 'sector'=>$t['sector'] ?? '', 'tecnico'=>$t['operativo_tecnico'] ?? 'Trabajo en Equipo', 'comunidad'=>$t['operativo_comunidad'] ?? '', 'periodo'=>$t['operativo_periodo'] ?? '', 'estado'=>$estado_actual, 't_part'=>$t['tipo_participante'] ?? '',
-            'm_act_obj'=>(float)($t['meta_actividades'] ?? 0), 'm_act_alc'=>(float)($t['meta_actividades_alc'] ?? 0), 'm_part_obj'=>(float)($t['operativo_meta_obj'] ?? 0), 'm_part_alc'=>(float)($t['operativo_meta_alc'] ?? 0),
-            'info_adicional'=>$t['operativo_info_adicional'] ?? '', 'team_lugares'=>$t['equipo_lugares_json'] ?? '[]', 'etapas'=>$etapas_map[$t[$col_id]] ?? [],
-            'op_act'=>array_combine(array_keys($meses_keys), array_map(fn($m)=>$t['op_act_'.$m]??0, array_keys($meses_keys))),
-            'op_part'=>array_combine(array_keys($meses_keys), array_map(fn($m)=>$t['op_part_'.$m]??0, array_keys($meses_keys))),
-            'asignaciones'=>$asignaciones_map[$t[$col_id]] ?? []
-        ], JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
     ?>
         <div class="<?php echo $card_class; ?> data-card" data-prog="<?php echo htmlspecialchars($t['programa'] ?? ''); ?>" data-sec="<?php echo strtolower(htmlspecialchars($t['sector'] ?? '')); ?>" data-tec="<?php echo htmlspecialchars($t['operativo_tecnico'] ?? ''); ?>" data-est="<?php echo htmlspecialchars($estado_actual); ?>" data-metap="<?php echo (float)($t['operativo_meta_obj'] ?? 0); ?>" data-alcp="<?php echo (float)($t['operativo_meta_alc'] ?? 0); ?>" data-meses="<?php echo implode(',', $active_months); ?>">
             <div class="task-main"><div class="code-corner"><?php if($codigo_visible): ?><span class="code-pill ml"><i class="fa-solid fa-hashtag"></i> <?php echo htmlspecialchars($codigo_visible); ?></span><?php endif; ?><?php if(trim($t['ext'] ?? '') !== ''): ?><span class="code-pill ext"><i class="fa-solid fa-code-branch"></i> EXT <?php echo htmlspecialchars(trim($t['ext'])); ?></span><?php endif; ?></div><h3 class="searchable-text"><?php echo htmlspecialchars($descripcion_principal); ?></h3><div><?php echo $html_months; ?></div><span class="prog-badge"><i class="fa-solid fa-tag"></i> <?php echo htmlspecialchars($t['programa'] ?? ''); ?></span><span class="prog-badge" style="background:#e0f2fe;color:#0284c7"><i class="fa-solid fa-layer-group"></i> <?php echo htmlspecialchars($t['sector'] ?? ''); ?></span></div>
@@ -1385,7 +1369,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
             <div class="task-meta"><div style="color:var(--ah-primary)"><i class="fa-solid fa-person"></i> Público: <strong><?php echo htmlspecialchars($t['tipo_participante'] ?? ''); ?></strong></div><div><i class="fa-solid fa-clipboard-check"></i> Actividades: <strong><?php echo (float)($t['meta_actividades_alc'] ?? 0); ?> / <?php echo (float)($t['meta_actividades'] ?? 0); ?></strong></div><div><i class="fa-solid fa-user-check"></i> Alcanzados: <strong><?php echo (float)($t['operativo_meta_alc'] ?? 0); ?> / <?php echo (float)($t['operativo_meta_obj'] ?? 0); ?></strong></div></div>
             <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
                 <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($estado_actual); ?></span>
-                <button class="btn-action" data-task="<?php echo $task_json; ?>" onclick="openUpdateModal(this)"><i class="fa-solid fa-pen-to-square"></i> Detallar</button>
+                <button class="btn-action" data-task-id="<?php echo (int)$t[$col_id]; ?>" onclick="openUpdateModal(this)"><i class="fa-solid fa-pen-to-square"></i> Detallar</button>
                 <button class="btn-action btn-mini btn-archive-toggle" onclick="toggleOcultar(<?php echo $t['id']; ?>, 1)"><i class="fa-solid fa-eye-slash"></i> Ocultar</button>
             </div>
         </div>
@@ -1537,7 +1521,7 @@ let currentTaskData = null;
 let currentTaskButton = null;
 let modalEtapasBuilt = false;
 let stageGridPages={};
-const stageGridPageSize=10;
+const stageGridPageSize=5;
 let autosaveQueue = Promise.resolve();
 function enqueueAutosave(job){
     autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
@@ -2288,7 +2272,6 @@ function updateCurrentTaskStageRow(index,key,rowData){
     currentTaskData.etapas[index].involucrados_json=JSON.stringify(inv);
 
     if(currentTaskButton){
-        $(currentTaskButton).attr('data-task',JSON.stringify(currentTaskData));
     }
 }
 
@@ -2482,10 +2465,7 @@ function buildEtapasTable(taskData){
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
     stageGridPages={};
     $('#agenda-stage-tabs').remove();
-    const tabs=etapas.map((e,i)=>`<button type="button" class="agenda-stage-tab ${i===0?'active':''}" data-stage="${i}" onclick="selectAgendaStage(${i})">${escHtml(e.codigo_etapa||`E-${i+1}`)}</button>`).join('');
-    $('#etapas-main-table').before(`<div id="agenda-stage-tabs" class="agenda-stage-tabs"><span>Programación detallada:</span>${tabs}</div>`);
-    $('#tabla_etapas_body .stage-main-row').each(function(){$(this).next('tr').hide();});
-    setTimeout(()=>selectAgendaStage(0),30);
+    scheduleStageSubgrids(etapas.length);
 }
 
 function loadStageSubgrid(index){
@@ -2497,14 +2477,10 @@ function loadStageSubgrid(index){
     buildSubgrid(index,resps,unis);
 }
 
-function selectAgendaStage(index){
-    $('.agenda-stage-tab').removeClass('active').filter(`[data-stage="${index}"]`).addClass('active');
-    $('#tabla_etapas_body .stage-main-row').each(function(i){$(this).next('tr').toggle(i===index);});
-    const cont=$(`#subgrid-${index}`);
-    if(cont.attr('data-built')!=='1'){
-        cont.html('<div style="padding:18px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando etapa...</div>');
-        requestAnimationFrame(()=>loadStageSubgrid(index));
-    }
+function scheduleStageSubgrids(total,index=0){
+    if(index>=total)return;
+    const run=()=>{if(!modalEtapasBuilt)return;loadStageSubgrid(index);setTimeout(()=>scheduleStageSubgrids(total,index+1),0);};
+    if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:200});else setTimeout(run,10);
 }
 
 function buildSubgrid(index,resps,unidades){
@@ -2835,16 +2811,22 @@ function updateActivityProgress(){
     return total;
 }
 
-function openUpdateModal(btn){
+async function openUpdateModal(btn){
     try {
-        let raw = btn.getAttribute('data-task');
-        let task = JSON.parse(raw);
+        const taskId=parseInt(btn.getAttribute('data-task-id'),10)||0;
+        if(!taskId)throw new Error('Actividad no válida.');
+        document.getElementById('updateModal').style.display='flex';
+        $('#lbl_actividad').html('<i class="fa-solid fa-spinner fa-spin"></i> Cargando actividad...');
+        $('#tabla_tecnicos_body,#tabla_etapas_body').empty();
+        const response=await fetch(`monitoreo_api.php?action=task_detail&id=${encodeURIComponent(taskId)}`,{headers:{'Accept':'application/json'}});
+        const payload=await response.json();
+        if(!response.ok||payload.status!=='ok'||!payload.task)throw new Error(payload.msg||'No se pudo cargar la actividad.');
+        const task=payload.task;
         currentTaskData = task;
         currentTaskButton = btn;
         modalEtapasBuilt = false;
         $('#etapas_loaded').val('0');
 
-        document.getElementById('updateModal').style.display = 'flex';
         $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:40px"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--ah-primary)"></i><br><br>Cargando programación...</td></tr>');
 
         $('#upd_task_id').val(task.id);
@@ -2919,7 +2901,6 @@ function updateCurrentTaskGlobalPlaces(){
     if(!currentTaskData) return;
     const lugares=selectedGlobalTeamPlaces();
     currentTaskData.team_lugares=JSON.stringify(lugares);
-    if(currentTaskButton) $(currentTaskButton).attr('data-task',JSON.stringify(currentTaskData));
 }
 
 function updateCurrentTaskAssignmentFromRow(row){
@@ -2933,14 +2914,12 @@ function updateCurrentTaskAssignmentFromRow(row){
     const idx=currentTaskData.asignaciones.findIndex(x=>x.tecnico===tecnico&&(x.base_asignada||'')===base);
     if(!selected&&!hasValues){
         if(idx>=0) currentTaskData.asignaciones.splice(idx,1);
-        if(currentTaskButton) $(currentTaskButton).attr('data-task',JSON.stringify(currentTaskData));
         return;
     }
     let a=idx>=0?currentTaskData.asignaciones[idx]:null;
     if(!a){a={tecnico,base_asignada:base};currentTaskData.asignaciones.push(a);}
     a.lugares_json=JSON.stringify(lugares);
     mesesEquipo.forEach(m=>{a['meta_'+m.k]=parseFloat(row.find(`.team-month-prog[data-mes="${m.k}"]`).val())||0;a['logro_'+m.k]=parseFloat(row.find(`.team-month-logro[data-mes="${m.k}"]`).val())||0;});
-    if(currentTaskButton) $(currentTaskButton).attr('data-task',JSON.stringify(currentTaskData));
 }
 
 
@@ -3138,7 +3117,6 @@ function snapshotCurrentTaskFromForm(){
     });
 
     if(modalEtapasBuilt) currentTaskData.etapas=etapas;
-    if(currentTaskButton) $(currentTaskButton).attr('data-task',JSON.stringify(currentTaskData));
 
     updateCardVisuals();
 }
