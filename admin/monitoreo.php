@@ -517,6 +517,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             }
         }
 
+        if (($_POST['etapas_loaded'] ?? '1') === '1') {
         $db->prepare("DELETE FROM ah_poa_etapas WHERE id_poa=?")->execute([(int)$_POST['task_id']]);
         if (isset($_POST['etapa_codigo']) && is_array($_POST['etapa_codigo'])) {
             $ins = $db->prepare("INSERT INTO ah_poa_etapas (id_poa, codigo_etapa, nombre_etapa, descripcion_etapa, unidad_medida, responsable, involucrados_json, fecha_recepcion, orden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -572,6 +573,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $fecha = trim($_POST['etapa_fecha_recepcion'][$i] ?? '');
                 $ins->execute([(int)$_POST['task_id'], trim($codigo), trim($_POST['etapa_nombre'][$i] ?? ''), trim($_POST['etapa_descripcion'][$i] ?? ''), $unidades, $resps, json_encode($inv, JSON_UNESCAPED_UNICODE), $fecha !== '' ? $fecha : null, $i + 1]);
             }
+        }
         }
         $db->commit();
         saveActivitySnapshot($db, $taskId, 'configuracion_actividad');
@@ -1390,7 +1392,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
     <div class="modal-header"><h2 style="margin:0;font-size:1.35rem"><i class="fa-solid fa-sliders"></i> Panel de Ejecución Programática</h2><button type="button" onclick="closeModal('updateModal')" style="background:none;border:0;font-size:1.45rem;cursor:pointer;color:#64748b"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="modal-tabs"><button type="button" class="modal-tab-btn active" onclick="switchModalTab('tab-equipo', this)"><i class="fa-solid fa-map-location-dot"></i> Asignar Equipo</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-metas', this)"><i class="fa-solid fa-bullseye"></i> Metas y Meses</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-etapas', this)"><i class="fa-solid fa-diagram-project"></i> Agenda Técnico (Etapas)</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-notas', this)"><i class="fa-solid fa-file-word"></i> Notas y Materiales</button></div>
     <form method="POST" id="formUpdate" style="display:flex;flex-direction:column;overflow:hidden;flex-grow:1">
-        <input type="hidden" name="action" value="update_task"><input type="hidden" name="task_id" id="upd_task_id"><input type="hidden" name="metas_authorized" id="metas_authorized" value="0">
+        <input type="hidden" name="action" value="update_task"><input type="hidden" name="task_id" id="upd_task_id"><input type="hidden" name="metas_authorized" id="metas_authorized" value="0"><input type="hidden" name="etapas_loaded" id="etapas_loaded" value="0">
         <div class="modal-body">
             <div class="agenda-sticky" id="agendaSticky">
                 <div class="agenda-sticky-inner">
@@ -1527,6 +1529,7 @@ let showAllTeamMonths = false;
 let hideNoBaseRowState = true;
 let currentTaskData = null;
 let currentTaskButton = null;
+let modalEtapasBuilt = false;
 let autosaveQueue = Promise.resolve();
 function enqueueAutosave(job){
     autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
@@ -1752,7 +1755,17 @@ function initMonitoreoEditor(){
         }
     }).catch(()=>{monitoreoEditorReady=false;});
 }
-function switchModalTab(tabId, btn){$('.modal-tab-btn').removeClass('active');$('.modal-tab-content').removeClass('active');if(btn)$(btn).addClass('active');else $(`.modal-tab-btn[onclick*="${tabId}"]`).addClass('active');$('#'+tabId).addClass('active');if(tabId==='tab-notas')initMonitoreoEditor();}
+function switchModalTab(tabId, btn){
+    $('.modal-tab-btn').removeClass('active');$('.modal-tab-content').removeClass('active');
+    if(btn)$(btn).addClass('active');else $(`.modal-tab-btn[onclick*="${tabId}"]`).addClass('active');
+    $('#'+tabId).addClass('active');
+    if(tabId==='tab-notas')initMonitoreoEditor();
+    if(tabId==='tab-etapas'&&!modalEtapasBuilt&&currentTaskData){
+        modalEtapasBuilt=true;
+        $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:35px"><i class="fa-solid fa-spinner fa-spin"></i> Cargando agenda...</td></tr>');
+        requestAnimationFrame(()=>buildEtapasTable(currentTaskData));
+    }
+}
 
 async function closeModal(id){
     if(id==='updateModal'){
@@ -2421,6 +2434,7 @@ function splitResponsibleNameHtml(name){
 }
 
 function buildEtapasTable(taskData){
+    $('#etapas_loaded').val('1');
     window.savedInvData={};
     let etapas=Array.isArray(taskData.etapas)&&taskData.etapas.length?taskData.etapas:etapasDefault.map((e,i)=>({codigo_etapa:e.codigo,nombre_etapa:e.nombre,descripcion_etapa:e.descripcion,unidad_medida:'[]',responsable:'[]',involucrados_json:'{}',fecha_recepcion:getFechaMaximaEtapa(i)}));
     let html='';
@@ -2768,6 +2782,8 @@ function openUpdateModal(btn){
         let task = JSON.parse(raw);
         currentTaskData = task;
         currentTaskButton = btn;
+        modalEtapasBuilt = false;
+        $('#etapas_loaded').val('0');
 
         document.getElementById('updateModal').style.display = 'flex';
         $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:40px"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--ah-primary)"></i><br><br>Cargando programación...</td></tr>');
@@ -2793,7 +2809,7 @@ function openUpdateModal(btn){
         setTimeout(()=>{
             fillMonths(task);
             buildTeamTable(task);
-            buildEtapasTable(task);
+            $('#tabla_etapas_body').empty();
             updateActivityProgress();
             if(typeof tinymce!=='undefined'&&tinymce.get('upd_info_adicional')) tinymce.get('upd_info_adicional').setContent(task.info_adicional||'');
             else $('#upd_info_adicional').val(task.info_adicional||'');
@@ -2930,6 +2946,7 @@ function buildTeamTable(task){
     tecnicosBases.forEach((tb,rowIndex)=>{
         const tecnico=tb.nombre,base=tb.nombre_base||'';
         const a=asig.find(x=>x.tecnico===tecnico&&(x.base_asignada||'')===base);
+        if(hideNoBaseRowState&&!base&&!a) return;
         const sel=a?'checked':'',cls=a?'row-selected':'';
         const rowId=`team_${rowIndex}`;
         html+=`<tr class="team-row ${cls} ${base?'':'no-base-row'}" data-row-id="${rowId}"><td><input type="checkbox" class="team-selected" ${sel}></td><td><div style="display:flex;gap:10px;align-items:center"><div class="avatar">${initials(tecnico)}</div><strong>${escHtml(tecnico)}</strong></div></td><td>${base?`<span class="base-badge">${escHtml(base)}</span>`:'<span style="color:#94a3b8">Sin base</span>'}<input type="hidden" class="team-tecnico" value="${escHtml(tecnico)}"><input type="hidden" class="team-base" value="${escHtml(base)}"></td>`;
@@ -2958,7 +2975,8 @@ function toggleTeamMonths(){
 
 function toggleNoBaseTechs(){
     hideNoBaseRowState=!hideNoBaseRowState;
-    applyTeamMonthVisibility();
+    if(!hideNoBaseRowState&&currentTaskData) buildTeamTable(currentTaskData);
+    else applyTeamMonthVisibility();
 }
 
 function recalcTeamRows(){
@@ -3060,7 +3078,7 @@ function snapshotCurrentTaskFromForm(){
         });
     });
 
-    currentTaskData.etapas=etapas;
+    if(modalEtapasBuilt) currentTaskData.etapas=etapas;
     if(currentTaskButton) $(currentTaskButton).attr('data-task',JSON.stringify(currentTaskData));
 
     updateCardVisuals();
