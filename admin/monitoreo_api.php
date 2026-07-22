@@ -21,6 +21,32 @@ try {
             throw new RuntimeException('Sesión de edición vencida.');
         }
     };
+    $currentCredential = static function (PDO $connection): ?array {
+        $ids = [$_SESSION['user_id'] ?? null,$_SESSION['usuario_id'] ?? null,$_SESSION['id_usuario'] ?? null,$_SESSION['id'] ?? null,is_array($_SESSION['user'] ?? null)?($_SESSION['user']['id']??null):null];
+        foreach ($ids as $id) if ($id !== null && $id !== '' && is_numeric($id)) { $st=$connection->prepare('SELECT id,email,password FROM users WHERE id=? LIMIT 1');$st->execute([(int)$id]);if($row=$st->fetch(PDO::FETCH_ASSOC))return $row; }
+        $emails = [$_SESSION['email']??null,$_SESSION['user_email']??null,$_SESSION['correo']??null,is_array($_SESSION['user']??null)?($_SESSION['user']['email']??null):null];
+        foreach ($emails as $email) { $email=trim((string)$email);if($email!==''){$st=$connection->prepare('SELECT id,email,password FROM users WHERE email=? LIMIT 1');$st->execute([$email]);if($row=$st->fetch(PDO::FETCH_ASSOC))return $row;} }
+        return null;
+    };
+    if ($action === 'verify_goals_password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();
+        $password=(string)($_POST['password']??'');if($password==='')throw new RuntimeException('Ingrese su contraseña.');
+        $user=$currentCredential($db);if(!$user)throw new RuntimeException('No fue posible identificar al usuario autenticado.');
+        $hash=(string)($user['password']??'');if(!(password_verify($password,$hash)||hash_equals($hash,$password)))throw new RuntimeException('Contraseña incorrecta.');
+        $_SESSION['metas_edit_unlocked_until']=time()+900;
+        echo json_encode(['status'=>'ok','expires_in'=>900],JSON_UNESCAPED_UNICODE);exit;
+    }
+    if ($action === 'save_goals' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();
+        if (empty($_SESSION['metas_edit_unlocked_until']) || (int)$_SESSION['metas_edit_unlocked_until'] < time()) throw new RuntimeException('La autorización para editar metas venció.');
+        $taskId=(int)($_POST['id_poa']??0);$payload=json_decode((string)($_POST['payload']??'{}'),true);if(!is_array($payload))throw new RuntimeException('Metas no válidas.');
+        $months=['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'];
+        $sets=['meta_actividades=?','meta_actividades_alc=?','operativo_meta_obj=?','operativo_meta_alc=?'];
+        $values=[max(0,(float)($payload['m_act_obj']??0)),max(0,(float)($payload['m_act_alc']??0)),max(0,(float)($payload['m_part_obj']??0)),max(0,(float)($payload['m_part_alc']??0))];
+        foreach($months as $month){$sets[]="op_act_{$month}=?";$values[]=max(0,(float)($payload['op_act'][$month]??0));$sets[]="op_part_{$month}=?";$values[]=max(0,(float)($payload['op_part'][$month]??0));$sets[]="op_editado_{$month}=1";}
+        $values[]=$taskId;$stmt=$db->prepare('UPDATE ah_poa SET '.implode(',',$sets).' WHERE id=? AND is_active=1');$stmt->execute($values);
+        echo json_encode(['status'=>'ok'],JSON_UNESCAPED_UNICODE);exit;
+    }
     if ($action === 'save_notes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $requireV2Csrf();
         $taskId = (int)($_POST['id_poa'] ?? 0);
