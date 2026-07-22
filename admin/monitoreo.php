@@ -1527,6 +1527,8 @@ let currentTaskButton = null;
 let modalEtapasBuilt = false;
 let stageGridPages={};
 const stageGridPageSize=<?php echo defined('AH_MONITOREO_V2') ? 2 : 5; ?>;
+let stageGridObserver=null;
+const stageRebuildTimers={};
 let autosaveQueue = Promise.resolve();
 function enqueueAutosave(job){
     autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
@@ -2218,7 +2220,18 @@ function captureCurrentInvData(index){
     $(`input[data-etapa-json="${index}"]`).val(JSON.stringify(window.savedInvData[index]||{}));
 }
 
-function triggerAgendaRebuild(index){captureCurrentInvData(index);const cont=$(`#subgrid-${index}`);if(cont.attr('data-built')!=='1')return;let resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);let unidades=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);buildSubgrid(index,resps,unidades);}
+function triggerAgendaRebuild(index){
+    captureCurrentInvData(index);
+    const cont=$(`#subgrid-${index}`);
+    if(cont.attr('data-built')!=='1')return;
+    clearTimeout(stageRebuildTimers[index]);
+    stageRebuildTimers[index]=setTimeout(()=>{
+        if(!modalEtapasBuilt||!document.getElementById(`subgrid-${index}`))return;
+        const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
+        const unidades=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
+        buildSubgrid(index,resps,unidades);
+    },80);
+}
 function rowKey(persona,unidad){return btoa(unescape(encodeURIComponent(persona+'|'+unidad))).replace(/=/g,'');}
 function getSaved(index,key){return (window.savedInvData[index]&&window.savedInvData[index][key])?window.savedInvData[index][key]:{};}
 function mergeUniqueArrays(a,b){a=Array.isArray(a)?a:[];b=Array.isArray(b)?b:[];return [...new Set([...a,...b])];}
@@ -2463,7 +2476,7 @@ function buildEtapasTable(taskData){
         let rowUnis = [...new Set([...filteredUnis, ...unis])];
 
         const savedJson=JSON.stringify(window.savedInvData[i]||{});
-        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"><input type="hidden" name="etapa_involucrados_json[]" data-etapa-json="${i}" value="${escHtml(savedJson)}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" data-built="0"><div style="padding:12px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando programación...</div></div></td></tr>`;
+        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"><input type="hidden" name="etapa_involucrados_json[]" data-etapa-json="${i}" value="${escHtml(savedJson)}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" data-built="0" data-stage-lazy="${i}"><div class="stage-lazy-placeholder" style="padding:16px;text-align:center;color:#64748b"><i class="fa-solid fa-gauge-high"></i> La programación se cargará al acercarse a esta etapa. <button type="button" class="btn-action btn-mini" onclick="loadStageSubgrid(${i})">Cargar ahora</button></div></div></td></tr>`;
     });
 
     $('#tabla_etapas_body').html(html);
@@ -2477,15 +2490,33 @@ function loadStageSubgrid(index){
     const cont=$(`#subgrid-${index}`);
     if(cont.attr('data-built')==='1')return;
     cont.attr('data-built','1');
+    if(stageGridObserver&&cont[0])stageGridObserver.unobserve(cont[0]);
+    cont.html('<div style="padding:16px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando programación...</div>');
     const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
     const unis=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
-    buildSubgrid(index,resps,unis);
+    requestAnimationFrame(()=>buildSubgrid(index,resps,unis));
 }
 
-function scheduleStageSubgrids(total,index=0){
-    if(index>=total)return;
-    const run=()=>{if(!modalEtapasBuilt)return;loadStageSubgrid(index);setTimeout(()=>scheduleStageSubgrids(total,index+1),0);};
-    if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:200});else setTimeout(run,10);
+function scheduleStageSubgrids(total){
+    if(stageGridObserver){stageGridObserver.disconnect();stageGridObserver=null;}
+    if(total<1)return;
+    loadStageSubgrid(0);
+    if(!('IntersectionObserver'in window))return;
+    const root=document.querySelector('#updateModal .modal-body');
+    stageGridObserver=new IntersectionObserver(entries=>{
+        entries.forEach(entry=>{
+            if(!entry.isIntersecting)return;
+            const index=Number(entry.target.dataset.stageLazy);
+            if(Number.isFinite(index))loadStageSubgrid(index);
+        });
+    },{root:root||null,rootMargin:'350px 0px',threshold:0.01});
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(!stageGridObserver||!modalEtapasBuilt)return;
+        for(let index=1;index<total;index++){
+            const node=document.getElementById(`subgrid-${index}`);
+            if(node)stageGridObserver.observe(node);
+        }
+    }));
 }
 
 function buildSubgrid(index,resps,unidades){
