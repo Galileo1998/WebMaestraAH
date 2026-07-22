@@ -1526,7 +1526,7 @@ let currentTaskData = null;
 let currentTaskButton = null;
 let modalEtapasBuilt = false;
 let stageGridPages={};
-const stageGridPageSize=5;
+const stageGridPageSize=<?php echo defined('AH_MONITOREO_V2') ? 2 : 5; ?>;
 let autosaveQueue = Promise.resolve();
 function enqueueAutosave(job){
     autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
