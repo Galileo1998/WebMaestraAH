@@ -1323,6 +1323,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .subgrid-card{box-shadow:none!important}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
 .stage-grid-pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-top:1px solid #e2e8f0}.stage-grid-pagination button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}.stage-grid-pagination button:disabled{opacity:.4;cursor:not-allowed}.stage-grid-pagination span{font-size:.78rem;color:#64748b;font-weight:800}
+.agenda-stage-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:10px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px}.agenda-stage-tabs button{border:1px solid #7dd3fc;background:#fff;color:#075985;border-radius:9px;padding:9px 14px;font-weight:900;cursor:pointer}.agenda-stage-tabs button.active{background:#075985;color:#fff;border-color:#075985}.agenda-stage-hidden{display:none!important}
 .monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
 </style>
 </head>
@@ -2482,6 +2483,9 @@ function buildEtapasTable(taskData){
     });
 
     $('#tabla_etapas_body').html(html);
+    $('#tabla_etapas_body').children('tr').each(function(position){
+        $(this).attr('data-agenda-stage',Math.floor(position/2));
+    });
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
     stageGridPages={};
     $('#agenda-stage-tabs').remove();
@@ -2499,33 +2503,22 @@ function loadStageSubgrid(index){
     requestAnimationFrame(()=>buildSubgrid(index,resps,unis));
 }
 
+function activateAgendaStage(index){
+    const rows=$('#tabla_etapas_body').children('tr');
+    rows.addClass('agenda-stage-hidden');
+    rows.filter(`[data-agenda-stage="${index}"]`).removeClass('agenda-stage-hidden');
+    $('#agenda-stage-tabs button').removeClass('active').filter(`[data-stage="${index}"]`).addClass('active');
+    loadStageSubgrid(index);
+    const modalBody=document.querySelector('#updateModal .modal-body');
+    if(modalBody)modalBody.scrollTop=Math.min(modalBody.scrollTop,document.getElementById('tab-etapas')?.offsetTop||0);
+}
+
 function scheduleStageSubgrids(total){
     if(stageGridObserver){stageGridObserver.disconnect();stageGridObserver=null;}
     if(total<1)return;
-    loadStageSubgrid(0);
-    if(!('IntersectionObserver'in window))return;
-    const root=document.querySelector('#updateModal .modal-body');
-    stageGridObserver=new IntersectionObserver(entries=>{
-        entries.forEach(entry=>{
-            if(!entry.isIntersecting)return;
-            const index=Number(entry.target.dataset.stageLazy);
-            if(!Number.isFinite(index)||stageLazyPending.has(index))return;
-            stageLazyPending.add(index);
-            const loadWhenFree=()=>{
-                stageLazyPending.delete(index);
-                if(modalEtapasBuilt&&document.getElementById(`subgrid-${index}`))loadStageSubgrid(index);
-            };
-            if('requestIdleCallback'in window)requestIdleCallback(loadWhenFree);
-            else setTimeout(loadWhenFree,250);
-        });
-    },{root:root||null,rootMargin:'350px 0px',threshold:0.01});
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        if(!stageGridObserver||!modalEtapasBuilt)return;
-        for(let index=1;index<total;index++){
-            const node=document.getElementById(`subgrid-${index}`);
-            if(node)stageGridObserver.observe(node);
-        }
-    }));
+    const labels=Array.from({length:total},(_,index)=>`<button type="button" data-stage="${index}" onclick="activateAgendaStage(${index})">E-${index+1}</button>`).join('');
+    $('#tab-etapas .stage-scroll').before(`<div id="agenda-stage-tabs" class="agenda-stage-tabs"><strong>Etapa:</strong>${labels}</div>`);
+    activateAgendaStage(0);
 }
 
 function buildSubgrid(index,resps,unidades){
