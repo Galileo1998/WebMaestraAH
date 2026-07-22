@@ -74,12 +74,27 @@ try {
             exit;
         }
         $rows = json_decode((string)$json, true);
-        if (!is_array($rows) || !isset($rows[$rowKey]) || !is_array($rows[$rowKey])) {
-            $db->rollBack();
-            http_response_code(404);
-            echo json_encode(['status'=>'error','msg'=>'La línea ya no existe.'], JSON_UNESCAPED_UNICODE);
-            exit;
+        if (!is_array($rows)) $rows = [];
+        if (!isset($rows[$rowKey]) || !is_array($rows[$rowKey])) {
+            if (($_POST['create'] ?? '0') !== '1') {
+                $db->rollBack();
+                http_response_code(404);
+                echo json_encode(['status'=>'error','msg'=>'La línea ya no existe.'], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            $rows[$rowKey] = ['persona'=>'','unidad'=>'','base'=>'','mes'=>'','verifics'=>[],'lugar'=>[],'centros'=>[],'deleted'=>false];
         }
+        if (array_key_exists('persona', $_POST)) $rows[$rowKey]['persona'] = trim((string)$_POST['persona']);
+        if (array_key_exists('unidad', $_POST)) $rows[$rowKey]['unidad'] = trim((string)$_POST['unidad']);
+        if (array_key_exists('base', $_POST)) $rows[$rowKey]['base'] = trim((string)$_POST['base']);
+        if (array_key_exists('mes', $_POST)) $rows[$rowKey]['mes'] = trim((string)$_POST['mes']);
+        foreach (['verifics','lugar'] as $arrayField) {
+            if (array_key_exists($arrayField, $_POST)) {
+                $decoded = json_decode((string)$_POST[$arrayField], true);
+                $rows[$rowKey][$arrayField] = is_array($decoded) ? array_values(array_unique(array_map('strval', $decoded))) : [];
+            }
+        }
+        if (array_key_exists('deleted', $_POST)) $rows[$rowKey]['deleted'] = (string)$_POST['deleted'] === '1';
         $rows[$rowKey]['a_lograr'] = max(0, (float)($_POST['a_lograr'] ?? 0));
         $rows[$rowKey]['cumplido'] = max(0, (float)($_POST['cumplido'] ?? 0));
         $rows[$rowKey]['a_tiempo'] = max(0, min(100, (float)($_POST['a_tiempo'] ?? 100)));
@@ -118,6 +133,20 @@ try {
         $stmt->execute($params);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode(['status'=>'ok','rows'=>$rows,'total'=>$total,'page'=>$page,'per_page'=>$perPage], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    if ($action === 'catalogs') {
+        $catalogs = [];
+        foreach (['responsables'=>'ah_cat_responsables','unidades'=>'ah_cat_unidades','lugares'=>'ah_cat_lugares'] as $key=>$table) {
+            try { $catalogs[$key] = $db->query("SELECT nombre FROM `{$table}` ORDER BY nombre ASC")->fetchAll(PDO::FETCH_COLUMN); }
+            catch (Throwable $ignored) { $catalogs[$key] = []; }
+        }
+        try { $catalogs['verificaciones'] = $db->query('SELECT nombre FROM ah_cat_verificaciones WHERE activo=1 ORDER BY nombre ASC')->fetchAll(PDO::FETCH_COLUMN); }
+        catch (Throwable $ignored) { try { $catalogs['verificaciones'] = $db->query('SELECT nombre FROM ah_cat_verificaciones ORDER BY nombre ASC')->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $ignoredAgain) { $catalogs['verificaciones'] = []; } }
+        try { $catalogs['tecnicos'] = $db->query('SELECT nombre FROM ah_tecnicos WHERE activo=1 ORDER BY nombre ASC')->fetchAll(PDO::FETCH_COLUMN); }
+        catch (Throwable $ignored) { $catalogs['tecnicos'] = []; }
+        $catalogs['responsables'] = array_values(array_unique(array_merge($catalogs['responsables'], $catalogs['tecnicos'])));
+        echo json_encode(['status'=>'ok','catalogs'=>$catalogs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
     if ($action !== 'task_detail') {
