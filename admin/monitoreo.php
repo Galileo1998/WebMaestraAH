@@ -1323,6 +1323,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .subgrid-wrapper{content-visibility:auto;contain-intrinsic-size:400px}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
 .stage-grid-pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-top:1px solid #e2e8f0}.stage-grid-pagination button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}.stage-grid-pagination button:disabled{opacity:.4;cursor:not-allowed}.stage-grid-pagination span{font-size:.78rem;color:#64748b;font-weight:800}
+.agenda-stage-tabs{display:flex;gap:8px;align-items:center;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-bottom:0;border-radius:10px 10px 0 0}.agenda-stage-tabs span{font-size:.78rem;font-weight:900;color:#64748b;margin-right:4px}.agenda-stage-tab{border:1px solid #bae6fd;background:#fff;color:#075985;border-radius:999px;padding:7px 13px;font-weight:900;cursor:pointer}.agenda-stage-tab.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}
 .monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
 </style>
 </head>
@@ -2480,7 +2481,11 @@ function buildEtapasTable(taskData){
     $('#tabla_etapas_body').html(html);
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
     stageGridPages={};
-    scheduleStageSubgrids(etapas.length);
+    $('#agenda-stage-tabs').remove();
+    const tabs=etapas.map((e,i)=>`<button type="button" class="agenda-stage-tab ${i===0?'active':''}" data-stage="${i}" onclick="selectAgendaStage(${i})">${escHtml(e.codigo_etapa||`E-${i+1}`)}</button>`).join('');
+    $('#etapas-main-table').before(`<div id="agenda-stage-tabs" class="agenda-stage-tabs"><span>Programación detallada:</span>${tabs}</div>`);
+    $('#tabla_etapas_body .stage-main-row').each(function(){$(this).next('tr').hide();});
+    setTimeout(()=>selectAgendaStage(0),30);
 }
 
 function loadStageSubgrid(index){
@@ -2492,10 +2497,14 @@ function loadStageSubgrid(index){
     buildSubgrid(index,resps,unis);
 }
 
-function scheduleStageSubgrids(total,index=0){
-    if(index>=total)return;
-    const run=()=>{if(!modalEtapasBuilt)return;loadStageSubgrid(index);setTimeout(()=>scheduleStageSubgrids(total,index+1),0);};
-    if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:250});else setTimeout(run,10);
+function selectAgendaStage(index){
+    $('.agenda-stage-tab').removeClass('active').filter(`[data-stage="${index}"]`).addClass('active');
+    $('#tabla_etapas_body .stage-main-row').each(function(i){$(this).next('tr').toggle(i===index);});
+    const cont=$(`#subgrid-${index}`);
+    if(cont.attr('data-built')!=='1'){
+        cont.html('<div style="padding:18px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando etapa...</div>');
+        requestAnimationFrame(()=>loadStageSubgrid(index));
+    }
 }
 
 function buildSubgrid(index,resps,unidades){
