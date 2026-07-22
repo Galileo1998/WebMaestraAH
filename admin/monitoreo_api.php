@@ -207,7 +207,7 @@ try {
         $offset = ($page - 1) * $perPage;
         $search = trim((string)($_GET['q'] ?? ''));
         $program = trim((string)($_GET['programa'] ?? ''));
-        $sector=trim((string)($_GET['sector']??''));$technician=trim((string)($_GET['tecnico']??''));$activityStatus=trim((string)($_GET['estado']??''));$month=trim((string)($_GET['mes']??''));$execution=trim((string)($_GET['ejecucion']??''));$hidden=(string)($_GET['ocultas']??'0')==='1';
+        $sector=trim((string)($_GET['sector']??''));$technician=trim((string)($_GET['tecnico']??''));$activityStatus=trim((string)($_GET['estado']??''));$month=trim((string)($_GET['mes']??''));$execution=trim((string)($_GET['ejecucion']??''));$hidden=(string)($_GET['ocultas']??'0')==='1';$hideAdmin=(string)($_GET['hide_admin']??'0')==='1';$hideZero=(string)($_GET['hide_zero']??'0')==='1';$mainOnly=(string)($_GET['main_only']??'0')==='1';
         $where = ['is_active=1', 'operativo_oculto='.($hidden?'1':'0')];
         $params = [];
         if ($search !== '') {
@@ -222,6 +222,7 @@ try {
         if($sector!==''){$where[]='sector=?';$params[]=$sector;}if($technician!==''){$where[]='(operativo_tecnico=? OR EXISTS(SELECT 1 FROM ah_poa_asignaciones a WHERE a.id_poa=ah_poa.id AND a.tecnico=?))';array_push($params,$technician,$technician);}if($activityStatus!==''){$where[]='operativo_estado=?';$params[]=$activityStatus;}
         $validMonths=['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'];if(in_array($month,$validMonths,true))$where[]="(op_act_{$month}>0 OR op_part_{$month}>0)";
         if($execution==='under')$where[]='operativo_meta_alc < operativo_meta_obj';elseif($execution==='over')$where[]='operativo_meta_alc > operativo_meta_obj';elseif($execution==='none')$where[]='COALESCE(operativo_meta_alc,0)=0';
+        if($hideAdmin&&$sector==='')$where[]="LOWER(COALESCE(sector,'')) NOT LIKE '%administr%' AND LOWER(COALESCE(sector,'')) NOT LIKE '%z_gastos%'";if($hideZero)$where[]='COALESCE(operativo_meta_obj,0)>0';if($mainOnly)$where[]="(UPPER(COALESCE(programa,'')) LIKE '%CRECER%' OR UPPER(COALESCE(programa,'')) LIKE '%REDES%' OR UPPER(COALESCE(programa,'')) LIKE '%TEJIENDO%')";
         $whereSql = implode(' AND ', $where);
         $count = $db->prepare("SELECT COUNT(*) FROM ah_poa WHERE {$whereSql}");
         $count->execute($params);
