@@ -1314,7 +1314,12 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .btn-archive-toggle:hover { background:#fee2e2; border-color:#fca5a5; }
 
 /* Evita calcular el diseño de subtablas que aún están fuera de pantalla. */
-.subgrid-wrapper{content-visibility:auto;contain-intrinsic-size:400px}
+.modal-overlay{backdrop-filter:none!important}
+.agenda-sticky{backdrop-filter:none!important;background:#f8fafc!important;box-shadow:none!important}
+.modal-body{overscroll-behavior:contain;scrollbar-gutter:stable;transform:translateZ(0)}
+.stage-scroll{contain:layout paint;overscroll-behavior:contain}
+.subgrid-wrapper{content-visibility:visible!important;contain-intrinsic-size:auto!important}
+.subgrid-card{box-shadow:none!important}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
 .stage-grid-pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-top:1px solid #e2e8f0}.stage-grid-pagination button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}.stage-grid-pagination button:disabled{opacity:.4;cursor:not-allowed}.stage-grid-pagination span{font-size:.78rem;color:#64748b;font-weight:800}
 .monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
