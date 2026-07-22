@@ -16,7 +16,7 @@ if (empty($_SESSION['monitoreo_v2_csrf'])) $_SESSION['monitoreo_v2_csrf'] = bin2
 <meta name="monitoreo-v2-csrf" content="<?php echo htmlspecialchars((string)$_SESSION['monitoreo_v2_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
 <title>Monitoreo Operativo V2 | Acción Honduras</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="../assets/css/monitoreo-v2.css?v=5">
+<link rel="stylesheet" href="../assets/css/monitoreo-v2.css?v=6">
 </head>
 <body class="monitoreo-v2">
 <?php include __DIR__ . '/sidebar.php'; ?>
@@ -30,6 +30,6 @@ if (empty($_SESSION['monitoreo_v2_csrf'])) $_SESSION['monitoreo_v2_csrf'] = bin2
 </main>
 <div id="v2-modal" class="v2-modal" hidden><div class="v2-dialog"><header><div><small id="v2-code"></small><h2 id="v2-title">Actividad</h2></div><button id="v2-close" aria-label="Cerrar">×</button></header><div id="v2-detail" class="v2-detail"></div></div></div>
 <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="../assets/js/monitoreo-v2.js?v=5" defer></script>
+<script src="../assets/js/monitoreo-v2.js?v=6" defer></script>
 </body>
 </html>
