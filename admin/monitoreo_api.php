@@ -15,13 +15,51 @@ try {
     $auth->checkAccess('monitoreo.php', $db);
 
     $action = (string)($_REQUEST['action'] ?? '');
-    if ($action === 'save_stage_row' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $requireV2Csrf = static function (): void {
         $csrf = (string)($_POST['csrf'] ?? '');
         if (empty($_SESSION['monitoreo_v2_csrf']) || !hash_equals((string)$_SESSION['monitoreo_v2_csrf'], $csrf)) {
-            http_response_code(403);
-            echo json_encode(['status'=>'error','msg'=>'Sesión de edición vencida.'], JSON_UNESCAPED_UNICODE);
-            exit;
+            throw new RuntimeException('Sesión de edición vencida.');
         }
+    };
+    if ($action === 'save_notes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();
+        $taskId = (int)($_POST['id_poa'] ?? 0);
+        $notes = (string)($_POST['info_adicional'] ?? '');
+        $stmt = $db->prepare('UPDATE ah_poa SET operativo_info_adicional=? WHERE id=? AND is_active=1');
+        $stmt->execute([$notes, $taskId]);
+        echo json_encode(['status'=>'ok'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if ($action === 'save_team_value' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();
+        $taskId = (int)($_POST['id_poa'] ?? 0);
+        $assignmentId = (int)($_POST['assignment_id'] ?? 0);
+        $month = (string)($_POST['month'] ?? '');
+        $kind = (string)($_POST['kind'] ?? '');
+        $value = max(0, (float)($_POST['value'] ?? 0));
+        $months = ['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'];
+        if (!in_array($month, $months, true) || !in_array($kind, ['meta','logro'], true)) throw new RuntimeException('Campo de asignación no válido.');
+        $db->beginTransaction();
+        $stmt = $db->prepare('SELECT * FROM ah_poa_asignaciones WHERE id=? AND id_poa=? LIMIT 1 FOR UPDATE');
+        $stmt->execute([$assignmentId, $taskId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) throw new RuntimeException('Asignación no encontrada.');
+        $row[$kind . '_' . $month] = $value;
+        $metaTotal = 0.0; $logroTotal = 0.0; $activeMonths = [];
+        foreach ($months as $m) {
+            $meta = (float)($row['meta_' . $m] ?? 0); $logro = (float)($row['logro_' . $m] ?? 0);
+            $metaTotal += $meta; $logroTotal += $logro;
+            if ($meta > 0 || $logro > 0) $activeMonths[] = $m;
+        }
+        $column = $kind . '_' . $month;
+        $stmt = $db->prepare("UPDATE ah_poa_asignaciones SET `{$column}`=?,meta_asignada=?,logro_asignado=?,meses_asignados=? WHERE id=? AND id_poa=?");
+        $stmt->execute([$value, $metaTotal, $logroTotal, implode(', ', $activeMonths), $assignmentId, $taskId]);
+        $db->commit();
+        echo json_encode(['status'=>'ok','meta_total'=>$metaTotal,'logro_total'=>$logroTotal], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if ($action === 'save_stage_row' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();
         $taskId = (int)($_POST['id_poa'] ?? 0);
         $stageId = (int)($_POST['stage_id'] ?? 0);
         $rowKey = (string)($_POST['row_key'] ?? '');
@@ -149,6 +187,6 @@ try {
     ]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (Throwable $e) {
     if (isset($db) && $db instanceof PDO && $db->inTransaction()) $db->rollBack();
-    http_response_code(500);
-    echo json_encode(['status' => 'error', 'msg' => 'No se pudo cargar la actividad.'], JSON_UNESCAPED_UNICODE);
+    http_response_code($e instanceof RuntimeException ? 422 : 500);
+    echo json_encode(['status' => 'error', 'msg' => $e instanceof RuntimeException ? $e->getMessage() : 'No se pudo completar la operación.'], JSON_UNESCAPED_UNICODE);
 }
