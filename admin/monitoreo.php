@@ -158,6 +158,12 @@ function saveActivitySnapshot(PDO $db, int $idPoa, string $evento): void {
     } catch (Throwable $e) {}
 }
 
+$monitoreoSchemaVersion = 0;
+try {
+    $monitoreoSchemaVersion = (int)$db->query('SELECT version FROM ah_monitoreo_schema WHERE id=1')->fetchColumn();
+} catch (Throwable $missingSchemaVersion) {}
+
+if ($monitoreoSchemaVersion < 1) {
 try {
     $db->exec("CREATE TABLE IF NOT EXISTS ah_monitoreo_historial (
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -250,8 +256,15 @@ try {
     addColIfNotExists($db, $tabla_poa, 'operativo_info_adicional', 'LONGTEXT NULL');
     addColIfNotExists($db, $tabla_poa, 'descripcion_actividad', 'TEXT NULL');
     addColIfNotExists($db, $tabla_poa, 'equipo_lugares_json', 'LONGTEXT NULL');
+    $db->exec("CREATE TABLE IF NOT EXISTS ah_monitoreo_schema (
+        id TINYINT PRIMARY KEY,
+        version INT NOT NULL DEFAULT 0,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $db->exec('INSERT INTO ah_monitoreo_schema(id,version) VALUES(1,1) ON DUPLICATE KEY UPDATE version=VALUES(version)');
 } catch (Throwable $e) {
     $msg = "<div class='alert error'>Error de migración: " . htmlspecialchars($e->getMessage()) . "</div>";
+}
 }
 
 $estados = ['Pendiente', 'En Proceso', 'Completado', 'Reprogramado', 'Cancelado'];
@@ -582,10 +595,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $meses_keys = ['jul'=>'Jul','aug'=>'Ago','sep'=>'Sep','oct'=>'Oct','nov'=>'Nov','dec'=>'Dic','jan'=>'Ene','feb'=>'Feb','mar'=>'Mar','apr'=>'Abr','may'=>'May','jun'=>'Jun'];
 try { $tareas = $db->query("SELECT * FROM {$tabla_poa} WHERE operativo_oculto = 0 ORDER BY id ASC LIMIT 2000")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas = []; }
 try { $tareas_ocultas = $db->query("SELECT id, descripcion_actividad, marco_logico, codigo_maestro FROM {$tabla_poa} WHERE operativo_oculto = 1 ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas_ocultas = []; }
-try { $asignaciones_raw = $db->query("SELECT * FROM ah_poa_asignaciones")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $asignaciones_raw = []; }
+try { $asignaciones_raw = $db->query("SELECT a.* FROM ah_poa_asignaciones a INNER JOIN ah_poa p ON p.id=a.id_poa WHERE p.is_active=1")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $asignaciones_raw = []; }
 $asignaciones_map = [];
 foreach ($asignaciones_raw as $a) $asignaciones_map[$a['id_poa']][] = $a;
-try { $etapas_raw = $db->query("SELECT * FROM ah_poa_etapas ORDER BY id_poa ASC, orden ASC, id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $etapas_raw = []; }
+try { $etapas_raw = $db->query("SELECT e.* FROM ah_poa_etapas e INNER JOIN ah_poa p ON p.id=e.id_poa WHERE p.is_active=1 ORDER BY e.id_poa ASC, e.orden ASC, e.id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $etapas_raw = []; }
 $etapas_map = [];
 foreach ($etapas_raw as $e) $etapas_map[$e['id_poa']][] = $e;
 try { $tecnicos_list = $db->query("SELECT nombre FROM ah_tecnicos WHERE activo=1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $e) { $tecnicos_list = []; }
