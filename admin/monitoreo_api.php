@@ -28,6 +28,24 @@ try {
         foreach ($emails as $email) { $email=trim((string)$email);if($email!==''){$st=$connection->prepare('SELECT id,email,password FROM users WHERE email=? LIMIT 1');$st->execute([$email]);if($row=$st->fetch(PDO::FETCH_ASSOC))return $row;} }
         return null;
     };
+    $saveSnapshot = static function (PDO $connection, int $taskId, string $event): void {
+        try {
+            $taskStmt=$connection->prepare('SELECT * FROM ah_poa WHERE id=? LIMIT 1');$taskStmt->execute([$taskId]);$task=$taskStmt->fetch(PDO::FETCH_ASSOC);if(!$task)return;
+            $assignmentStmt=$connection->prepare('SELECT * FROM ah_poa_asignaciones WHERE id_poa=? ORDER BY id');$assignmentStmt->execute([$taskId]);
+            $stageStmt=$connection->prepare('SELECT * FROM ah_poa_etapas WHERE id_poa=? ORDER BY orden,id');$stageStmt->execute([$taskId]);
+            $snapshot=['tarea'=>$task,'asignaciones'=>$assignmentStmt->fetchAll(PDO::FETCH_ASSOC),'etapas'=>$stageStmt->fetchAll(PDO::FETCH_ASSOC)];$json=json_encode($snapshot,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);if($json===false)return;$hash=hash('sha256',$json);
+            $last=$connection->prepare('SELECT estado_hash FROM ah_monitoreo_historial WHERE id_poa=? ORDER BY id DESC LIMIT 1');$last->execute([$taskId]);if(hash_equals((string)($last->fetchColumn()?:''),$hash))return;
+            $period=(string)($task['operativo_periodo']??'');$user=(string)($_SESSION['email']??$_SESSION['user_email']??$_SESSION['nombre']??'V2');$insert=$connection->prepare('INSERT INTO ah_monitoreo_historial (id_poa,periodo,evento,estado_json,estado_hash,usuario) VALUES(?,?,?,?,?,?)');$insert->execute([$taskId,$period,$event,$json,$hash,$user]);
+        } catch (Throwable $ignored) {}
+    };
+    if ($action === 'save_activity_meta' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();$taskId=(int)($_POST['id_poa']??0);$mode=(string)($_POST['mode']??'status');
+        if($mode==='hidden'){$hidden=(string)($_POST['hidden']??'0')==='1'?1:0;$stmt=$db->prepare('UPDATE ah_poa SET operativo_oculto=? WHERE id=? AND is_active=1');$stmt->execute([$hidden,$taskId]);$saveSnapshot($db,$taskId,$hidden?'ocultar':'restaurar');echo json_encode(['status'=>'ok','hidden'=>$hidden]);exit;}
+        $allowed=['Pendiente','En Proceso','Completado','Reprogramado','Cancelado'];$status=trim((string)($_POST['estado']??''));if(!in_array($status,$allowed,true))throw new RuntimeException('Estado no válido.');$stmt=$db->prepare('UPDATE ah_poa SET operativo_estado=? WHERE id=? AND is_active=1');$stmt->execute([$status,$taskId]);$saveSnapshot($db,$taskId,'estado');echo json_encode(['status'=>'ok','estado'=>$status],JSON_UNESCAPED_UNICODE);exit;
+    }
+    if ($action === 'add_catalog' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();$type=(string)($_POST['catalog_type']??'');$value=trim((string)($_POST['catalog_value']??''));$map=['responsable'=>'ah_cat_responsables','unidad'=>'ah_cat_unidades','verificacion'=>'ah_cat_verificaciones','lugar'=>'ah_cat_lugares'];if(!isset($map[$type])||$value==='')throw new RuntimeException('Dato de catálogo no válido.');$table=$map[$type];$stmt=$db->prepare("INSERT IGNORE INTO `{$table}` (nombre) VALUES (?)");$stmt->execute([$value]);echo json_encode(['status'=>'ok','value'=>$value],JSON_UNESCAPED_UNICODE);exit;
+    }
     if ($action === 'verify_goals_password' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $requireV2Csrf();
         $password=(string)($_POST['password']??'');if($password==='')throw new RuntimeException('Ingrese su contraseña.');
@@ -45,7 +63,7 @@ try {
         $values=[max(0,(float)($payload['m_act_obj']??0)),max(0,(float)($payload['m_act_alc']??0)),max(0,(float)($payload['m_part_obj']??0)),max(0,(float)($payload['m_part_alc']??0))];
         foreach($months as $month){$sets[]="op_act_{$month}=?";$values[]=max(0,(float)($payload['op_act'][$month]??0));$sets[]="op_part_{$month}=?";$values[]=max(0,(float)($payload['op_part'][$month]??0));$sets[]="op_editado_{$month}=1";}
         $values[]=$taskId;$stmt=$db->prepare('UPDATE ah_poa SET '.implode(',',$sets).' WHERE id=? AND is_active=1');$stmt->execute($values);
-        echo json_encode(['status'=>'ok'],JSON_UNESCAPED_UNICODE);exit;
+        $saveSnapshot($db,$taskId,'metas_v2');echo json_encode(['status'=>'ok'],JSON_UNESCAPED_UNICODE);exit;
     }
     if ($action === 'save_notes' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $requireV2Csrf();
@@ -53,7 +71,7 @@ try {
         $notes = (string)($_POST['info_adicional'] ?? '');
         $stmt = $db->prepare('UPDATE ah_poa SET operativo_info_adicional=? WHERE id=? AND is_active=1');
         $stmt->execute([$notes, $taskId]);
-        echo json_encode(['status'=>'ok'], JSON_UNESCAPED_UNICODE);
+        $saveSnapshot($db,$taskId,'notas_v2');echo json_encode(['status'=>'ok'], JSON_UNESCAPED_UNICODE);
         exit;
     }
     if ($action === 'save_team_value' && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -81,20 +99,20 @@ try {
         $stmt = $db->prepare("UPDATE ah_poa_asignaciones SET `{$column}`=?,meta_asignada=?,logro_asignado=?,meses_asignados=? WHERE id=? AND id_poa=?");
         $stmt->execute([$value, $metaTotal, $logroTotal, implode(', ', $activeMonths), $assignmentId, $taskId]);
         $db->commit();
-        echo json_encode(['status'=>'ok','meta_total'=>$metaTotal,'logro_total'=>$logroTotal], JSON_UNESCAPED_UNICODE);
+        $saveSnapshot($db,$taskId,'equipo_v2');echo json_encode(['status'=>'ok','meta_total'=>$metaTotal,'logro_total'=>$logroTotal], JSON_UNESCAPED_UNICODE);
         exit;
     }
     if ($action === 'save_team_assignment' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $requireV2Csrf();$taskId=(int)($_POST['id_poa']??0);$assignmentId=(int)($_POST['assignment_id']??0);$remove=(string)($_POST['remove']??'0')==='1';
-        if($remove&&$assignmentId>0){$stmt=$db->prepare('DELETE FROM ah_poa_asignaciones WHERE id=? AND id_poa=?');$stmt->execute([$assignmentId,$taskId]);echo json_encode(['status'=>'ok']);exit;}
+        if($remove&&$assignmentId>0){$stmt=$db->prepare('DELETE FROM ah_poa_asignaciones WHERE id=? AND id_poa=?');$stmt->execute([$assignmentId,$taskId]);$saveSnapshot($db,$taskId,'equipo_v2');echo json_encode(['status'=>'ok']);exit;}
         $tecnico=trim((string)($_POST['tecnico']??''));$base=trim((string)($_POST['base_asignada']??''));if($tecnico==='')throw new RuntimeException('Seleccione un técnico.');
         $stmt=$db->prepare("INSERT INTO ah_poa_asignaciones (id_poa,tecnico,base_asignada,meses_asignados,meta_asignada,logro_asignado,lugares_json) VALUES(?,?,?,'',0,0,'[]')");$stmt->execute([$taskId,$tecnico,$base]);
-        echo json_encode(['status'=>'ok','assignment_id'=>(int)$db->lastInsertId()],JSON_UNESCAPED_UNICODE);exit;
+        $assignmentId=(int)$db->lastInsertId();$saveSnapshot($db,$taskId,'equipo_v2');echo json_encode(['status'=>'ok','assignment_id'=>$assignmentId],JSON_UNESCAPED_UNICODE);exit;
     }
     if ($action === 'save_team_places' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $requireV2Csrf();$taskId=(int)($_POST['id_poa']??0);$places=json_decode((string)($_POST['places']??'[]'),true);if(!is_array($places))$places=[];$places=array_values(array_unique(array_filter(array_map('strval',$places),static fn($v)=>trim($v)!=='')));$json=json_encode($places,JSON_UNESCAPED_UNICODE);
         $db->beginTransaction();$stmt=$db->prepare('UPDATE ah_poa SET equipo_lugares_json=? WHERE id=? AND is_active=1');$stmt->execute([$json,$taskId]);$stmt=$db->prepare('UPDATE ah_poa_asignaciones SET lugares_json=? WHERE id_poa=?');$stmt->execute([$json,$taskId]);$db->commit();
-        echo json_encode(['status'=>'ok','places'=>$places],JSON_UNESCAPED_UNICODE);exit;
+        $saveSnapshot($db,$taskId,'lugares_equipo_v2');echo json_encode(['status'=>'ok','places'=>$places],JSON_UNESCAPED_UNICODE);exit;
     }
     if ($action === 'save_stage_row' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $requireV2Csrf();
@@ -142,8 +160,15 @@ try {
         $stmt = $db->prepare('UPDATE ah_poa_etapas SET involucrados_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND id_poa=?');
         $stmt->execute([json_encode($rows, JSON_UNESCAPED_UNICODE), $stageId, $taskId]);
         $db->commit();
-        echo json_encode(['status'=>'ok','row'=>$rows[$rowKey]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $saveSnapshot($db,$taskId,'agenda_v2');echo json_encode(['status'=>'ok','row'=>$rows[$rowKey]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
+    }
+    if ($action === 'save_center_row' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();$taskId=(int)($_POST['id_poa']??0);$stageId=(int)($_POST['stage_id']??0);$rowKey=(string)($_POST['row_key']??'');$centerId=(string)($_POST['center_id']??'');
+        if($rowKey===''||$centerId==='')throw new RuntimeException('Centro no válido.');$db->beginTransaction();$stmt=$db->prepare('SELECT involucrados_json FROM ah_poa_etapas WHERE id=? AND id_poa=? LIMIT 1 FOR UPDATE');$stmt->execute([$stageId,$taskId]);$rows=json_decode((string)$stmt->fetchColumn(),true);
+        if(!is_array($rows)||!isset($rows[$rowKey])||!is_array($rows[$rowKey]))throw new RuntimeException('Línea de agenda no encontrada.');if(!isset($rows[$rowKey]['centros'])||!is_array($rows[$rowKey]['centros']))$rows[$rowKey]['centros']=[];$center=$rows[$rowKey]['centros'][$centerId]??['id'=>$centerId];
+        foreach(['a_lograr','cumplido','pob_0_5','pob_6_17','pob_18_24'] as $field)$center[$field]=max(0,(float)($_POST[$field]??0));foreach(['a_tiempo','en_forma'] as $field)$center[$field]=max(0,min(100,(float)($_POST[$field]??100)));$center['quality_initialized']=true;$center['quality_version']=2;$rows[$rowKey]['centros'][$centerId]=$center;
+        $stmt=$db->prepare('UPDATE ah_poa_etapas SET involucrados_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND id_poa=?');$stmt->execute([json_encode($rows,JSON_UNESCAPED_UNICODE),$stageId,$taskId]);$db->commit();$saveSnapshot($db,$taskId,'centros_v2');echo json_encode(['status'=>'ok','center'=>$center],JSON_UNESCAPED_UNICODE);exit;
     }
     if ($action === 'task_list') {
         $page = max(1, (int)($_GET['page'] ?? 1));
@@ -151,7 +176,8 @@ try {
         $offset = ($page - 1) * $perPage;
         $search = trim((string)($_GET['q'] ?? ''));
         $program = trim((string)($_GET['programa'] ?? ''));
-        $where = ['is_active=1', 'operativo_oculto=0'];
+        $sector=trim((string)($_GET['sector']??''));$technician=trim((string)($_GET['tecnico']??''));$activityStatus=trim((string)($_GET['estado']??''));$month=trim((string)($_GET['mes']??''));$execution=trim((string)($_GET['ejecucion']??''));$hidden=(string)($_GET['ocultas']??'0')==='1';
+        $where = ['is_active=1', 'operativo_oculto='.($hidden?'1':'0')];
         $params = [];
         if ($search !== '') {
             $where[] = '(descripcion_actividad LIKE ? OR marco_logico LIKE ? OR codigo_maestro LIKE ?)';
@@ -162,6 +188,9 @@ try {
             $where[] = 'programa=?';
             $params[] = $program;
         }
+        if($sector!==''){$where[]='sector=?';$params[]=$sector;}if($technician!==''){$where[]='(operativo_tecnico=? OR EXISTS(SELECT 1 FROM ah_poa_asignaciones a WHERE a.id_poa=ah_poa.id AND a.tecnico=?))';array_push($params,$technician,$technician);}if($activityStatus!==''){$where[]='operativo_estado=?';$params[]=$activityStatus;}
+        $validMonths=['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'];if(in_array($month,$validMonths,true))$where[]="(op_act_{$month}>0 OR op_part_{$month}>0)";
+        if($execution==='under')$where[]='operativo_meta_alc < operativo_meta_obj';elseif($execution==='over')$where[]='operativo_meta_alc > operativo_meta_obj';elseif($execution==='none')$where[]='COALESCE(operativo_meta_alc,0)=0';
         $whereSql = implode(' AND ', $where);
         $count = $db->prepare("SELECT COUNT(*) FROM ah_poa WHERE {$whereSql}");
         $count->execute($params);
@@ -183,6 +212,7 @@ try {
         catch (Throwable $ignored) { try { $catalogs['verificaciones'] = $db->query('SELECT nombre FROM ah_cat_verificaciones ORDER BY nombre ASC')->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $ignoredAgain) { $catalogs['verificaciones'] = []; } }
         try { $catalogs['tecnicos'] = $db->query('SELECT nombre FROM ah_tecnicos WHERE activo=1 ORDER BY nombre ASC')->fetchAll(PDO::FETCH_COLUMN); }
         catch (Throwable $ignored) { $catalogs['tecnicos'] = []; }
+        try { $catalogs['sectores']=$db->query("SELECT DISTINCT sector FROM ah_poa WHERE is_active=1 AND sector IS NOT NULL AND sector<>'' ORDER BY sector")->fetchAll(PDO::FETCH_COLUMN); } catch(Throwable $ignored){$catalogs['sectores']=[];}
         $catalogs['responsables'] = array_values(array_unique(array_merge($catalogs['responsables'], $catalogs['tecnicos'])));
         try { $catalogs['tecnicos_bases']=$db->query("SELECT DISTINCT t.nombre,COALESCE(b.nombre_base,'') AS nombre_base FROM ah_tecnicos t LEFT JOIN ah_bases_geograficas b ON t.identidad=b.identidad_tecnico WHERE t.activo=1 ORDER BY t.nombre,b.nombre_base")->fetchAll(PDO::FETCH_ASSOC); }
         catch(Throwable $ignored){$catalogs['tecnicos_bases']=array_map(static fn($name)=>['nombre'=>$name,'nombre_base'=>''],$catalogs['tecnicos']);}
