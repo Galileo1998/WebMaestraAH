@@ -1322,7 +1322,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 /* Evita calcular el diseño de subtablas que aún están fuera de pantalla. */
 .subgrid-wrapper{content-visibility:auto;contain-intrinsic-size:400px}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
-.stage-main-row.stage-collapsible{cursor:pointer}.stage-main-row.stage-collapsible:hover td{background:#f0f9ff}.stage-main-row.stage-open td{background:#e0f2fe}.stage-main-row.stage-collapsible .stage-code::after{content:' Abrir';display:block;font-size:.62rem;color:#0284c7;margin-top:4px}.stage-main-row.stage-open .stage-code::after{content:' Cerrar'}
+.stage-grid-pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-top:1px solid #e2e8f0}.stage-grid-pagination button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}.stage-grid-pagination button:disabled{opacity:.4;cursor:not-allowed}.stage-grid-pagination span{font-size:.78rem;color:#64748b;font-weight:800}
 .monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
 </style>
 </head>
@@ -1535,6 +1535,8 @@ let hideNoBaseRowState = true;
 let currentTaskData = null;
 let currentTaskButton = null;
 let modalEtapasBuilt = false;
+let stageGridPages={};
+const stageGridPageSize=10;
 let autosaveQueue = Promise.resolve();
 function enqueueAutosave(job){
     autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
@@ -2477,14 +2479,8 @@ function buildEtapasTable(taskData){
 
     $('#tabla_etapas_body').html(html);
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
-    $('#tabla_etapas_body .stage-main-row').each(function(index){
-        $(this).addClass('stage-collapsible').attr({'role':'button','tabindex':'0'}).on('click keydown',function(event){
-            if(event.type==='keydown'&&event.key!=='Enter'&&event.key!==' ')return;
-            if($(event.target).closest('input,button,a,.custom-multiselect').length)return;
-            event.preventDefault();toggleStagePanel(index);
-        });
-        $(this).next('tr').hide().find(`#subgrid-${index}`).empty();
-    });
+    stageGridPages={};
+    scheduleStageSubgrids(etapas.length);
 }
 
 function loadStageSubgrid(index){
@@ -2496,15 +2492,10 @@ function loadStageSubgrid(index){
     buildSubgrid(index,resps,unis);
 }
 
-function toggleStagePanel(index){
-    const mainRows=$('#tabla_etapas_body .stage-main-row'),target=mainRows.eq(index),detail=target.next('tr'),cont=$(`#subgrid-${index}`),wasOpen=target.hasClass('stage-open');
-    mainRows.removeClass('stage-open').each(function(){$(this).next('tr').hide();});
-    if(wasOpen)return;
-    target.addClass('stage-open');detail.show();
-    if(cont.attr('data-built')!=='1'){
-        cont.html('<div style="padding:18px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando programación...</div>');
-        requestAnimationFrame(()=>loadStageSubgrid(index));
-    }
+function scheduleStageSubgrids(total,index=0){
+    if(index>=total)return;
+    const run=()=>{if(!modalEtapasBuilt)return;loadStageSubgrid(index);setTimeout(()=>scheduleStageSubgrids(total,index+1),0);};
+    if('requestIdleCallback'in window)requestIdleCallback(run,{timeout:250});else setTimeout(run,10);
 }
 
 function buildSubgrid(index,resps,unidades){
@@ -2517,11 +2508,17 @@ function buildSubgrid(index,resps,unidades){
     let html=`<div class="subgrid-wrapper"><div class="subgrid-card"><div class="subgrid-header subgrid-toolbar"><h5><i class="fa-solid fa-users-viewfinder"></i> Programación por responsable y unidad</h5><div style="display:flex;align-items:center;gap:8px"><span class="sticky-mini-note"><i class="fa-solid fa-calendar-days"></i> Mes actual: <b>${escHtml((mesesEquipo.find(x=>x.k===currentTeamMonth)||{}).n||currentTeamMonth)}</b></span><button type="button" class="btn-action btn-mini btn-xlsx" onclick="exportClosestTable(this,'etapa_${index+1}_responsables')"><i class="fa-solid fa-file-excel"></i></button></div></div><table class="subgrid-table"><thead><tr><th style="width:22%">Responsable</th><th style="width:10%">Unidad</th><th style="width:9%">PROG.</th><th style="width:9%">CUMPL.</th><th style="width:9%">A tiempo (%)</th><th style="width:9%">En forma (%)</th><th style="width:8%">%</th><th style="width:15%">Medios verificación</th><th style="width:11%">Lugar</th><th style="width:86px">Acción</th>${index===2?'<th style="width:92px">Detalle</th>':''}</tr></thead><tbody>`;
 
     let hiddenHoldersHtml = '';
+    const totalCombinations=resps.length*unidades.length,totalPages=Math.max(1,Math.ceil(totalCombinations/stageGridPageSize));
+    const currentPage=Math.min(Math.max(1,stageGridPages[index]||1),totalPages),start=(currentPage-1)*stageGridPageSize,end=start+stageGridPageSize;
+    stageGridPages[index]=currentPage;
+    let combinationIndex=0;
 
     resps.forEach(p=>{
         let bases=getBasesByTecnico(p);
         let basesVisibles=bases.filter(b=>String(b||'').trim()!=='');
         unidades.forEach(u=>{
+            const position=combinationIndex++;
+            if(position<start||position>=end)return;
             let key=rowKey(p+'|__ALLBASES',u);
             let d=getSaved(index,key);
 
@@ -2569,10 +2566,18 @@ function buildSubgrid(index,resps,unidades){
         });
     });
 
-    html+='</tbody></table>' + hiddenHoldersHtml + '</div></div>';
+    html+='</tbody></table>' + hiddenHoldersHtml;
+    if(totalPages>1)html+=`<div class="stage-grid-pagination"><button type="button" onclick="changeStageGridPage(${index},${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button><span>${start+1}-${Math.min(end,totalCombinations)} de ${totalCombinations}</span><button type="button" onclick="changeStageGridPage(${index},${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button></div>`;
+    html+='</div></div>';
     cont.html(html).show();
     cont.find('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
     updateActivityProgress();
+}
+function changeStageGridPage(index,page){
+    captureCurrentInvData(index);
+    stageGridPages[index]=page;
+    const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`),unidades=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
+    buildSubgrid(index,resps,unidades);
 }
 function deleteInvRow(index,key){
     if(!window.savedInvData[index]) window.savedInvData[index]={};
