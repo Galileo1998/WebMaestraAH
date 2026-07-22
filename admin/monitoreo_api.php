@@ -15,6 +15,34 @@ try {
     $auth->checkAccess('monitoreo.php', $db);
 
     $action = (string)($_GET['action'] ?? '');
+    if ($action === 'task_list') {
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $perPage = min(50, max(10, (int)($_GET['per_page'] ?? 20)));
+        $offset = ($page - 1) * $perPage;
+        $search = trim((string)($_GET['q'] ?? ''));
+        $program = trim((string)($_GET['programa'] ?? ''));
+        $where = ['is_active=1', 'operativo_oculto=0'];
+        $params = [];
+        if ($search !== '') {
+            $where[] = '(descripcion_actividad LIKE ? OR marco_logico LIKE ? OR codigo_maestro LIKE ?)';
+            $needle = '%' . $search . '%';
+            array_push($params, $needle, $needle, $needle);
+        }
+        if ($program !== '') {
+            $where[] = 'programa=?';
+            $params[] = $program;
+        }
+        $whereSql = implode(' AND ', $where);
+        $count = $db->prepare("SELECT COUNT(*) FROM ah_poa WHERE {$whereSql}");
+        $count->execute($params);
+        $total = (int)$count->fetchColumn();
+        $sql = "SELECT id,codigo_maestro,descripcion_actividad,marco_logico,programa,sector,operativo_tecnico,operativo_comunidad,operativo_estado,meta_actividades,meta_actividades_alc,operativo_meta_obj,operativo_meta_alc FROM ah_poa WHERE {$whereSql} ORDER BY id ASC LIMIT {$perPage} OFFSET {$offset}";
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode(['status'=>'ok','rows'=>$rows,'total'=>$total,'page'=>$page,'per_page'=>$perPage], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
     if ($action !== 'task_detail') {
         http_response_code(400);
         echo json_encode(['status' => 'error', 'msg' => 'Acción no válida.'], JSON_UNESCAPED_UNICODE);
