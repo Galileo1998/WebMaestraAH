@@ -84,6 +84,18 @@ try {
         echo json_encode(['status'=>'ok','meta_total'=>$metaTotal,'logro_total'=>$logroTotal], JSON_UNESCAPED_UNICODE);
         exit;
     }
+    if ($action === 'save_team_assignment' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();$taskId=(int)($_POST['id_poa']??0);$assignmentId=(int)($_POST['assignment_id']??0);$remove=(string)($_POST['remove']??'0')==='1';
+        if($remove&&$assignmentId>0){$stmt=$db->prepare('DELETE FROM ah_poa_asignaciones WHERE id=? AND id_poa=?');$stmt->execute([$assignmentId,$taskId]);echo json_encode(['status'=>'ok']);exit;}
+        $tecnico=trim((string)($_POST['tecnico']??''));$base=trim((string)($_POST['base_asignada']??''));if($tecnico==='')throw new RuntimeException('Seleccione un técnico.');
+        $stmt=$db->prepare("INSERT INTO ah_poa_asignaciones (id_poa,tecnico,base_asignada,meses_asignados,meta_asignada,logro_asignado,lugares_json) VALUES(?,?,?,'',0,0,'[]')");$stmt->execute([$taskId,$tecnico,$base]);
+        echo json_encode(['status'=>'ok','assignment_id'=>(int)$db->lastInsertId()],JSON_UNESCAPED_UNICODE);exit;
+    }
+    if ($action === 'save_team_places' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $requireV2Csrf();$taskId=(int)($_POST['id_poa']??0);$places=json_decode((string)($_POST['places']??'[]'),true);if(!is_array($places))$places=[];$places=array_values(array_unique(array_filter(array_map('strval',$places),static fn($v)=>trim($v)!=='')));$json=json_encode($places,JSON_UNESCAPED_UNICODE);
+        $db->beginTransaction();$stmt=$db->prepare('UPDATE ah_poa SET equipo_lugares_json=? WHERE id=? AND is_active=1');$stmt->execute([$json,$taskId]);$stmt=$db->prepare('UPDATE ah_poa_asignaciones SET lugares_json=? WHERE id_poa=?');$stmt->execute([$json,$taskId]);$db->commit();
+        echo json_encode(['status'=>'ok','places'=>$places],JSON_UNESCAPED_UNICODE);exit;
+    }
     if ($action === 'save_stage_row' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $requireV2Csrf();
         $taskId = (int)($_POST['id_poa'] ?? 0);
@@ -172,6 +184,8 @@ try {
         try { $catalogs['tecnicos'] = $db->query('SELECT nombre FROM ah_tecnicos WHERE activo=1 ORDER BY nombre ASC')->fetchAll(PDO::FETCH_COLUMN); }
         catch (Throwable $ignored) { $catalogs['tecnicos'] = []; }
         $catalogs['responsables'] = array_values(array_unique(array_merge($catalogs['responsables'], $catalogs['tecnicos'])));
+        try { $catalogs['tecnicos_bases']=$db->query("SELECT DISTINCT t.nombre,COALESCE(b.nombre_base,'') AS nombre_base FROM ah_tecnicos t LEFT JOIN ah_bases_geograficas b ON t.identidad=b.identidad_tecnico WHERE t.activo=1 ORDER BY t.nombre,b.nombre_base")->fetchAll(PDO::FETCH_ASSOC); }
+        catch(Throwable $ignored){$catalogs['tecnicos_bases']=array_map(static fn($name)=>['nombre'=>$name,'nombre_base'=>''],$catalogs['tecnicos']);}
         echo json_encode(['status'=>'ok','catalogs'=>$catalogs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
