@@ -1316,9 +1316,10 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 /* Evita calcular el diseño de subtablas que aún están fuera de pantalla. */
 .modal-overlay{backdrop-filter:none!important}
 .agenda-sticky{backdrop-filter:none!important;background:#f8fafc!important;box-shadow:none!important}
-.modal-body{overscroll-behavior:contain;scrollbar-gutter:stable;transform:translateZ(0)}
-.stage-scroll{contain:layout paint;overscroll-behavior:contain}
-.subgrid-wrapper{content-visibility:visible!important;contain-intrinsic-size:auto!important}
+.modal-body{overscroll-behavior:contain;scrollbar-gutter:stable;transform:none!important}
+#tab-etapas .stage-scroll{contain:none!important;overscroll-behavior:auto}
+#tab-etapas .subgrid-wrapper{content-visibility:auto!important;contain-intrinsic-size:auto 520px!important}
+#tab-etapas .subgrid-card{box-shadow:none!important}
 .subgrid-card{box-shadow:none!important}
 .data-card.filtered-out,.data-card.paged-out{display:none!important}
 .stage-grid-pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-top:1px solid #e2e8f0}.stage-grid-pagination button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}.stage-grid-pagination button:disabled{opacity:.4;cursor:not-allowed}.stage-grid-pagination span{font-size:.78rem;color:#64748b;font-weight:800}
@@ -1526,9 +1527,10 @@ let currentTaskData = null;
 let currentTaskButton = null;
 let modalEtapasBuilt = false;
 let stageGridPages={};
-const stageGridPageSize=<?php echo defined('AH_MONITOREO_V2') ? 2 : 5; ?>;
+const stageGridPageSize=3;
 let stageGridObserver=null;
 const stageRebuildTimers={};
+const stageLazyPending=new Set();
 let autosaveQueue = Promise.resolve();
 function enqueueAutosave(job){
     autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
@@ -2507,7 +2509,14 @@ function scheduleStageSubgrids(total){
         entries.forEach(entry=>{
             if(!entry.isIntersecting)return;
             const index=Number(entry.target.dataset.stageLazy);
-            if(Number.isFinite(index))loadStageSubgrid(index);
+            if(!Number.isFinite(index)||stageLazyPending.has(index))return;
+            stageLazyPending.add(index);
+            const loadWhenFree=()=>{
+                stageLazyPending.delete(index);
+                if(modalEtapasBuilt&&document.getElementById(`subgrid-${index}`))loadStageSubgrid(index);
+            };
+            if('requestIdleCallback'in window)requestIdleCallback(loadWhenFree);
+            else setTimeout(loadWhenFree,250);
         });
     },{root:root||null,rootMargin:'350px 0px',threshold:0.01});
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
