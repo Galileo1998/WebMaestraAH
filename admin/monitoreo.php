@@ -1313,6 +1313,8 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .btn-archive-toggle { background:#fff1f2; color:#991b1b; border-color:#fecaca; }
 .btn-archive-toggle:hover { background:#fee2e2; border-color:#fca5a5; }
 
+/* Evita calcular el diseño de subtablas que aún están fuera de pantalla. */
+.subgrid-wrapper{content-visibility:auto;contain-intrinsic-size:400px}
 </style>
 </head>
 <body>
@@ -1510,6 +1512,13 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 </div>
 <div id="autosave-indicator" class="autosave-indicator"></div>
 <script>
+const _normCache = {};
+function normalizarTxt(v){
+    if(!v) return '';
+    const str=String(v).trim();
+    if(Object.prototype.hasOwnProperty.call(_normCache,str)) return _normCache[str];
+    return _normCache[str]=str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
 window.savedInvData = {};
 let showAllTeamMonths = false;
 let hideNoBaseRowState = true;
@@ -1566,7 +1575,6 @@ function getFilteredCatalog(catalogRaw, prog, stg) {
 }
 
 function escHtml(str){if(str===null||str===undefined)return'';return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-function normalizarTxt(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function formatNum(n){return (parseFloat(n)||0).toLocaleString('es-HN',{maximumFractionDigits:1});}
 function pctClass(p){p=parseFloat(p)||0;if(p<=0)return'pct-gray';if(p<50)return'pct-red';if(p<85)return'pct-yellow';if(p<100)return'pct-softgreen';return'pct-darkgreen';}
 function calcPct(aTiempo,enForma){return Math.max(0,Math.min(100,((parseFloat(aTiempo)||0)+(parseFloat(enForma)||0))/2));}
@@ -1802,6 +1810,23 @@ $(document).ready(function(){const monthKeys=['jan','feb','mar','apr','may','jun
 });
 function getFechaMaximaEtapa(index){let d=new Date(),y=d.getFullYear(),m=d.getMonth();if(index===0)return `${y}-${String(m+1).padStart(2,'0')}-03`;if(index===1)return `${y}-${String(m+1).padStart(2,'0')}-06`;if(index===2)return `${y}-${String(m+1).padStart(2,'0')}-20`;let last=new Date(y,m+1,0).getDate();return `${y}-${String(m+1).padStart(2,'0')}-${String(last).padStart(2,'0')}`;}
 
+let _centrosIndex=null;
+function preprocesarCentros(){
+    if(_centrosIndex) return;
+    _centrosIndex={};
+    centrosCatalogo.forEach(c=>{
+        const base=normalizarTxt(c.comunidad_base),tipo=normalizarTxt(c.tipo);
+        let cat='otro';
+        if(tipo.includes('preescolar')) cat='preescolar';
+        else if(tipo.includes('adn')) cat='adn';
+        else if(tipo.includes('uaps')||tipo.includes('cis')) cat='uaps/cis';
+        else if(tipo.includes('basica')||tipo.includes('media')||tipo.includes('educativo')) cat='basica';
+        const key=base+'|'+cat;
+        (_centrosIndex[key]||(_centrosIndex[key]=[])).push(c);
+    });
+    Object.values(_centrosIndex).forEach(rows=>rows.sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||''),'es',{sensitivity:'base'})));
+}
+
 function lugarToTipo(lugar){
     const l=normalizarTxt(Array.isArray(lugar)?lugar[0]:lugar);
     if(!l) return '';
@@ -1818,19 +1843,11 @@ function getBasesByTecnico(tecnico){let bases=tecnicosBases.filter(x=>x.nombre==
 function getBaseByTecnico(tecnico){let bases=getBasesByTecnico(tecnico).filter(Boolean);return bases.length?bases[0]:'';}
 
 function getCentrosPorTecnicoYLugar(baseTecnico,lugarRaw){
+    preprocesarCentros();
     const base=normalizarTxt(baseTecnico);
     const tipoReq=lugarToTipo(lugarRaw);
     if(!base || !tipoReq) return [];
-    return centrosCatalogo.filter(c=>{
-        const tipo=normalizarTxt(c.tipo);
-        const comunidad=normalizarTxt(c.comunidad_base);
-        if(comunidad!==base) return false;
-        if(tipoReq==='preescolar') return tipo.includes('preescolar');
-        if(tipoReq==='adn') return tipo.includes('adn');
-        if(tipoReq==='uaps/cis') return tipo.includes('uaps')||tipo.includes('cis');
-        if(tipoReq==='basica') return tipo.includes('basica')||tipo.includes('media')||tipo.includes('educativo');
-        return false;
-    }).sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||''),'es',{sensitivity:'base'}));
+    return _centrosIndex[base+'|'+tipoReq]||[];
 }
 
 // FUNCION DE POBLACION INTELIGENTE SEGÚN LA UNIDAD DE LA ETAPA 3
@@ -1994,6 +2011,7 @@ function dragFillDrop(ev,box){
 
     updateMultiselectText(panel[0]);
 
+    setTimeout(() => {
     if(payload.type==='responsable'||payload.type==='unidad'){
         triggerAgendaRebuild(idx);
     }else if(payload.type==='lugar_sub'){
@@ -2015,6 +2033,7 @@ function dragFillDrop(ev,box){
     }
 
     scheduleFullAutosave();
+    }, 10);
 }
 $(document).on('mousedown click','.custom-multiselect,.multiselect-dropdown-panel,.multiselect-option,.multiselect-add-new-btn',function(e){e.stopPropagation();});
 
@@ -2051,6 +2070,7 @@ $(document).on('change','.multiselect-dropdown-panel input',function(e){
         }
     }
 
+    setTimeout(() => {
     if(type==='responsable' || type==='unidad'){
         try{ triggerAgendaRebuild(idx); }catch(ex){}
     }else if(type==='lugar_sub'){
@@ -2070,6 +2090,7 @@ $(document).on('change','.multiselect-dropdown-panel input',function(e){
         captureCurrentInvData(idx);
     }
     scheduleFullAutosave();
+    }, 10);
 });
 $(document).on('mousedown',function(e){if(!$(e.target).closest('.custom-multiselect,.multiselect-dropdown-panel').length)$('.multiselect-dropdown-panel').hide();});
 function selectedFromPanel(selector){return $(selector).find('input:checked').map(function(){return $(this).val();}).get();}
@@ -2152,7 +2173,7 @@ function combineSavedForBases(index, persona, bases, unidad){
     }
     return has?combined:{};
 }
-function centrosByBasesYLugares(bases,lugares){let centros=[];(lugares||[]).forEach(l=>{(bases||['']).forEach(base=>{centros=centros.concat(getCentrosPorTecnicoYLugar(base,l));});});let seen={};return centros.filter(c=>{if(seen[c.id])return false;seen[c.id]=1;return true;});}
+function centrosByBasesYLugares(bases,lugares){let centros=[],seen=new Set();(lugares||[]).forEach(l=>{(bases||['']).forEach(base=>{getCentrosPorTecnicoYLugar(base,l).forEach(c=>{if(!seen.has(c.id)){seen.add(c.id);centros.push(c);}});});});return centros;}
 function sumMatriculaCentros(centros){return (centros||[]).reduce((acc,c)=>acc+(parseFloat(c.pob_total)||0),0);}
 
 function readHiddenCenters(index,key){
@@ -2700,6 +2721,7 @@ function openUpdateModal(btn){
         currentTaskButton = btn;
 
         document.getElementById('updateModal').style.display = 'flex';
+        $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:40px"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--ah-primary)"></i><br><br>Cargando programación...</td></tr>');
 
         $('#upd_task_id').val(task.id);
         $('#btn-historial-actividad').attr('href',`historial_actividad.php?id=${encodeURIComponent(task.id)}`);
@@ -2719,18 +2741,15 @@ function openUpdateModal(btn){
         if (task.extension) { $('#lbl_ext_modal').show().find('span').text(task.extension); }
         else { $('#lbl_ext_modal').hide(); }
 
-        fillMonths(task);
-        buildTeamTable(task);
-        buildEtapasTable(task);
-        updateActivityProgress();
-
-        if (typeof tinymce !== 'undefined' && tinymce.get('upd_info_adicional')) {
-            tinymce.get('upd_info_adicional').setContent(task.info_adicional || '');
-        } else {
-            $('#upd_info_adicional').val(task.info_adicional || '');
-        }
-
-        switchModalTab('tab-equipo');
+        setTimeout(()=>{
+            fillMonths(task);
+            buildTeamTable(task);
+            buildEtapasTable(task);
+            updateActivityProgress();
+            if(typeof tinymce!=='undefined'&&tinymce.get('upd_info_adicional')) tinymce.get('upd_info_adicional').setContent(task.info_adicional||'');
+            else $('#upd_info_adicional').val(task.info_adicional||'');
+            switchModalTab('tab-equipo');
+        },50);
     } catch (err) {
         console.error('Error al abrir modal de monitoreo:', err);
         alert('No se pudo abrir el panel. Error: ' + err.message);
