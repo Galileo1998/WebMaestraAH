@@ -525,6 +525,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $unidades = isset($_POST['etapa_unidades'][$i]) ? json_encode($_POST['etapa_unidades'][$i], JSON_UNESCAPED_UNICODE) : '[]';
                 $resps = isset($_POST['etapa_resps'][$i]) ? json_encode($_POST['etapa_resps'][$i], JSON_UNESCAPED_UNICODE) : '[]';
                 $inv = [];
+                if (!empty($_POST['etapa_involucrados_json'][$i])) {
+                    $invPrev = json_decode((string)$_POST['etapa_involucrados_json'][$i], true);
+                    if (is_array($invPrev)) $inv = $invPrev;
+                }
                 if (isset($_POST['inv_alograr'][$i])) {
                     foreach ($_POST['inv_alograr'][$i] as $key => $aLograr) {
                         $centrosPrev = [];
@@ -2203,9 +2207,10 @@ function captureCurrentInvData(index){
             }
         }
     });
+    $(`input[data-etapa-json="${index}"]`).val(JSON.stringify(window.savedInvData[index]||{}));
 }
 
-function triggerAgendaRebuild(index){captureCurrentInvData(index);let resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);let unidades=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);buildSubgrid(index,resps,unidades);}
+function triggerAgendaRebuild(index){captureCurrentInvData(index);const cont=$(`#subgrid-${index}`);if(cont.attr('data-built')!=='1')return;let resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);let unidades=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);buildSubgrid(index,resps,unidades);}
 function rowKey(persona,unidad){return btoa(unescape(encodeURIComponent(persona+'|'+unidad))).replace(/=/g,'');}
 function getSaved(index,key){return (window.savedInvData[index]&&window.savedInvData[index][key])?window.savedInvData[index][key]:{};}
 function mergeUniqueArrays(a,b){a=Array.isArray(a)?a:[];b=Array.isArray(b)?b:[];return [...new Set([...a,...b])];}
@@ -2450,15 +2455,23 @@ function buildEtapasTable(taskData){
         let filteredUnis = getFilteredCatalog(masterUnidadesRaw, currentProg, `E-${i+1}`);
         let rowUnis = [...new Set([...filteredUnis, ...unis])];
 
-        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" style="display:none"></div></td></tr>`;
+        const savedJson=JSON.stringify(window.savedInvData[i]||{});
+        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"><input type="hidden" name="etapa_involucrados_json[]" data-etapa-json="${i}" value="${escHtml(savedJson)}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" data-built="0"><div style="padding:12px;text-align:center"><button type="button" class="btn-action" onclick="loadStageSubgrid(${i},this)"><i class="fa-solid fa-table-list"></i> Mostrar programación de esta etapa</button></div></div></td></tr>`;
     });
 
     $('#tabla_etapas_body').html(html);
     $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
-    etapas.forEach((e,i)=>{
-        let resps=selectedFromPanel(`.panel-responsable-box[data-index="${i}"]`);
-        let unis=selectedFromPanel(`.panel-unidad-box[data-index="${i}"]`);
-        buildSubgrid(i,resps,unis);
+}
+
+function loadStageSubgrid(index,button){
+    const cont=$(`#subgrid-${index}`);
+    if(cont.attr('data-built')==='1')return;
+    cont.attr('data-built','1');
+    if(button)$(button).prop('disabled',true).html('<i class="fa-solid fa-spinner fa-spin"></i> Cargando...');
+    requestAnimationFrame(()=>{
+        const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
+        const unis=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
+        buildSubgrid(index,resps,unis);
     });
 }
 
