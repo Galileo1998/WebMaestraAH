@@ -1,9 +1,18 @@
 <?php
 // BUILD: MONITOREO_OPERATIVO_V3_OPTIMIZADO_AJAX_UPSERT
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+ini_set('log_errors', '1');
 error_reporting(E_ALL);
 
+if (session_status() === PHP_SESSION_NONE) {
+    $monitoreoHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ((int)($_SERVER['SERVER_PORT'] ?? 0) === 443);
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.cookie_secure', $monitoreoHttps ? '1' : '0');
+}
 session_start();
 require_once __DIR__ . '/../config/Database.php';
 require_once dirname(__DIR__) . '/classes/Auth.php';
@@ -171,6 +180,13 @@ function requireMonitoreoCsrf(string $expected): void {
     if ($csrf === '' || !hash_equals($expected, $csrf)) {
         throw new RuntimeException('La sesión de seguridad venció. Recargue la página.');
     }
+}
+
+function monitoreoErrorMessage(Throwable $error): string {
+    error_log('Monitoreo: ' . $error->getMessage());
+    return $error instanceof RuntimeException || $error instanceof InvalidArgumentException
+        ? $error->getMessage()
+        : 'No fue posible completar la operación. Intente nuevamente.';
 }
 
 function normalizeStringList($values): array {
@@ -568,7 +584,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_t
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } catch (Throwable $e) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status' => 'error', 'msg' => monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -582,7 +598,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_t
         echo json_encode(['status'=>'ok','etapas'=>loadTaskStages($db,$idPoa)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } catch (Throwable $e) {
         http_response_code(400);
-        echo json_encode(['status'=>'error','msg'=>$e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status'=>'error','msg'=>monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -602,7 +618,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_t
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } catch (Throwable $e) {
         http_response_code(400);
-        echo json_encode(['status'=>'error','msg'=>$e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status'=>'error','msg'=>monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -617,7 +633,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_c
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status' => 'error', 'msg' => monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -630,7 +646,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $oculto = (int)$_POST['oculto'];
         $db->prepare("UPDATE ah_poa SET operativo_oculto = ? WHERE id = ?")->execute([$oculto, $id]);
         echo json_encode(['status'=>'ok']);
-    } catch(Throwable $e) { echo json_encode(['status'=>'error','msg'=>$e->getMessage()]); }
+    } catch(Throwable $e) { echo json_encode(['status'=>'error','msg'=>monitoreoErrorMessage($e)]); }
     exit;
 }
 
@@ -643,19 +659,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $user = getCurrentUserCredential($db);
         if (!$user) throw new Exception('No fue posible identificar al usuario autenticado.');
         $hash = (string)($user['password'] ?? '');
-        if (!(password_verify($password, $hash) || hash_equals($hash, $password))) throw new Exception('Contraseña incorrecta.');
+        if (!password_verify($password, $hash)) throw new Exception('Contraseña incorrecta.');
+        if (password_needs_rehash($hash, PASSWORD_DEFAULT)) {
+            $db->prepare('UPDATE users SET password = ? WHERE id = ?')->execute([password_hash($password, PASSWORD_DEFAULT), (int)$user['id']]);
+        }
         $_SESSION['metas_edit_unlocked_until'] = time() + 900;
         echo json_encode(['status'=>'ok','expires_in'=>900]);
     } catch (Throwable $e) {
         http_response_code(403);
-        echo json_encode(['status'=>'error','msg'=>$e->getMessage()]);
+        echo json_encode(['status'=>'error','msg'=>monitoreoErrorMessage($e)]);
     }
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_to_catalog') {
     header('Content-Type: application/json; charset=utf-8');
-    try { requireMonitoreoCsrf($monitoreoCsrf); } catch (Throwable $e) { http_response_code(403); echo json_encode(['status'=>'error','msg'=>$e->getMessage()]); exit; }
+    try { requireMonitoreoCsrf($monitoreoCsrf); } catch (Throwable $e) { http_response_code(403); echo json_encode(['status'=>'error','msg'=>monitoreoErrorMessage($e)]); exit; }
     $type = $_POST['catalog_type'] ?? '';
     $value = trim($_POST['catalog_value'] ?? '');
     $prog = trim($_POST['programa'] ?? 'GENERAL');
@@ -673,7 +692,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $db->prepare("INSERT IGNORE INTO `$table` (nombre) VALUES (?)")->execute([$value]);
         }
         echo json_encode(['status'=>'ok', 'value'=>$value]);
-    } catch (Throwable $e) { echo json_encode(['status'=>'error', 'msg'=>$e->getMessage()]); }
+    } catch (Throwable $e) { echo json_encode(['status'=>'error', 'msg'=>monitoreoErrorMessage($e)]); }
     exit;
 }
 
@@ -704,7 +723,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'autos
             $db->rollBack();
         }
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status' => 'error', 'msg' => monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -763,7 +782,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'autos
             $db->rollBack();
         }
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status' => 'error', 'msg' => monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -871,7 +890,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } catch (Throwable $e) {
         if ($db->inTransaction()) $db->rollBack();
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status' => 'error', 'msg' => monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -923,7 +942,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'autos
     } catch (Throwable $e) {
         if ($db->inTransaction()) $db->rollBack();
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['status' => 'error', 'msg' => monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
     }
     exit;
 }
@@ -1104,10 +1123,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
         if ($isAutosave) {
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['status' => 'error', 'msg' => monitoreoErrorMessage($e)], JSON_UNESCAPED_UNICODE);
             exit;
         }
-        $msg = "<div class='alert error'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
+        $msg = "<div class='alert error'>Error: " . htmlspecialchars(monitoreoErrorMessage($e)) . "</div>";
     }
 }
 

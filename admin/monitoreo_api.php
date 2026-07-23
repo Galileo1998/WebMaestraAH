@@ -1,6 +1,17 @@
 <?php
 declare(strict_types=1);
 
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+ini_set('log_errors', '1');
+if (session_status() === PHP_SESSION_NONE) {
+    $monitoreoApiHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ((int)($_SERVER['SERVER_PORT'] ?? 0) === 443);
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.cookie_secure', $monitoreoApiHttps ? '1' : '0');
+}
 session_start();
 require_once __DIR__ . '/../config/Database.php';
 require_once dirname(__DIR__) . '/classes/Auth.php';
@@ -68,7 +79,8 @@ try {
         $requireV2Csrf();
         $password=(string)($_POST['password']??'');if($password==='')throw new RuntimeException('Ingrese su contraseña.');
         $user=$currentCredential($db);if(!$user)throw new RuntimeException('No fue posible identificar al usuario autenticado.');
-        $hash=(string)($user['password']??'');if(!(password_verify($password,$hash)||hash_equals($hash,$password)))throw new RuntimeException('Contraseña incorrecta.');
+        $hash=(string)($user['password']??'');if(!password_verify($password,$hash))throw new RuntimeException('Contraseña incorrecta.');
+        if(password_needs_rehash($hash,PASSWORD_DEFAULT)){$db->prepare('UPDATE users SET password=? WHERE id=?')->execute([password_hash($password,PASSWORD_DEFAULT),(int)$user['id']]);}
         $_SESSION['metas_edit_unlocked_until']=time()+900;
         echo json_encode(['status'=>'ok','expires_in'=>900],JSON_UNESCAPED_UNICODE);exit;
     }
