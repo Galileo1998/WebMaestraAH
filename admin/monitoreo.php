@@ -523,8 +523,11 @@ function loadTaskStageDetail(PDO $db, int $idPoa, int $order): array {
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 }
 
-function loadCentersCatalog(PDO $db): array {
-    $period = date('Y-m');
+function loadCentersCatalog(PDO $db, string $monthKey = '', int $year = 0): array {
+    $monthMap = ['jan'=>1,'feb'=>2,'mar'=>3,'apr'=>4,'may'=>5,'jun'=>6,'jul'=>7,'aug'=>8,'sep'=>9,'oct'=>10,'nov'=>11,'dec'=>12];
+    $monthNumber = $monthMap[strtolower(trim($monthKey))] ?? (int)date('n');
+    if ($year < 2000 || $year > 2100) $year = (int)date('Y');
+    $period = sprintf('%04d-%02d', $year, $monthNumber);
     try {
         $stmt = $db->prepare(
             "SELECT c.id, c.tipo, c.nombre, c.comunidad_base, c.caserio,
@@ -629,7 +632,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_c
         requireMonitoreoCsrf($monitoreoCsrf);
         echo json_encode([
             'status' => 'ok',
-            'centros' => loadCentersCatalog($db),
+            'centros' => loadCentersCatalog($db, (string)($_POST['mes'] ?? ''), (int)($_POST['anio'] ?? 0)),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } catch (Throwable $e) {
         http_response_code(500);
@@ -1893,13 +1896,15 @@ body.detail-page-mode #updateModal .modal-content{width:100vw!important;max-widt
 body.detail-page-mode #updateModal .modal-header{flex:0 0 auto!important;border-radius:0!important;}
 body.detail-page-mode #updateModal .modal-tabs{position:static!important;flex:0 0 auto!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;width:100%!important;z-index:120;}
 body.detail-page-mode #updateModal .modal-tab-btn{width:100%!important;justify-content:center!important;min-height:52px!important;border-radius:0!important;}
-body.detail-page-mode #updateModal .modal-body{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow:hidden!important;padding:0!important;}
-body.detail-page-mode #updateModal .modal-tab-content{display:none!important;width:100%!important;height:100%!important;min-height:0!important;overflow:auto!important;padding:18px!important;box-sizing:border-box!important;}
+body.detail-page-mode #updateModal .modal-body{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 0 96px!important;overscroll-behavior:contain!important;scrollbar-gutter:stable!important;}
+body.detail-page-mode #updateModal .modal-tab-content{display:none!important;width:100%!important;height:auto!important;min-height:100%!important;overflow:visible!important;padding:18px!important;box-sizing:border-box!important;}
 body.detail-page-mode #updateModal .modal-tab-content.active{display:block!important;}
-body.detail-page-mode #updateModal .modal-footer{position:static!important;flex:0 0 auto!important;z-index:120;}
-body.detail-page-mode #tab-equipo>div:last-child{max-height:none!important;height:calc(100% - 78px)!important;overflow:auto!important;}
-body.detail-page-mode #tab-etapas .stage-scroll{height:calc(100% - 52px)!important;max-height:none!important;overflow:auto!important;}
-body.detail-page-mode #tab-metas,#tab-notas{overflow:auto!important;}
+body.detail-page-mode #updateModal .modal-footer{position:relative!important;flex:0 0 auto!important;z-index:120;background:#fff!important;}
+body.detail-page-mode #tab-equipo>div:last-child{max-height:none!important;height:auto!important;overflow-x:auto!important;overflow-y:visible!important;}
+body.detail-page-mode #tab-etapas{height:auto!important;min-height:100%!important;overflow:visible!important;}
+body.detail-page-mode #tab-etapas .stage-scroll{height:auto!important;max-height:none!important;min-height:0!important;overflow-x:auto!important;overflow-y:visible!important;}
+body.detail-page-mode #tab-etapas #etapas-main-table{margin-bottom:32px!important;}
+body.detail-page-mode #tab-metas,body.detail-page-mode #tab-notas{height:auto!important;overflow:visible!important;}
 @media(max-width:900px){body.detail-page-mode #updateModal .modal-tabs{grid-template-columns:repeat(2,minmax(0,1fr))!important;}}
 /* Modal v18: detalle aislado en iframe para no cargar el panel pesado sobre el listado */
 #detailFrameModal{position:fixed;inset:0;z-index:99999;display:none;background:rgba(15,23,42,.58);backdrop-filter:blur(5px);padding:14px;box-sizing:border-box;}
@@ -1919,6 +1924,17 @@ body.embedded-detail-mode #updateModal{z-index:1!important;}
 body.detail-page-mode .detail-page-back{display:inline-flex!important;}
 .detail-page-back{display:none;}
 
+
+/* Combobox flotante v23: fuera de tablas y contenedores con overflow */
+body > .multiselect-dropdown-panel{position:fixed!important;max-width:calc(100vw - 20px)!important;contain:layout paint;isolation:isolate;}
+.multiselect-dropdown-panel{background:#fff!important;border:1px solid #b9c9dc!important;border-radius:16px!important;box-shadow:0 22px 60px rgba(15,23,42,.24),0 3px 12px rgba(15,23,42,.10)!important;}
+.multiselect-search-wrap{padding:10px!important;background:linear-gradient(180deg,#fff,#f8fbff)!important;}
+.multiselect-search{height:42px!important;border-radius:12px!important;font-size:.9rem!important;}
+.multiselect-options-scroll{padding:8px!important;}
+.multiselect-option{min-height:40px!important;padding:9px 11px!important;border:1px solid transparent;}
+.multiselect-option:hover{border-color:#bae6fd;background:#f0f9ff!important;}
+.multiselect-select-box{min-height:46px!important;border-radius:13px!important;}
+@media (max-width:700px){body > .multiselect-dropdown-panel{left:10px!important;width:calc(100vw - 20px)!important;max-width:none!important;}}
 </style>
 </head>
 <body class="<?php echo $isDetailPage ? 'detail-page-mode' : ''; ?><?php echo $isEmbeddedDetail ? ' embedded-detail-mode' : ''; ?>">
@@ -1991,7 +2007,7 @@ body.detail-page-mode .detail-page-back{display:inline-flex!important;}
 </div>
 
 <div id="updateModal" class="modal-overlay"><div class="modal-content">
-    <div class="modal-header"><h2 style="margin:0;font-size:1.35rem"><i class="fa-solid fa-sliders"></i> Panel de Ejecución Programática</h2><div style="display:flex;gap:8px;align-items:center"><button type="button" class="btn-action btn-mini detail-page-back" onclick="window.close(); setTimeout(()=>history.back(),100)"><i class="fa-solid fa-arrow-left"></i> Volver</button><button type="button" class="modal-close-only" onclick="closeModal('updateModal')" style="background:none;border:0;font-size:1.45rem;cursor:pointer;color:#64748b"><i class="fa-solid fa-xmark"></i></button></div></div>
+    <div class="modal-header"><h2 style="margin:0;font-size:1.35rem"><i class="fa-solid fa-sliders"></i> Panel de Ejecución Programática</h2><div style="display:flex;gap:8px;align-items:center"><button type="button" class="modal-close-only" onclick="closeModal('updateModal')" style="background:none;border:0;font-size:1.45rem;cursor:pointer;color:#64748b"><i class="fa-solid fa-xmark"></i></button></div></div>
     <div class="modal-tabs"><button type="button" class="modal-tab-btn active" onclick="switchModalTab('tab-equipo', this)"><i class="fa-solid fa-map-location-dot"></i> Asignar Equipo</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-metas', this)"><i class="fa-solid fa-bullseye"></i> Metas y Meses</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-etapas', this)"><i class="fa-solid fa-diagram-project"></i> Agenda Técnico (Etapas)</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-notas', this)"><i class="fa-solid fa-file-word"></i> Notas y Materiales</button></div>
     <form method="POST" id="formUpdate" style="display:flex;flex-direction:column;overflow:hidden;flex-grow:1">
         <input type="hidden" name="action" value="update_task"><input type="hidden" name="csrf" value="<?php echo htmlspecialchars($monitoreoCsrf, ENT_QUOTES, 'UTF-8'); ?>"><input type="hidden" name="task_id" id="upd_task_id"><input type="hidden" name="metas_authorized" id="metas_authorized" value="0">
@@ -2040,7 +2056,6 @@ body.detail-page-mode .detail-page-back{display:inline-flex!important;}
                 <i class="fa-solid fa-cloud-arrow-up" id="save-icon"></i> <span id="save-text">Guardado automático activo</span>
             </button>
             <button type="button" class="btn-primary modal-close-only" style="background:white;color:var(--text-main);border:1px solid var(--border)" onclick="closeModal('updateModal')">Cerrar</button>
-            <button type="button" class="btn-primary detail-page-back" style="background:white;color:var(--text-main);border:1px solid var(--border)" onclick="window.close(); setTimeout(()=>history.back(),100)"><i class="fa-solid fa-arrow-left"></i> Volver al listado</button>
         </div>
     </form>
 </div></div>
@@ -2145,6 +2160,7 @@ const etapasDefault = <?php echo json_encode($etapas_default, JSON_UNESCAPED_UNI
 const tecnicosBases = <?php echo json_encode($tecnicos_bases, JSON_UNESCAPED_UNICODE); ?>;
 let centrosCatalogo = [];
 const monitoreoCsrfToken = <?php echo json_encode($monitoreoCsrf); ?>;
+const MONITOREO_SCROLL_BUILD = 'AGENDA-UN-SOLO-SCROLL-2026-07-23-v25';
 const MONITOREO_DETAIL_TASK_ID = <?php echo (int)$detailTaskId; ?>;
 const MONITOREO_IS_DETAIL_PAGE = MONITOREO_DETAIL_TASK_ID > 0;
 const MONITOREO_IS_EMBEDDED_DETAIL = <?php echo $isEmbeddedDetail ? 'true' : 'false'; ?>;
@@ -2219,7 +2235,7 @@ async function ensureTinyMceEditor(){
     });
     return tinyMceEditorPromise;
 }
-const MONITOREO_PREVIOUS_MONTH_BUILD = 'PREVIOUS-MONTH-AUTOSAVE-2026-07-22-v15';
+const MONITOREO_PREVIOUS_MONTH_BUILD = 'PREVIOUS-MONTH-OPTIONAL-2026-07-23-v21';
 const mesesEquipo = [{k:'jul',n:'Jul'},{k:'aug',n:'Ago'},{k:'sep',n:'Sep'},{k:'oct',n:'Oct'},{k:'nov',n:'Nov'},{k:'dec',n:'Dic'},{k:'jan',n:'Ene'},{k:'feb',n:'Feb'},{k:'mar',n:'Mar'},{k:'apr',n:'Abr'},{k:'may',n:'May'},{k:'jun',n:'Jun'}];
 let currentTeamMonth = <?php echo json_encode($mes_trabajo_inicial); ?>;
 let currentTeamYear = <?php echo (int)$anio_trabajo_inicial; ?>;
@@ -2314,11 +2330,24 @@ async function copiarMesAnterior() {
         const currentPartInput = document.querySelector(`input[name="op_part[${currentTeamMonth}]"]`);
         const prevAct = parseFloat(prevActInput?.value) || 0;
         const prevPart = parseFloat(prevPartInput?.value) || 0;
+        const rows = Array.from(document.querySelectorAll('#tabla_tecnicos_body .team-row'));
+
+        // Si la actividad no tenía programación en el mes anterior, no buscar,
+        // no copiar ceros y no modificar el mes actual. Se conserva la captura normal.
+        const hasPreviousTeamProgramming = rows.some(row => {
+            const prevInput = row.querySelector(`.team-month-prog[data-mes="${prevMonth}"]`);
+            return (parseFloat(prevInput?.value) || 0) > 0;
+        });
+        const hasPreviousMonthData = prevAct > 0 || prevPart > 0 || hasPreviousTeamProgramming;
+
+        if (!hasPreviousMonthData) {
+            showToast('La actividad no tiene programación en el mes anterior. El mes actual queda listo para captura normal.');
+            return;
+        }
 
         if (currentActInput) currentActInput.value = prevAct;
         if (currentPartInput) currentPartInput.value = prevPart;
 
-        const rows = Array.from(document.querySelectorAll('#tabla_tecnicos_body .team-row'));
         const changedRows = [];
         const chunkSize = 20;
 
@@ -2537,13 +2566,11 @@ async function switchModalTab(tabId, btn){
         await new Promise(resolve=>requestAnimationFrame(resolve));
         buildEtapasTable(currentTaskData);
 
-        // En la vista independiente se cargan y muestran todas las etapas automáticamente.
-        // Se hace de forma secuencial para conservar la respuesta de la interfaz.
+        // En detalle, las etapas vacías no hacen una segunda consulta al servidor.
+        // Las etapas con registros se solicitan en paralelo para evitar 4 esperas consecutivas.
         if(MONITOREO_IS_DETAIL_PAGE){
-            for(let i=0;i<currentTaskData.etapas.length;i++){
-                await openStageProgramming(i,null,true);
-                await new Promise(resolve=>requestAnimationFrame(resolve));
-            }
+            const stageJobs=currentTaskData.etapas.map((etapa,i)=>openStageProgramming(i,null,true));
+            await Promise.allSettled(stageJobs);
         }
         modalEtapasBuilt=true;
     }catch(error){
@@ -2697,6 +2724,9 @@ function preprocesarCentros() {
         let key = base + '|' + cat;
         if(!_centrosIndex[key]) _centrosIndex[key] = [];
         _centrosIndex[key].push(c);
+        const globalKey = '*|' + cat;
+        if(!_centrosIndex[globalKey]) _centrosIndex[globalKey] = [];
+        _centrosIndex[globalKey].push(c);
     });
     // Sort once
     for(let key in _centrosIndex) {
@@ -2732,8 +2762,10 @@ function getCentrosPorTecnicoYLugar(baseTecnico,lugarRaw){
     if(!_centrosIndex) preprocesarCentros();
     const base = normalizarTxt(baseTecnico);
     const tipoReq = lugarToTipo(lugarRaw);
-    if(!base || !tipoReq) return [];
-    return _centrosIndex[base + '|' + tipoReq] || [];
+    if(!tipoReq) return [];
+    // Si el responsable no tiene base asignada, no dejar el PROG. en cero:
+    // usar todos los centros del tipo seleccionado desde Gestión de Centros.
+    return _centrosIndex[(base || '*') + '|' + tipoReq] || [];
 }
 
 // FUNCION DE POBLACION INTELIGENTE SEGÚN LA UNIDAD DE LA ETAPA 3
@@ -2832,8 +2864,39 @@ function ensureLazyMultiselectOptions(ms){
     el.data('options-ready',1);
 }
 
+let multiselectPortalSeq=0;
+function getMultiselectOwner(panelOrChild){
+    const panel=$(panelOrChild).hasClass('multiselect-dropdown-panel')?$(panelOrChild):$(panelOrChild).closest('.multiselect-dropdown-panel');
+    const ownerId=panel.attr('data-owner-id');
+    if(ownerId) return $('#'+ownerId);
+    return panel.closest('.custom-multiselect');
+}
+function getPanelForBox(box){
+    const ms=$(box).closest('.custom-multiselect');
+    const ownerId=ms.attr('id');
+    if(ownerId){
+        const portaled=$('body > .multiselect-dropdown-panel[data-owner-id="'+ownerId+'"]');
+        if(portaled.length) return portaled.first();
+    }
+    return ms.children('.multiselect-dropdown-panel').first();
+}
+function portalDropdownPanel(ms,panel){
+    if(!ms.attr('id')) ms.attr('id','multiselect-owner-'+(++multiselectPortalSeq));
+    panel.attr('data-owner-id',ms.attr('id'));
+    if(panel.parent()[0]!==document.body) panel.appendTo(document.body);
+}
+function restoreDropdownPanel(panel){
+    const ownerId=panel.attr('data-owner-id');
+    if(!ownerId) return;
+    const owner=$('#'+ownerId);
+    if(owner.length && panel.parent()[0]===document.body) panel.appendTo(owner);
+}
 function closeAllMultiselects(){
-    $('.multiselect-dropdown-panel').hide().css({visibility:'hidden'});
+    $('.multiselect-dropdown-panel').each(function(){
+        const panel=$(this);
+        panel.hide().css({visibility:'hidden'});
+        restoreDropdownPanel(panel);
+    });
     $('.multiselect-select-box').removeClass('is-open');
 }
 
@@ -2850,13 +2913,13 @@ function prepareDropdownPanel(panel){
 function positionDropdownPanel(box,panel){
     const rect=box.getBoundingClientRect();
     const margin=10;
-    const width=Math.min(Math.max(rect.width,260),Math.min(420,window.innerWidth-(margin*2)));
+    const width=Math.min(Math.max(rect.width,300),Math.min(460,window.innerWidth-(margin*2)));
     const below=Math.max(0,window.innerHeight-rect.bottom-margin);
     const above=Math.max(0,rect.top-margin);
     const openAbove=below<220 && above>below;
-    const available=Math.max(150,Math.min(360,openAbove?above:below));
+    const available=Math.max(180,Math.min(440,openAbove?above:below));
     panel.css({position:'fixed',visibility:'hidden',display:'block',width:width+'px',zIndex:999999});
-    panel.find('.multiselect-options-scroll').css('max-height',Math.max(90,available-104)+'px');
+    panel.find('.multiselect-options-scroll').css('max-height',Math.max(120,available-94)+'px');
     const measured=Math.min(panel.outerHeight()||available,available);
     let top=openAbove?rect.top-measured-7:rect.bottom+7;
     top=Math.max(margin,Math.min(top,window.innerHeight-measured-margin));
@@ -2867,11 +2930,13 @@ function positionDropdownPanel(box,panel){
 function toggleDropdownPanel(box){
     const ms=$(box).closest('.custom-multiselect');
     ensureLazyMultiselectOptions(ms);
-    const panel=$(box).next('.multiselect-dropdown-panel');
+    let panel=getPanelForBox(box);
     const wasVisible=panel.is(':visible');
     closeAllMultiselects();
     if(wasVisible) return;
+    panel=ms.children('.multiselect-dropdown-panel').first();
     prepareDropdownPanel(panel);
+    portalDropdownPanel(ms,panel);
     panel.find('.multiselect-search').val('');
     panel.find('.multiselect-option').show();
     panel.find('.multiselect-empty').remove();
@@ -2881,14 +2946,14 @@ function toggleDropdownPanel(box){
 }
 
 function updateMultiselectText(panelDOM){
-    const panel=$(panelDOM),box=panel.prev('.multiselect-select-box');
+    const panel=$(panelDOM),owner=getMultiselectOwner(panel),box=owner.children('.multiselect-select-box').first();
     const checked=panel.find('input:checked').map(function(){return $(this).val();}).get();
     const visible=checked.slice(0,2).map(v=>`<span class="multi-tag" title="${escHtml(v)}">${escHtml(v)}</span>`).join('');
     const content=checked.length?visible+(checked.length>2?`<span class="multi-tag">+${checked.length-2}</span>`:''):'<span style="color:#94a3b8;font-weight:700">Seleccione...</span>';
     box.attr('title',checked.join(', ')).find('.multi-label').html(content);
 }
 let dragFillPayload=null;
-function dragFillStart(ev,box){let panel=$(box).next('.multiselect-dropdown-panel');dragFillPayload={type:$(box).closest('.custom-multiselect').data('type'),values:panel.find('input:checked').map(function(){return $(this).val();}).get()};ev.dataTransfer.setData('text/plain',JSON.stringify(dragFillPayload));}
+function dragFillStart(ev,box){let panel=getPanelForBox(box);dragFillPayload={type:$(box).closest('.custom-multiselect').data('type'),values:panel.find('input:checked').map(function(){return $(this).val();}).get()};ev.dataTransfer.setData('text/plain',JSON.stringify(dragFillPayload));}
 function dragFillOver(ev,box){
     ev.preventDefault();
     ev.stopPropagation();
@@ -2932,7 +2997,7 @@ function dragFillDrop(ev,box){
     let target = $(box).closest('.custom-multiselect');
     if(target.data('type') !== payload.type) return;
 
-    let panel = target.find('.multiselect-dropdown-panel');
+    let panel = getPanelForBox(target.find('.multiselect-select-box')[0]);
     panel.find('input[type="checkbox"]').prop('checked', false);
 
     let idx = target.data('index');
@@ -2998,7 +3063,7 @@ $(document).on('change','.multiselect-dropdown-panel input',function(e){
     e.stopPropagation();
     const panel=$(this).closest('.multiselect-dropdown-panel');
     updateMultiselectText(panel[0]);
-    const ms=panel.closest('.custom-multiselect');
+    const ms=getMultiselectOwner(panel);
     const type=ms.data('type');
     const idx=ms.data('index');
     const isChecked = this.checked;
@@ -3065,7 +3130,28 @@ $(document).on('input','.multiselect-search',function(e){
 });
 $(document).on('mousedown',function(e){if(!$(e.target).closest('.custom-multiselect,.multiselect-dropdown-panel').length)closeAllMultiselects();});
 $(window).on('resize scroll',function(){closeAllMultiselects();});
-function selectedFromPanel(selector){return $(selector).find('input:checked').map(function(){return $(this).val();}).get();}
+function selectedFromPanel(selector){
+    const owner=$(selector).first();
+    if(!owner.length) return [];
+    const box=owner.children('.multiselect-select-box').first()[0];
+    const panel=box ? getPanelForBox(box) : owner.children('.multiselect-dropdown-panel').first();
+    return panel.find('input[type="checkbox"]:checked').map(function(){return $(this).val();}).get();
+}
+
+function selectedValuesFromMultiselect(ownerOrChild){
+    const owner=$(ownerOrChild).hasClass('custom-multiselect')
+        ? $(ownerOrChild)
+        : $(ownerOrChild).closest('.custom-multiselect');
+    if(!owner.length) return [];
+    const box=owner.children('.multiselect-select-box').first()[0];
+    const panel=box ? getPanelForBox(box) : owner.children('.multiselect-dropdown-panel').first();
+    return panel.find('input[type="checkbox"]:checked').map(function(){return String(this.value)}).get();
+}
+
+function selectedRowMultiselectValues(row,type){
+    const owner=$(row).find(`.panel-${type}-box`).first();
+    return selectedValuesFromMultiselect(owner);
+}
 
 function captureCurrentInvData(index){
     if(!window.savedInvData[index]) window.savedInvData[index]={};
@@ -3164,8 +3250,9 @@ function combineSavedForBases(index, persona, bases, unidad){
 function centrosByBasesYLugares(bases, lugares) {
     let centros = [];
     let seen = new Set();
+    const basesNormalizadas = Array.isArray(bases) && bases.length ? bases : [''];
     (lugares || []).forEach(l => {
-        (bases || ['']).forEach(base => {
+        basesNormalizadas.forEach(base => {
             let lista = getCentrosPorTecnicoYLugar(base, l);
             lista.forEach(c => {
                 if (!seen.has(c.id)) {
@@ -3223,8 +3310,8 @@ function collectStageRowData(index,key){
         en_forma:Math.max(0,Math.min(100,parseFloat(row.find('input[name^="inv_en_forma"]').val())||0)),
         quality_initialized:true,
         quality_version:2,
-        verifics:row.find('.panel-verific_sub-box input:checked').map(function(){return this.value;}).get(),
-        lugar:row.find('.panel-lugar_sub-box input:checked').map(function(){return this.value;}).get(),
+        verifics:selectedRowMultiselectValues(row,'verific_sub'),
+        lugar:selectedRowMultiselectValues(row,'lugar_sub'),
         centros:readHiddenCenters(index,key)
     };
 
@@ -3289,7 +3376,7 @@ function mergeSelectedCentersIntoMemory(index,key,centros,unidad=''){
 
 function getActiveCenterPayload(row,allMemory){
     const bases=String(row.data('base')||'').split('|').filter(b=>String(b||'').trim()!=='');
-    const lugares=row.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get().filter(isCenterLugar);
+    const lugares=selectedRowMultiselectValues(row,'lugar_sub').filter(isCenterLugar);
     const selected=centrosByBasesYLugares(bases,lugares);
     const active={};
     selected.forEach(c=>{
@@ -3307,7 +3394,7 @@ function refreshStage3RowFromPlaces(rowOrTarget,autosaveNow=false){
     const key=String(row.data('key'));
     const unidad=row.find('input[name^="inv_unidad"]').val();
     const bases=String(row.data('base')||'').split('|').filter(b=>String(b||'').trim()!=='');
-    const todosLugares=row.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get();
+    const todosLugares=selectedRowMultiselectValues(row,'lugar_sub');
     const lugaresCentro=todosLugares.filter(isCenterLugar);
     const centrosActivos=centrosByBasesYLugares(bases,lugaresCentro);
     const allMemory=mergeSelectedCentersIntoMemory(index,key,centrosActivos,unidad);
@@ -3374,9 +3461,61 @@ function splitResponsibleNameHtml(name){
     return `<div class="resp-name"><span class="resp-first">${escHtml(first)}</span><span class="resp-last">${escHtml(last)}</span></div>`;
 }
 
+const MONITOREO_FUTURE_MONTH_BUILD = 'FUTURE-MONTH-PARALLEL-EMPTY-SKIP-2026-07-23-v20';
+
+const MONITOREO_BLANK_STAGE_BUILD = 'BLANK-STAGE-TEMPLATE-2026-07-23-v22';
+
+const MONITOREO_FOUR_STAGES_BUILD = 'CENTER-ADN-PORTAL-PERIOD-2026-07-23-v27';
+
+function normalizeFourStages(rawStages){
+    const incoming=Array.isArray(rawStages)?rawStages:[];
+    return etapasDefault.map((def,i)=>{
+        const expectedCode=String(def.codigo||`E-${i+1}`).toUpperCase();
+        const found=incoming.find((stage,position)=>{
+            const code=String(stage?.codigo_etapa||'').trim().toUpperCase();
+            const order=Number(stage?.orden_etapa||stage?.orden||position+1);
+            return code===expectedCode || order===i+1;
+        });
+        if(found){
+            return {
+                ...found,
+                orden_etapa:i+1,
+                codigo_etapa:found.codigo_etapa||def.codigo,
+                nombre_etapa:found.nombre_etapa||def.nombre,
+                descripcion_etapa:found.descripcion_etapa||def.descripcion,
+                unidad_medida:found.unidad_medida||'[]',
+                responsable:found.responsable||'[]',
+                involucrados_json:found.involucrados_json||'{}',
+                involucrados_count:parseInt(found.involucrados_count||0,10)||0,
+                fecha_recepcion:found.fecha_recepcion||getFechaMaximaEtapa(i)
+            };
+        }
+        return {
+            orden_etapa:i+1,
+            codigo_etapa:def.codigo,
+            nombre_etapa:def.nombre,
+            descripcion_etapa:def.descripcion,
+            unidad_medida:'[]',
+            responsable:'[]',
+            involucrados_json:'{}',
+            involucrados_count:0,
+            fecha_recepcion:getFechaMaximaEtapa(i),
+            is_blank_template:true
+        };
+    });
+}
+
 function buildEtapasTable(taskData){
     window.savedInvData={};
-    const etapas=Array.isArray(taskData.etapas)&&taskData.etapas.length?taskData.etapas:etapasDefault.map((e,i)=>({codigo_etapa:e.codigo,nombre_etapa:e.nombre,descripcion_etapa:e.descripcion,unidad_medida:'[]',responsable:'[]',involucrados_json:'{}',fecha_recepcion:getFechaMaximaEtapa(i)}));
+    // Siempre mostrar E-1, E-2, E-3 y E-4. Si la consulta solo devuelve
+    // algunas etapas, las faltantes se crean como plantillas editables.
+    const etapas=normalizeFourStages(taskData.etapas);
+
+    // Importante: cuando el mes no tiene registros, las etapas predeterminadas
+    // deben formar parte del estado actual. De lo contrario, el cargador de la
+    // vista de detalle no encuentra etapas y deja los avisos en "Preparando...".
+    taskData.etapas=etapas;
+    currentTaskData.etapas=etapas;
     let html='';
     etapas.forEach((e,i)=>{
         let resps=[],unis=[];
@@ -3386,7 +3525,7 @@ function buildEtapasTable(taskData){
         window.savedInvData[i]={};
         const fecha=e.fecha_recepcion||getFechaMaximaEtapa(i);
         const savedCount=parseInt(e.involucrados_count||0,10)||0;
-        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"></div></div></td><td><span class="prog-badge">${unis.length} unidad(es)</span>${unis.map(v=>`<input type="hidden" name="etapa_unidades[${i}][]" value="${escHtml(v)}">`).join('')}</td><td><span class="prog-badge">${resps.length} responsable(s)</span>${resps.map(v=>`<input type="hidden" name="etapa_resps[${i}][]" value="${escHtml(v)}">`).join('')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" class="stage-lazy-host"><div style="padding:14px 16px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="color:#64748b;font-weight:700">${savedCount?savedCount+' registros guardados':'Programación sin registros'}</div>${MONITOREO_IS_DETAIL_PAGE?'<span style="color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Cargando programación...</span>':`<button type="button" class="btn-action btn-mini" onclick="openStageProgramming(${i},this)"><i class="fa-solid fa-sliders"></i> Configurar etapa</button>`}</div></div></td></tr>`;
+        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"></div></div></td><td><span class="prog-badge">${unis.length} unidad(es)</span>${unis.map(v=>`<input type="hidden" name="etapa_unidades[${i}][]" value="${escHtml(v)}">`).join('')}</td><td><span class="prog-badge">${resps.length} responsable(s)</span>${resps.map(v=>`<input type="hidden" name="etapa_resps[${i}][]" value="${escHtml(v)}">`).join('')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" class="stage-lazy-host"><div style="padding:14px 16px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="color:#64748b;font-weight:700">${savedCount?savedCount+' registros guardados':'Programación sin registros'}</div>${MONITOREO_IS_DETAIL_PAGE?(savedCount?'<span style="color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Cargando programación...</span>':'<span style="color:#16a34a;font-weight:800"><i class="fa-solid fa-file-circle-plus"></i> Creando plantilla en blanco...</span>'):`<button type="button" class="btn-action btn-mini" onclick="openStageProgramming(${i},this)"><i class="fa-solid fa-sliders"></i> Configurar etapa</button>`}</div></div></td></tr>`;
     });
     $('#tabla_etapas_body').html(html);
 }
@@ -3414,10 +3553,15 @@ async function openStageProgramming(index,btn,autoRender=false){
     if(btn) $(btn).prop('disabled',true).html('<i class="fa-solid fa-spinner fa-spin"></i> Cargando etapa...');
 
     try{
-        // Solo aquí viaja involucrados_json de UNA etapa.
-        const etapa=await fetchTaskStageDetail(currentTaskData.id,index);
+        // Si el resumen indica que no hay programación guardada, evitamos una
+        // consulta adicional. Esto acelera especialmente los meses futuros.
         if(!Array.isArray(currentTaskData.etapas)) currentTaskData.etapas=[];
-        currentTaskData.etapas[index]={...(currentTaskData.etapas[index]||{}),...etapa};
+        const etapaResumen=currentTaskData.etapas[index]||{};
+        const savedCount=parseInt(etapaResumen.involucrados_count||0,10)||0;
+        const etapa=savedCount>0
+            ? await fetchTaskStageDetail(currentTaskData.id,index)
+            : {...etapaResumen,involucrados_json:'{}'};
+        currentTaskData.etapas[index]={...etapaResumen,...etapa};
 
         let resps=[],unis=[];
         try{resps=JSON.parse(etapa.responsable||'[]')}catch(ex){if(etapa.responsable)resps=[etapa.responsable]}
@@ -3434,6 +3578,9 @@ async function openStageProgramming(index,btn,autoRender=false){
         const totalCruces = resps.length * unis.length;
         if(autoRender){
             buildSubgrid(index,resps,unis);
+            if(!resps.length || !unis.length){
+                $('#stage-grid-inner-'+index).html('<div style="padding:16px 18px;background:#f8fafc;border-top:1px solid #e2e8f0;color:#475569"><div style="font-weight:900;color:#0f172a;margin-bottom:4px"><i class="fa-solid fa-file-circle-plus"></i> Plantilla en blanco</div><div>Seleccione al menos un responsable y una unidad para comenzar la programación de esta etapa.</div></div>');
+            }
         }else{
             $('#stage-grid-inner-'+index).html(`<div class="stage-grid-gate" style="padding:18px;background:#fff7ed;border-top:1px solid #fed7aa;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap"><div><div style="font-weight:900;color:#9a3412">Programación aún no renderizada</div><div style="color:#7c2d12;margin-top:4px">Se crearán ${totalCruces} cruces (${resps.length} responsables × ${unis.length} unidades).</div></div><button type="button" class="btn-action btn-mini" onclick="renderStageGrid(${index},this)"><i class="fa-solid fa-table-cells"></i> Cargar tabla</button></div>`);
         }
@@ -3461,7 +3608,7 @@ async function renderStageGrid(index,btn){
     buildSubgrid(index,resps,unis);
 }
 
-const MONITOREO_TAB3_GRID_BUILD = 'TAB3-SIN-PAGINADO-2026-07-23-v19';
+const MONITOREO_TAB3_GRID_BUILD = 'COMBOBOX-PORTAL-SELECTION-FIX-2026-07-23-v24';
 function buildSubgrid(index,resps,unidades){
     let cont=$(`#stage-grid-inner-${index}`);
     if(!cont.length) cont=$(`#subgrid-${index}`);
@@ -3552,7 +3699,8 @@ function deleteInvRow(index,key){
             return $(this).find(`input[name^="inv_persona"]`).val() === persona;
         }).length;
         if (activeForPersona === 0) {
-            let respPanel = $(`.panel-responsable-box[data-index="${index}"] .multiselect-dropdown-panel`);
+            let respOwner = $(`.panel-responsable-box[data-index="${index}"]`).first();
+            let respPanel = getPanelForBox(respOwner.children('.multiselect-select-box').first()[0]);
             let checkbox = respPanel.find(`input[value="${escHtml(persona).replace(/"/g,'\\"')}"]`);
             if (checkbox.length && checkbox.prop('checked')) {
                 checkbox.prop('checked', false);
@@ -3566,7 +3714,8 @@ function deleteInvRow(index,key){
             return $(this).find(`input[name^="inv_unidad"]`).val() === unidad;
         }).length;
         if (activeForUnidad === 0) {
-            let uniPanel = $(`.panel-unidad-box[data-index="${index}"] .multiselect-dropdown-panel`);
+            let uniOwner = $(`.panel-unidad-box[data-index="${index}"]`).first();
+            let uniPanel = getPanelForBox(uniOwner.children('.multiselect-select-box').first()[0]);
             let checkbox = uniPanel.find(`input[value="${escHtml(unidad).replace(/"/g,'\\"')}"]`);
             if (checkbox.length && checkbox.prop('checked')) {
                 checkbox.prop('checked', false);
@@ -3686,7 +3835,7 @@ async function toggleDetalleCentros(index,key,btn){
     const unidad=invRow.find('input[name^="inv_unidad"]').val();
     let bases=String(invRow.data('base')||'').split('|').filter(b=>String(b||'').trim()!=='');
     if(!bases.length) bases=[''];
-    const todosLugares=invRow.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get();
+    const todosLugares=selectedRowMultiselectValues(invRow,'lugar_sub');
     const lugares=todosLugares.filter(isCenterLugar);
     // Pasamos la "unidad" para que el merge cruce la población exacta (Infantes, Jóvenes, Líderes, etc.)
     const savedCentros=mergeSelectedCentersIntoMemory(index,key,centrosByBasesYLugares(bases,lugares), unidad);
@@ -3813,6 +3962,8 @@ async function ensureCentersCatalogLoaded(){
     centrosCatalogPromise = (async()=>{
         const fd = new FormData();
         fd.append('action', 'get_centers_catalog');
+        fd.append('mes', currentTeamMonth);
+        fd.append('anio', String(currentTeamYear));
         fd.append('csrf', monitoreoCsrfToken);
         const response = await fetch(window.location.pathname, {method:'POST', body:fd});
         const result = await response.json();
@@ -4275,7 +4426,7 @@ let fullAutosaveTimer=null;
 let pendingFullSaveTarget=null;
 let tab3Dirty=false;
 const MONITOREO_TAB3_AUTOSAVE_BUILD='TAB3-LAZY-ROW-OPTIONS-2026-07-22-v10';
-const MONITOREO_DETAIL_PAGE_BUILD='POLISHED-RESPONSIVE-DROPDOWNS-2026-07-22-v13';
+const MONITOREO_DETAIL_PAGE_BUILD='CLOSE-X-AND-REAL-DIRTY-STATE-2026-07-23-v28';
 
 function snapshotCurrentTaskFromForm(){
     if(!currentTaskData) return;
@@ -4325,6 +4476,16 @@ function markTab3Dirty(target=null){
     if(btn){
         btn.dataset.tab3Dirty='1';
         btn.title='Hay cambios pendientes en Agenda Técnico';
+    }
+}
+
+function clearTab3DirtyIfSaved(){
+    if(stageAutosaveTimers.size>0 || stageAutosaveInFlight.size>0) return;
+    tab3Dirty=false;
+    const btn=document.getElementById('btn-force-save');
+    if(btn){
+        delete btn.dataset.tab3Dirty;
+        btn.title='';
     }
 }
 
@@ -4406,6 +4567,7 @@ $('#formUpdate').on('submit',function(e){
 // Autoguardado incremental de Agenda Técnico: una etapa por petición.
 const stageAutosaveTimers = new Map();
 const stageAutosaveVersions = new Map();
+const stageAutosaveInFlight = new Set();
 
 function stageMetaValue(index, name, fallback=''){
     const el=document.querySelector(`#tabla_etapas_body input[name="${name}[${index}]"]`)
@@ -4438,6 +4600,7 @@ function scheduleStageAutosave(index,target=null,delay=1200){
 
 async function autosaveStageIncremental(index,version,target=null){
     if(version!==stageAutosaveVersions.get(index)) return false;
+    stageAutosaveInFlight.add(index);
     const payload=collectStageAutosavePayload(index);
     const fd=new FormData();
     fd.append('action','autosave_stage_incremental');
@@ -4467,6 +4630,9 @@ async function autosaveStageIncremental(index,version,target=null){
         console.error('Autoguardado de etapa:',error);
         if(active) flashSaved(active,false);
         return false;
+    }finally{
+        stageAutosaveInFlight.delete(index);
+        clearTab3DirtyIfSaved();
     }
 }
 
@@ -4681,7 +4847,8 @@ async function initStandaloneDetailPage(){
 document.addEventListener('DOMContentLoaded',initStandaloneDetailPage);
 
 window.addEventListener('beforeunload',function(e){
-    if(!tab3Dirty) return;
+    const hasPendingStageSave = stageAutosaveTimers.size > 0 || stageAutosaveInFlight.size > 0;
+    if(!tab3Dirty || !hasPendingStageSave) return;
     e.preventDefault();
     e.returnValue='';
 });
