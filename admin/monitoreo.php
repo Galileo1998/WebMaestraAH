@@ -1,5 +1,5 @@
 <?php
-// BUILD: MONITOREO_OPERATIVO_V3_FULL_CATALOG_SYNC
+// BUILD: MONITOREO_OPERATIVO_V3_OPTIMIZADO_AJAX_UPSERT
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -21,8 +21,20 @@ if (empty($_SESSION['monitoreo_csrf'])) {
 $monitoreoCsrf = (string)$_SESSION['monitoreo_csrf'];
 
 $msg = '';
+$detailTaskId = isset($_GET['detalle']) ? max(0, (int)$_GET['detalle']) : 0;
+$isDetailPage = $detailTaskId > 0;
+$isEmbeddedDetail = $isDetailPage && isset($_GET['embedded']) && $_GET['embedded'] === '1';
 $tabla_poa = 'ah_poa';
 $col_id = 'id';
+$MONITOREO_MONTH_KEYS = ['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'];
+$requestedWorkMonth = strtolower(trim((string)($_GET['mes'] ?? '')));
+if (!in_array($requestedWorkMonth, $MONITOREO_MONTH_KEYS, true)) {
+    $requestedWorkMonth = '';
+}
+$requestedWorkYear = isset($_GET['anio']) ? (int)$_GET['anio'] : 0;
+if ($requestedWorkYear < 2000 || $requestedWorkYear > 2100) {
+    $requestedWorkYear = 0;
+}
 
 $CATALOG_PROGRAMS = [
     'GENERAL' => 'GENERAL / TODOS',
@@ -41,15 +53,6 @@ $CATALOG_STAGES = [
     'E-3' => 'E-3 · Desarrollar y reportar',
     'E-4' => 'E-4 · Asistencia y monitoreo',
 ];
-
-function addColIfNotExists(PDO $db, string $table, string $col, string $def): void {
-    try {
-        $stmt = $db->query("SHOW COLUMNS FROM `$table` LIKE " . $db->quote($col));
-        if ($stmt && $stmt->rowCount() == 0) {
-            $db->exec("ALTER TABLE `$table` ADD COLUMN `$col` $def");
-        }
-    } catch (Throwable $e) {}
-}
 
 function safe_json_decode($value, $default = []) {
     if (is_array($value)) return $value;
@@ -158,113 +161,388 @@ function saveActivitySnapshot(PDO $db, int $idPoa, string $evento): void {
     } catch (Throwable $e) {}
 }
 
-$monitoreoSchemaVersion = 0;
-try {
-    $monitoreoSchemaVersion = (int)$db->query('SELECT version FROM ah_monitoreo_schema WHERE id=1')->fetchColumn();
-} catch (Throwable $missingSchemaVersion) {}
 
-if ($monitoreoSchemaVersion < 1) {
-try {
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_monitoreo_historial (
-        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        id_poa INT NOT NULL,
-        periodo VARCHAR(7) NOT NULL,
-        evento VARCHAR(80) NOT NULL,
-        estado_json LONGTEXT NOT NULL,
-        estado_hash CHAR(64) NOT NULL,
-        usuario VARCHAR(190) NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_hist_poa_fecha (id_poa, created_at),
-        INDEX idx_hist_poa_periodo (id_poa, periodo)
-    )");
+/**
+ * La estructura de BD se instala una sola vez con migrar_monitoreo_operativo.php.
+ * Esta página no ejecuta CREATE/ALTER TABLE durante las solicitudes normales.
+ */
+function requireMonitoreoCsrf(string $expected): void {
+    $csrf = (string)($_POST['csrf'] ?? '');
+    if ($csrf === '' || !hash_equals($expected, $csrf)) {
+        throw new RuntimeException('La sesión de seguridad venció. Recargue la página.');
+    }
+}
 
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_tecnicos (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nombre VARCHAR(150),
-        identidad VARCHAR(50) UNIQUE,
-        activo TINYINT(1) DEFAULT 1
-    )");
-
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_cat_responsables (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(150) NOT NULL UNIQUE)");
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_cat_unidades (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(150) NOT NULL UNIQUE)");
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_cat_verificaciones (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(150) NOT NULL UNIQUE)");
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_cat_lugares (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(150) NOT NULL UNIQUE)");
-
-    $default_resps = ['Lider-CRECER', 'Lider-REDES', 'Lider-Tejiendo-Futuro', 'Monitoreo', 'Coordinador Programas', 'Jardineras', 'Docentes', 'Líderes', 'Profesional de la Salud', 'Otros'];
-    $default_unis = ['Caja de Herramientas', 'Población', 'Visitas', 'Centros Básica/Media', 'Centros Preescolares', 'Docentes', 'Jardineras', 'Líderes', 'NNAJ'];
-    $default_ver = ['Guión Metodológico', 'Producto Multimedia', 'Listado de Participación', 'Fotografías', 'Historia de Éxito', 'Reporte Mensual Docente', 'Asistencia Técnica', 'Ficha de supervisión'];
-    $default_lug = ['Oficina', 'Trabajo de campo', 'Centro Educativo', 'Centro Preescolar', 'Centro ADN', 'UAPS/CIS'];
-    foreach ([['ah_cat_responsables', $default_resps], ['ah_cat_unidades', $default_unis], ['ah_cat_verificaciones', $default_ver], ['ah_cat_lugares', $default_lug]] as $pair) {
-        [$table, $items] = $pair;
-        $count = (int)$db->query("SELECT COUNT(*) FROM `$table`")->fetchColumn();
-        if ($count === 0) {
-            $st = $db->prepare("INSERT IGNORE INTO `$table` (nombre) VALUES (?)");
-            foreach ($items as $item) $st->execute([$item]);
+function normalizeStringList($values): array {
+    $result = [];
+    foreach ((array)$values as $value) {
+        $value = trim((string)$value);
+        if ($value !== '' && !in_array($value, $result, true)) {
+            $result[] = $value;
         }
     }
-
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_poa_asignaciones (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        id_poa INT NOT NULL,
-        tecnico VARCHAR(150) NOT NULL,
-        base_asignada VARCHAR(150) NULL,
-        meses_asignados VARCHAR(255) NULL,
-        meta_asignada DECIMAL(10,2) DEFAULT 0,
-        logro_asignado DECIMAL(10,2) DEFAULT 0,
-        lugares_json LONGTEXT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX (id_poa),
-        INDEX (tecnico),
-        INDEX (base_asignada)
-    )");
-
-    try { $db->exec("ALTER TABLE ah_poa_asignaciones ADD COLUMN base_asignada VARCHAR(150) NULL"); } catch (Throwable $e) {}
-    try { $db->exec("ALTER TABLE ah_poa_asignaciones ADD COLUMN logro_asignado DECIMAL(10,2) DEFAULT 0"); } catch (Throwable $e) {}
-    try { $db->exec("ALTER TABLE ah_poa_asignaciones ADD COLUMN lugares_json LONGTEXT NULL"); } catch (Throwable $e) {}
-    try { $db->exec("ALTER TABLE ah_poa ADD COLUMN operativo_oculto TINYINT(1) DEFAULT 0"); } catch (Throwable $e) {}
-
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_poa_etapas (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        id_poa INT NOT NULL,
-        codigo_etapa VARCHAR(50) NULL,
-        nombre_etapa VARCHAR(150) NULL,
-        descripcion_etapa TEXT NULL,
-        unidad_medida TEXT NULL,
-        responsable TEXT NULL,
-        involucrados_json LONGTEXT NULL,
-        fecha_recepcion DATE NULL,
-        orden INT DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-        INDEX (id_poa)
-    )");
-    addColIfNotExists($db, 'ah_poa_etapas', 'nombre_etapa', 'VARCHAR(150) NULL');
-    addColIfNotExists($db, 'ah_poa_etapas', 'unidad_medida', 'TEXT NULL');
-    addColIfNotExists($db, 'ah_poa_etapas', 'responsable', 'TEXT NULL');
-    addColIfNotExists($db, 'ah_poa_etapas', 'involucrados_json', 'LONGTEXT NULL');
-    addColIfNotExists($db, 'ah_poa_etapas', 'fecha_recepcion', 'DATE NULL');
-    addColIfNotExists($db, 'ah_poa_etapas', 'updated_at', 'TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
-
-    foreach (['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'] as $m) {
-        addColIfNotExists($db, $tabla_poa, 'op_act_'.$m, 'DECIMAL(10,2) DEFAULT 0');
-        addColIfNotExists($db, $tabla_poa, 'op_part_'.$m, 'DECIMAL(10,2) DEFAULT 0');
-        addColIfNotExists($db, $tabla_poa, 'op_editado_'.$m, 'TINYINT(1) DEFAULT 0');
-        addColIfNotExists($db, 'ah_poa_asignaciones', 'meta_'.$m, 'DECIMAL(10,2) DEFAULT 0');
-        addColIfNotExists($db, 'ah_poa_asignaciones', 'logro_'.$m, 'DECIMAL(10,2) DEFAULT 0');
-    }
-    addColIfNotExists($db, $tabla_poa, 'operativo_info_adicional', 'LONGTEXT NULL');
-    addColIfNotExists($db, $tabla_poa, 'descripcion_actividad', 'TEXT NULL');
-    addColIfNotExists($db, $tabla_poa, 'equipo_lugares_json', 'LONGTEXT NULL');
-    $db->exec("CREATE TABLE IF NOT EXISTS ah_monitoreo_schema (
-        id TINYINT PRIMARY KEY,
-        version INT NOT NULL DEFAULT 0,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $db->exec('INSERT INTO ah_monitoreo_schema(id,version) VALUES(1,1) ON DUPLICATE KEY UPDATE version=VALUES(version)');
-} catch (Throwable $e) {
-    $msg = "<div class='alert error'>Error de migración: " . htmlspecialchars($e->getMessage()) . "</div>";
+    return $result;
 }
+
+function persistTeamAssignmentRow(
+    PDO $db,
+    int $idPoa,
+    array $row,
+    string $lugaresJson,
+    array $monthKeys
+): bool {
+    $tecnico = trim((string)($row['tecnico'] ?? ''));
+    if ($tecnico === '') {
+        return false;
+    }
+
+    $base = trim((string)($row['base_asignada'] ?? ''));
+    if (strcasecmp($base, 'General') === 0) {
+        $base = '';
+    }
+
+    $selected = (int)($row['selected'] ?? 0) === 1;
+    $metas = isset($row['metas']) && is_array($row['metas']) ? $row['metas'] : [];
+    $logros = isset($row['logros']) && is_array($row['logros']) ? $row['logros'] : [];
+
+    $metaTotal = 0.0;
+    $logroTotal = 0.0;
+    $meses = [];
+    $monthValues = [];
+
+    foreach ($monthKeys as $month) {
+        $meta = (float)($metas[$month] ?? 0);
+        $logro = (float)($logros[$month] ?? 0);
+        $metaTotal += $meta;
+        $logroTotal += $logro;
+        if ($meta != 0.0 || $logro != 0.0) {
+            $meses[] = $month;
+        }
+        $monthValues['meta_' . $month] = $meta;
+        $monthValues['logro_' . $month] = $logro;
+    }
+
+    $keep = $selected || $metaTotal != 0.0 || $logroTotal != 0.0;
+
+    $find = $db->prepare(
+        "SELECT id
+         FROM ah_poa_asignaciones
+         WHERE id_poa = ?
+           AND tecnico = ?
+           AND COALESCE(base_asignada, '') = ?
+         ORDER BY id ASC"
+    );
+    $find->execute([$idPoa, $tecnico, $base]);
+    $existingIds = array_map('intval', $find->fetchAll(PDO::FETCH_COLUMN));
+
+    if (!$keep) {
+        if ($existingIds) {
+            $delete = $db->prepare(
+                "DELETE FROM ah_poa_asignaciones
+                 WHERE id_poa = ?
+                   AND tecnico = ?
+                   AND COALESCE(base_asignada, '') = ?"
+            );
+            $delete->execute([$idPoa, $tecnico, $base]);
+        }
+        return false;
+    }
+
+    $columns = [
+        'base_asignada' => $base,
+        'meses_asignados' => implode(', ', $meses),
+        'meta_asignada' => $metaTotal,
+        'logro_asignado' => $logroTotal,
+        'lugares_json' => $lugaresJson,
+    ] + $monthValues;
+
+    if ($existingIds) {
+        $keeperId = $existingIds[0];
+        $sets = [];
+        $params = [];
+        foreach ($columns as $column => $value) {
+            $sets[] = "`{$column}` = ?";
+            $params[] = $value;
+        }
+        $params[] = $keeperId;
+        $update = $db->prepare(
+            "UPDATE ah_poa_asignaciones SET " . implode(', ', $sets) . " WHERE id = ?"
+        );
+        $update->execute($params);
+
+        if (count($existingIds) > 1) {
+            $placeholders = implode(',', array_fill(0, count($existingIds) - 1, '?'));
+            $deleteDuplicates = $db->prepare(
+                "DELETE FROM ah_poa_asignaciones WHERE id IN ({$placeholders})"
+            );
+            $deleteDuplicates->execute(array_slice($existingIds, 1));
+        }
+        return true;
+    }
+
+    $insertColumns = ['id_poa', 'tecnico'];
+    $insertValues = [$idPoa, $tecnico];
+    foreach ($columns as $column => $value) {
+        $insertColumns[] = $column;
+        $insertValues[] = $value;
+    }
+    $quotedColumns = array_map(static function ($column) {
+        return "`{$column}`";
+    }, $insertColumns);
+    $placeholders = implode(', ', array_fill(0, count($insertColumns), '?'));
+    $insert = $db->prepare(
+        "INSERT INTO ah_poa_asignaciones (" . implode(', ', $quotedColumns) . ")
+         VALUES ({$placeholders})"
+    );
+    $insert->execute($insertValues);
+    return true;
+}
+
+function persistPoaStage(
+    PDO $db,
+    int $idPoa,
+    int $order,
+    string $code,
+    string $name,
+    string $description,
+    string $unitsJson,
+    string $responsiblesJson,
+    string $involvedJson,
+    ?string $receptionDate
+): void {
+    $find = $db->prepare(
+        "SELECT id FROM ah_poa_etapas WHERE id_poa = ? AND orden = ? ORDER BY id ASC"
+    );
+    $find->execute([$idPoa, $order]);
+    $ids = array_map('intval', $find->fetchAll(PDO::FETCH_COLUMN));
+
+    if ($ids) {
+        $keeperId = $ids[0];
+        $update = $db->prepare(
+            "UPDATE ah_poa_etapas
+             SET codigo_etapa = ?,
+                 nombre_etapa = ?,
+                 descripcion_etapa = ?,
+                 unidad_medida = ?,
+                 responsable = ?,
+                 involucrados_json = ?,
+                 fecha_recepcion = ?,
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = ?"
+        );
+        $update->execute([
+            $code,
+            $name,
+            $description,
+            $unitsJson,
+            $responsiblesJson,
+            $involvedJson,
+            $receptionDate,
+            $keeperId,
+        ]);
+
+        if (count($ids) > 1) {
+            $placeholders = implode(',', array_fill(0, count($ids) - 1, '?'));
+            $deleteDuplicates = $db->prepare(
+                "DELETE FROM ah_poa_etapas WHERE id IN ({$placeholders})"
+            );
+            $deleteDuplicates->execute(array_slice($ids, 1));
+        }
+        return;
+    }
+
+    $insert = $db->prepare(
+        "INSERT INTO ah_poa_etapas
+         (id_poa, codigo_etapa, nombre_etapa, descripcion_etapa, unidad_medida,
+          responsable, involucrados_json, fecha_recepcion, orden)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    );
+    $insert->execute([
+        $idPoa,
+        $code,
+        $name,
+        $description,
+        $unitsJson,
+        $responsiblesJson,
+        $involvedJson,
+        $receptionDate,
+        $order,
+    ]);
+}
+
+function detectTaskWorkPeriod(array $poa, array $monthKeys, string $requestedMonth = '', int $requestedYear = 0): array {
+    $month = in_array($requestedMonth, $monthKeys, true) ? $requestedMonth : '';
+    $year = ($requestedYear >= 2000 && $requestedYear <= 2100) ? $requestedYear : 0;
+
+    $periodText = trim((string)($poa['operativo_periodo'] ?? ''));
+    $normalized = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $periodText) ?: $periodText);
+    $monthAliases = [
+        'jan'=>['ene','enero','jan','january'], 'feb'=>['feb','febrero','february'],
+        'mar'=>['mar','marzo','march'], 'apr'=>['abr','abril','apr','april'],
+        'may'=>['may','mayo'], 'jun'=>['jun','junio','june'],
+        'jul'=>['jul','julio','july'], 'aug'=>['ago','agosto','aug','august'],
+        'sep'=>['sep','sept','septiembre','setiembre','september'],
+        'oct'=>['oct','octubre','october'], 'nov'=>['nov','noviembre','november'],
+        'dec'=>['dic','diciembre','dec','december']
+    ];
+
+    if ($month === '' && $normalized !== '') {
+        foreach ($monthAliases as $key => $aliases) {
+            foreach ($aliases as $alias) {
+                if (preg_match('/\\b'.preg_quote($alias, '/').'\\b/i', $normalized)) {
+                    $month = $key;
+                    break 2;
+                }
+            }
+        }
+    }
+    if ($year === 0 && preg_match('/\\b(20\\d{2})\\b/', $periodText, $match)) {
+        $year = (int)$match[1];
+    }
+
+    if ($month === '') {
+        foreach ($monthKeys as $key) {
+            if ((float)($poa['op_act_'.$key] ?? 0) != 0.0 || (float)($poa['op_part_'.$key] ?? 0) != 0.0) {
+                $month = $key;
+                break;
+            }
+        }
+    }
+    if ($month === '') {
+        $month = strtolower(date('M'));
+        if (!in_array($month, $monthKeys, true)) $month = 'jul';
+    }
+    if ($year === 0) $year = (int)date('Y');
+
+    return ['month'=>$month, 'year'=>$year];
+}
+
+function loadTaskDetail(PDO $db, int $idPoa, array $monthKeys, string $requestedMonth = '', int $requestedYear = 0): array {
+    $stmt = $db->prepare("SELECT * FROM ah_poa WHERE id = ? LIMIT 1");
+    $stmt->execute([$idPoa]);
+    $poa = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$poa) {
+        throw new RuntimeException('La actividad solicitada no existe.');
+    }
+
+    $workPeriod = detectTaskWorkPeriod($poa, $monthKeys, $requestedMonth, $requestedYear);
+
+    $stmt = $db->prepare(
+        "SELECT * FROM ah_poa_asignaciones WHERE id_poa = ? ORDER BY tecnico ASC, base_asignada ASC, id ASC"
+    );
+    $stmt->execute([$idPoa]);
+    $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $opAct = [];
+    $opPart = [];
+    foreach ($monthKeys as $month) {
+        $opAct[$month] = (float)($poa['op_act_' . $month] ?? 0);
+        $opPart[$month] = (float)($poa['op_part_' . $month] ?? 0);
+    }
+
+    $activity = trim((string)($poa['descripcion_actividad'] ?? ''));
+    if ($activity === '') {
+        $activity = trim((string)($poa['marco_logico'] ?? 'Actividad'));
+    }
+    $code = trim((string)($poa['codigo_maestro'] ?? ''));
+    if ($code === '') {
+        $code = poa_codigo_corto($poa['marco_logico'] ?? '');
+    }
+
+    return [
+        'id' => (int)$poa['id'],
+        'actividad' => $activity,
+        'codigo' => $code,
+        'extension' => trim((string)($poa['ext'] ?? '')),
+        'marco_logico' => (string)($poa['marco_logico'] ?? ''),
+        'programa' => (string)($poa['programa'] ?? ''),
+        'sector' => (string)($poa['sector'] ?? ''),
+        'tecnico' => (string)($poa['operativo_tecnico'] ?? 'Trabajo en Equipo'),
+        'comunidad' => (string)($poa['operativo_comunidad'] ?? ''),
+        'periodo' => (string)($poa['operativo_periodo'] ?? ''),
+        'mes_trabajo' => $workPeriod['month'],
+        'anio_trabajo' => $workPeriod['year'],
+        'estado' => (string)($poa['operativo_estado'] ?? '0%'),
+        't_part' => (string)($poa['tipo_participante'] ?? ''),
+        'm_act_obj' => (float)($poa['meta_actividades'] ?? 0),
+        'm_act_alc' => (float)($poa['meta_actividades_alc'] ?? 0),
+        'm_part_obj' => (float)($poa['operativo_meta_obj'] ?? 0),
+        'm_part_alc' => (float)($poa['operativo_meta_alc'] ?? 0),
+        'info_adicional' => (string)($poa['operativo_info_adicional'] ?? ''),
+        'team_lugares' => (string)($poa['equipo_lugares_json'] ?? '[]'),
+        'op_act' => $opAct,
+        'op_part' => $opPart,
+        'asignaciones' => $assignments,
+    ];
+}
+
+function loadTaskStages(PDO $db, int $idPoa): array {
+    // Resumen liviano: NO transferir involucrados_json al abrir el tab 3.
+    // Ese campo puede contener miles de centros y congelar el navegador al parsearlo.
+    $stmt = $db->prepare(
+        "SELECT id, id_poa, codigo_etapa, nombre_etapa, descripcion_etapa,
+                unidad_medida, responsable, fecha_recepcion, orden,
+                CASE
+                    WHEN involucrados_json IS NULL OR involucrados_json = '' THEN 0
+                    ELSE COALESCE(JSON_LENGTH(involucrados_json), 0)
+                END AS involucrados_count
+         FROM ah_poa_etapas
+         WHERE id_poa = ?
+         ORDER BY orden ASC, id ASC"
+    );
+    $stmt->execute([$idPoa]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function loadTaskStageDetail(PDO $db, int $idPoa, int $order): array {
+    $stmt = $db->prepare(
+        "SELECT id, id_poa, codigo_etapa, nombre_etapa, descripcion_etapa,
+                unidad_medida, responsable, involucrados_json, fecha_recepcion, orden
+         FROM ah_poa_etapas
+         WHERE id_poa = ? AND orden = ?
+         ORDER BY id ASC
+         LIMIT 1"
+    );
+    $stmt->execute([$idPoa, $order]);
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+}
+
+function loadCentersCatalog(PDO $db): array {
+    $period = date('Y-m');
+    try {
+        $stmt = $db->prepare(
+            "SELECT c.id, c.tipo, c.nombre, c.comunidad_base, c.caserio,
+                    c.pob_total, c.pob_fem, c.pob_masc,
+                    c.pob_0_5, c.pob_6_17, c.pob_18_24,
+                    c.lideres_f, c.lideres_m,
+                    pm.pob_0_5_9_f AS pm_0_5_9_f,
+                    pm.pob_0_5_9_m AS pm_0_5_9_m,
+                    pm.pob_6_14_9_f AS pm_6_14_9_f,
+                    pm.pob_6_14_9_m AS pm_6_14_9_m,
+                    pm.pob_15_17_9_f AS pm_15_17_9_f,
+                    pm.pob_15_17_9_m AS pm_15_17_9_m,
+                    pm.pob_18_24_f AS pm_18_24_f,
+                    pm.pob_18_24_m AS pm_18_24_m,
+                    pm.lideres_f AS pm_lideres_f,
+                    pm.lideres_m AS pm_lideres_m
+             FROM ah_centros c
+             LEFT JOIN ah_centros_poblacion_mensual pm
+                    ON pm.centro_id = c.id AND pm.periodo = ?
+             ORDER BY c.id ASC"
+        );
+        $stmt->execute([$period]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        $stmt = $db->query(
+            "SELECT id, tipo, nombre, comunidad_base, caserio,
+                    pob_total, pob_fem, pob_masc,
+                    pob_0_5, pob_6_17, pob_18_24,
+                    lideres_f, lideres_m
+             FROM ah_centros
+             ORDER BY id ASC"
+        );
+        return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+    }
 }
 
 $estados = ['Pendiente', 'En Proceso', 'Completado', 'Reprogramado', 'Cancelado'];
@@ -275,13 +553,79 @@ $etapas_default = [
     ['codigo'=>'E-4', 'nombre'=>'Asistencia y Monitoreo de Actividad', 'descripcion'=>'Acompañar la actividad aplicando herramientas evaluativas a la calidad del proceso y el nivel de satisfacción de participantes.', 'dia'=>'last']
 ];
 
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_task_detail') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        requireMonitoreoCsrf($monitoreoCsrf);
+        $idPoa = (int)($_POST['id_poa'] ?? 0);
+        if ($idPoa <= 0) {
+            throw new RuntimeException('Actividad inválida.');
+        }
+        echo json_encode([
+            'status' => 'ok',
+            'task' => loadTaskDetail($db, $idPoa, $MONITOREO_MONTH_KEYS, (string)($_REQUEST['mes'] ?? ''), (int)($_REQUEST['anio'] ?? 0)),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } catch (Throwable $e) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_task_stages') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        requireMonitoreoCsrf($monitoreoCsrf);
+        $idPoa = (int)($_POST['id_poa'] ?? 0);
+        if ($idPoa <= 0) throw new RuntimeException('Actividad inválida.');
+        echo json_encode(['status'=>'ok','etapas'=>loadTaskStages($db,$idPoa)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } catch (Throwable $e) {
+        http_response_code(400);
+        echo json_encode(['status'=>'error','msg'=>$e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_task_stage_detail') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        requireMonitoreoCsrf($monitoreoCsrf);
+        $idPoa = (int)($_POST['id_poa'] ?? 0);
+        $order = (int)($_POST['stage_order'] ?? 0);
+        if ($idPoa <= 0 || $order < 1 || $order > 4) {
+            throw new RuntimeException('Etapa inválida.');
+        }
+        echo json_encode([
+            'status' => 'ok',
+            'etapa' => loadTaskStageDetail($db, $idPoa, $order),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } catch (Throwable $e) {
+        http_response_code(400);
+        echo json_encode(['status'=>'error','msg'=>$e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'get_centers_catalog') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        requireMonitoreoCsrf($monitoreoCsrf);
+        echo json_encode([
+            'status' => 'ok',
+            'centros' => loadCentersCatalog($db),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'toggle_ocultar') {
     header('Content-Type: application/json; charset=utf-8');
     try {
-        $csrf = (string)($_POST['csrf'] ?? '');
-        if ($csrf === '' || !hash_equals($monitoreoCsrf, $csrf)) {
-            throw new RuntimeException('La sesión de seguridad venció. Recargue la página.');
-        }
+        requireMonitoreoCsrf($monitoreoCsrf);
         $id = (int)$_POST['id_poa'];
         $oculto = (int)$_POST['oculto'];
         $db->prepare("UPDATE ah_poa SET operativo_oculto = ? WHERE id = ?")->execute([$oculto, $id]);
@@ -293,6 +637,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'verify_metas_password') {
     header('Content-Type: application/json; charset=utf-8');
     try {
+        requireMonitoreoCsrf($monitoreoCsrf);
         $password = (string)($_POST['password'] ?? '');
         if ($password === '') throw new Exception('Ingrese su contraseña.');
         $user = getCurrentUserCredential($db);
@@ -310,6 +655,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_to_catalog') {
     header('Content-Type: application/json; charset=utf-8');
+    try { requireMonitoreoCsrf($monitoreoCsrf); } catch (Throwable $e) { http_response_code(403); echo json_encode(['status'=>'error','msg'=>$e->getMessage()]); exit; }
     $type = $_POST['catalog_type'] ?? '';
     $value = trim($_POST['catalog_value'] ?? '');
     $prog = trim($_POST['programa'] ?? 'GENERAL');
@@ -331,78 +677,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// GUARDADO MASIVO (BULK SAVE) DE ASIGNACIONES
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'autosave_team_assignment_bulk') {
+// GUARDADO DE UNA SOLA FILA DE ASIGNACIÓN
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'autosave_team_assignment_row') {
     header('Content-Type: application/json; charset=utf-8');
     try {
-        $id_poa = (int)($_POST['id_poa'] ?? 0);
-        if ($id_poa <= 0) throw new Exception('Actividad inválida.');
-
-        $lugaresRaw = $_POST['lugares'] ?? [];
-        $lugares = [];
-        foreach ((array)$lugaresRaw as $lugar) {
-            $lugar = trim((string)$lugar);
-            if ($lugar !== '' && !in_array($lugar, $lugares, true)) $lugares[] = $lugar;
+        requireMonitoreoCsrf($monitoreoCsrf);
+        $idPoa = (int)($_POST['id_poa'] ?? 0);
+        $row = json_decode((string)($_POST['row'] ?? '{}'), true);
+        if ($idPoa <= 0 || !is_array($row)) {
+            throw new RuntimeException('Asignación inválida.');
         }
-        $lugaresJson = json_encode($lugares, JSON_UNESCAPED_UNICODE);
 
-        $rows = json_decode($_POST['rows'] ?? '[]', true);
-        if (!is_array($rows)) $rows = [];
+        $lugares = normalizeStringList($_POST['lugares'] ?? []);
+        $lugaresJson = json_encode($lugares, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($lugaresJson === false) {
+            $lugaresJson = '[]';
+        }
 
         $db->beginTransaction();
-
-        try {
-            $db->prepare("UPDATE {$tabla_poa} SET equipo_lugares_json = ? WHERE {$col_id} = ?")->execute([$lugaresJson, $id_poa]);
-        } catch (Throwable $e) {}
-
-        $db->prepare("DELETE FROM ah_poa_asignaciones WHERE id_poa = ?")->execute([$id_poa]);
-
-        $sql = "INSERT INTO ah_poa_asignaciones (id_poa, tecnico, base_asignada, meses_asignados, meta_asignada, logro_asignado, lugares_json, meta_jul, meta_aug, meta_sep, meta_oct, meta_nov, meta_dec, meta_jan, meta_feb, meta_mar, meta_apr, meta_may, meta_jun, logro_jul, logro_aug, logro_sep, logro_oct, logro_nov, logro_dec, logro_jan, logro_feb, logro_mar, logro_apr, logro_may, logro_jun) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $db->prepare($sql);
-
-        foreach ($rows as $row) {
-            $tecnico = trim($row['tecnico'] ?? '');
-            $base_asignada = trim($row['base_asignada'] ?? '');
-            if ($base_asignada === 'General') $base_asignada = '';
-            $selected = (int)($row['selected'] ?? 0) === 1;
-
-            $metas = $row['metas'] ?? [];
-            $logros = $row['logros'] ?? [];
-            $meta_total = 0; $logro_total = 0; $meses = [];
-
-            foreach (['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'] as $m) {
-                $valM = (float)($metas[$m] ?? 0);
-                $valL = (float)($logros[$m] ?? 0);
-                $meta_total += $valM;
-                $logro_total += $valL;
-                if ($valM > 0 || $valL > 0) $meses[] = $m;
-            }
-
-            if ($selected || $meta_total > 0 || $logro_total > 0) {
-                $stmt->execute([
-                    $id_poa, $tecnico, $base_asignada, implode(', ', $meses), $meta_total, $logro_total, $lugaresJson,
-                    (float)($metas['jul']??0),(float)($metas['aug']??0),(float)($metas['sep']??0),(float)($metas['oct']??0),(float)($metas['nov']??0),(float)($metas['dec']??0),
-                    (float)($metas['jan']??0),(float)($metas['feb']??0),(float)($metas['mar']??0),(float)($metas['apr']??0),(float)($metas['may']??0),(float)($metas['jun']??0),
-                    (float)($logros['jul']??0),(float)($logros['aug']??0),(float)($logros['sep']??0),(float)($logros['oct']??0),(float)($logros['nov']??0),(float)($logros['dec']??0),
-                    (float)($logros['jan']??0),(float)($logros['feb']??0),(float)($logros['mar']??0),(float)($logros['apr']??0),(float)($logros['may']??0),(float)($logros['jun']??0)
-                ]);
-            }
-        }
-
+        persistTeamAssignmentRow($db, $idPoa, $row, $lugaresJson, $MONITOREO_MONTH_KEYS);
         $db->commit();
-        saveActivitySnapshot($db, $id_poa, 'asignacion_equipo_masiva');
-        echo json_encode(['status'=>'ok','lugares'=>$lugares]); exit;
+
+        echo json_encode(['status' => 'ok'], JSON_UNESCAPED_UNICODE);
     } catch (Throwable $e) {
-        if ($db->inTransaction()) $db->rollBack();
-        echo json_encode(['status'=>'error','msg'=>$e->getMessage()]); exit;
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
     }
+    exit;
 }
 
+// SINCRONIZACIÓN MASIVA: se usa al cambiar lugares globales o al cerrar el modal.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'autosave_team_assignment_bulk') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        requireMonitoreoCsrf($monitoreoCsrf);
+        $idPoa = (int)($_POST['id_poa'] ?? 0);
+        if ($idPoa <= 0) {
+            throw new RuntimeException('Actividad inválida.');
+        }
+
+        $rows = json_decode((string)($_POST['rows'] ?? '[]'), true);
+        if (!is_array($rows)) {
+            $rows = [];
+        }
+        $lugares = normalizeStringList($_POST['lugares'] ?? []);
+        $lugaresJson = json_encode($lugares, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($lugaresJson === false) {
+            $lugaresJson = '[]';
+        }
+
+        $db->beginTransaction();
+        $opMonth = trim((string)($_POST['op_month'] ?? ''));
+        $allowedOpMonths = array_values($MONITOREO_MONTH_KEYS);
+        if ($opMonth !== '' && in_array($opMonth, $allowedOpMonths, true)) {
+            $opAct = (float)($_POST['op_act'] ?? 0);
+            $opPart = (float)($_POST['op_part'] ?? 0);
+            $colAct = 'op_act_' . $opMonth;
+            $colPart = 'op_part_' . $opMonth;
+            $updatePoa = $db->prepare(
+                "UPDATE {$tabla_poa}
+                 SET equipo_lugares_json = ?, `{$colAct}` = ?, `{$colPart}` = ?
+                 WHERE {$col_id} = ?"
+            );
+            $updatePoa->execute([$lugaresJson, $opAct, $opPart, $idPoa]);
+        } else {
+            $updatePoa = $db->prepare(
+                "UPDATE {$tabla_poa} SET equipo_lugares_json = ? WHERE {$col_id} = ?"
+            );
+            $updatePoa->execute([$lugaresJson, $idPoa]);
+        }
+
+        foreach ($rows as $row) {
+            if (is_array($row)) {
+                persistTeamAssignmentRow($db, $idPoa, $row, $lugaresJson, $MONITOREO_MONTH_KEYS);
+            }
+        }
+        $db->commit();
+
+        echo json_encode(['status' => 'ok', 'lugares' => $lugares], JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'autosave_centros_etapa3') {
     header('Content-Type: application/json; charset=utf-8');
 
     try {
+        requireMonitoreoCsrf($monitoreoCsrf);
         $idPoa = (int)($_POST['id_poa'] ?? 0);
         $rowKey = trim((string)($_POST['row_key'] ?? ''));
         $rowJson = (string)($_POST['row_json'] ?? '');
@@ -489,8 +859,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $insEtapa->execute([$idPoa, $etapas_default[2]['nombre'] ?? 'Desarrollar y reportar Actividad', $etapas_default[2]['descripcion'] ?? '', $json, $fechaMaxima]);
         }
 
+        $estadoActividad = trim((string)($_POST['estado'] ?? ''));
+        if ($estadoActividad !== '') {
+            $db->prepare("UPDATE {$tabla_poa} SET operativo_estado = ? WHERE {$col_id} = ?")
+               ->execute([$estadoActividad, $idPoa]);
+        }
+
         $db->commit();
-        saveActivitySnapshot($db, $idPoa, 'detalle_centros_etapa3');
 
         echo json_encode(['status' => 'ok', 'msg' => 'Detalle de centros guardado.', 'row' => $rowData], JSON_UNESCAPED_UNICODE);
     } catch (Throwable $e) {
@@ -501,40 +876,152 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_task') {
-    try {
-        $db->beginTransaction();
-        $taskId = (int)($_POST['task_id'] ?? 0);
-        $db->prepare("UPDATE {$tabla_poa} SET operativo_estado=?, operativo_info_adicional=? WHERE {$col_id}=?")
-           ->execute([$_POST['estado'] ?? '0%', $_POST['info_adicional'] ?? '', $taskId]);
 
-        if (metasEditUnlocked() && (($_POST['metas_authorized'] ?? '0') === '1')) {
-            $db->prepare("UPDATE {$tabla_poa} SET meta_actividades=?, operativo_meta_obj=?, meta_actividades_alc=?, operativo_meta_alc=? WHERE {$col_id}=?")
-               ->execute([(float)($_POST['meta_act_obj'] ?? 0), (float)($_POST['meta_part_obj'] ?? 0), (float)($_POST['meta_act_alc'] ?? 0), (float)($_POST['meta_part_alc'] ?? 0), $taskId]);
-            foreach (['jul','aug','sep','oct','nov','dec','jan','feb','mar','apr','may','jun'] as $m) {
-                $db->prepare("UPDATE {$tabla_poa} SET op_act_{$m}=?, op_part_{$m}=?, op_editado_{$m}=1 WHERE {$col_id}=?")
-                   ->execute([(float)($_POST['op_act'][$m] ?? 0), (float)($_POST['op_part'][$m] ?? 0), $taskId]);
-            }
+// AUTOGUARDADO INCREMENTAL DE UNA ETAPA (evita serializar todo el formulario)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'autosave_stage_incremental') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        requireMonitoreoCsrf($monitoreoCsrf);
+        $idPoa = (int)($_POST['id_poa'] ?? 0);
+        $orden = (int)($_POST['stage_order'] ?? 0);
+        if ($idPoa <= 0 || $orden < 1 || $orden > 4) {
+            throw new RuntimeException('Etapa inválida.');
         }
 
-        if (($_POST['etapas_loaded'] ?? '1') === '1') {
-        $db->prepare("DELETE FROM ah_poa_etapas WHERE id_poa=?")->execute([(int)$_POST['task_id']]);
-        if (isset($_POST['etapa_codigo']) && is_array($_POST['etapa_codigo'])) {
-            $ins = $db->prepare("INSERT INTO ah_poa_etapas (id_poa, codigo_etapa, nombre_etapa, descripcion_etapa, unidad_medida, responsable, involucrados_json, fecha_recepcion, orden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            foreach ($_POST['etapa_codigo'] as $i => $codigo) {
-                $unidades = isset($_POST['etapa_unidades'][$i]) ? json_encode($_POST['etapa_unidades'][$i], JSON_UNESCAPED_UNICODE) : '[]';
-                $resps = isset($_POST['etapa_resps'][$i]) ? json_encode($_POST['etapa_resps'][$i], JSON_UNESCAPED_UNICODE) : '[]';
-                $inv = [];
-                if (!empty($_POST['etapa_involucrados_json'][$i])) {
-                    $invPrev = json_decode((string)$_POST['etapa_involucrados_json'][$i], true);
-                    if (is_array($invPrev)) $inv = $invPrev;
+        $codigo = trim((string)($_POST['codigo_etapa'] ?? ('E-' . $orden)));
+        $nombre = trim((string)($_POST['nombre_etapa'] ?? ''));
+        $descripcion = trim((string)($_POST['descripcion_etapa'] ?? ''));
+        $fecha = trim((string)($_POST['fecha_recepcion'] ?? ''));
+
+        $unidades = json_decode((string)($_POST['unidad_medida'] ?? '[]'), true);
+        $responsables = json_decode((string)($_POST['responsable'] ?? '[]'), true);
+        $involucrados = json_decode((string)($_POST['involucrados_json'] ?? '{}'), true);
+        if (!is_array($unidades)) $unidades = [];
+        if (!is_array($responsables)) $responsables = [];
+        if (!is_array($involucrados)) $involucrados = [];
+
+        $unidadesJson = json_encode(array_values($unidades), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]';
+        $responsablesJson = json_encode(array_values($responsables), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '[]';
+        $involucradosJson = json_encode($involucrados, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
+
+        $db->beginTransaction();
+        persistPoaStage(
+            $db,
+            $idPoa,
+            $orden,
+            $codigo,
+            $nombre,
+            $descripcion,
+            $unidadesJson,
+            $responsablesJson,
+            $involucradosJson,
+            $fecha !== '' ? $fecha : null
+        );
+        $db->commit();
+
+        echo json_encode(['status' => 'ok', 'stage_order' => $orden], JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    }
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_task') {
+    $isAutosave = (string)($_POST['autosave_full'] ?? '') === '1';
+    try {
+        requireMonitoreoCsrf($monitoreoCsrf);
+        $taskId = (int)($_POST['task_id'] ?? 0);
+        if ($taskId <= 0) {
+            throw new RuntimeException('Actividad inválida.');
+        }
+
+        $db->beginTransaction();
+        $db->prepare(
+            "UPDATE {$tabla_poa}
+             SET operativo_estado = ?, operativo_info_adicional = ?
+             WHERE {$col_id} = ?"
+        )->execute([
+            (string)($_POST['estado'] ?? '0%'),
+            (string)($_POST['info_adicional'] ?? ''),
+            $taskId,
+        ]);
+
+        if (metasEditUnlocked() && (string)($_POST['metas_authorized'] ?? '0') === '1') {
+            $sets = [
+                'meta_actividades = ?',
+                'operativo_meta_obj = ?',
+                'meta_actividades_alc = ?',
+                'operativo_meta_alc = ?',
+            ];
+            $params = [
+                (float)($_POST['meta_act_obj'] ?? 0),
+                (float)($_POST['meta_part_obj'] ?? 0),
+                (float)($_POST['meta_act_alc'] ?? 0),
+                (float)($_POST['meta_part_alc'] ?? 0),
+            ];
+
+            foreach ($MONITOREO_MONTH_KEYS as $month) {
+                $sets[] = "op_act_{$month} = ?";
+                $sets[] = "op_part_{$month} = ?";
+                $sets[] = "op_editado_{$month} = 1";
+                $params[] = (float)($_POST['op_act'][$month] ?? 0);
+                $params[] = (float)($_POST['op_part'][$month] ?? 0);
+            }
+            $params[] = $taskId;
+
+            $updateMetas = $db->prepare(
+                "UPDATE {$tabla_poa} SET " . implode(', ', $sets) . " WHERE {$col_id} = ?"
+            );
+            $updateMetas->execute($params);
+        }
+
+        $etapasPayload = [];
+        if (!empty($_POST['etapas_payload'])) {
+            $tmpEtapas = json_decode((string)$_POST['etapas_payload'], true);
+            if (is_array($tmpEtapas)) $etapasPayload = $tmpEtapas;
+        }
+        if ($etapasPayload) {
+            foreach ($etapasPayload as $i => $etapaPayload) {
+                $invPayload = $etapaPayload['involucrados_json'] ?? '{}';
+                if (is_array($invPayload)) {
+                    $invPayload = json_encode($invPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 }
-                if (isset($_POST['inv_alograr'][$i])) {
+                if (!is_string($invPayload) || $invPayload === '') $invPayload = '{}';
+                persistPoaStage(
+                    $db,
+                    $taskId,
+                    $i + 1,
+                    trim((string)($etapaPayload['codigo_etapa'] ?? '')),
+                    trim((string)($etapaPayload['nombre_etapa'] ?? '')),
+                    trim((string)($etapaPayload['descripcion_etapa'] ?? '')),
+                    is_string($etapaPayload['unidad_medida'] ?? null) ? $etapaPayload['unidad_medida'] : json_encode($etapaPayload['unidad_medida'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                    is_string($etapaPayload['responsable'] ?? null) ? $etapaPayload['responsable'] : json_encode($etapaPayload['responsable'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                    $invPayload,
+                    !empty($etapaPayload['fecha_recepcion']) ? (string)$etapaPayload['fecha_recepcion'] : null
+                );
+            }
+        } elseif (isset($_POST['etapa_codigo']) && is_array($_POST['etapa_codigo'])) {
+            foreach ($_POST['etapa_codigo'] as $i => $codigo) {
+                $unidades = isset($_POST['etapa_unidades'][$i])
+                    ? json_encode($_POST['etapa_unidades'][$i], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                    : '[]';
+                $resps = isset($_POST['etapa_resps'][$i])
+                    ? json_encode($_POST['etapa_resps'][$i], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                    : '[]';
+                if ($unidades === false) $unidades = '[]';
+                if ($resps === false) $resps = '[]';
+
+                $inv = [];
+                if (isset($_POST['inv_alograr'][$i]) && is_array($_POST['inv_alograr'][$i])) {
                     foreach ($_POST['inv_alograr'][$i] as $key => $aLograr) {
                         $centrosPrev = [];
                         if (!empty($_POST['inv_centros_json'][$i][$key])) {
-                            $tmpCentros = json_decode($_POST['inv_centros_json'][$i][$key], true);
-                            if (is_array($tmpCentros)) { $centrosPrev = $tmpCentros; }
+                            $tmpCentros = json_decode((string)$_POST['inv_centros_json'][$i][$key], true);
+                            if (is_array($tmpCentros)) {
+                                $centrosPrev = $tmpCentros;
+                            }
                         }
                         if (isset($_POST['inv_centros'][$i][$key]) && is_array($_POST['inv_centros'][$i][$key])) {
                             foreach ($_POST['inv_centros'][$i][$key] as $idCentro => $centroData) {
@@ -552,16 +1039,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                     'quality_version' => 2,
                                     'pob_0_5' => (float)($centroData['pob_0_5'] ?? 0),
                                     'pob_6_17' => (float)($centroData['pob_6_17'] ?? 0),
-                                    'pob_18_24' => (float)($centroData['pob_18_24'] ?? 0)
+                                    'pob_18_24' => (float)($centroData['pob_18_24'] ?? 0),
                                 ];
                             }
                         }
+
                         $inv[$key] = [
                             'persona' => $_POST['inv_persona'][$i][$key] ?? '',
                             'base' => $_POST['inv_base'][$i][$key] ?? '',
                             'unidad' => $_POST['inv_unidad'][$i][$key] ?? '',
                             'mes' => $_POST['inv_mes'][$i][$key] ?? '',
-                            'deleted' => (($_POST['inv_deleted'][$i][$key] ?? '0') === '1'),
+                            'deleted' => (string)($_POST['inv_deleted'][$i][$key] ?? '0') === '1',
                             'a_lograr' => (float)$aLograr,
                             'cumplido' => (float)($_POST['inv_cumplido'][$i][$key] ?? 0),
                             'a_tiempo' => max(0, min(100, (float)($_POST['inv_a_tiempo'][$i][$key] ?? 100))),
@@ -570,28 +1058,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             'quality_version' => 2,
                             'verifics' => $_POST['inv_verifics'][$i][$key] ?? [],
                             'lugar' => $_POST['inv_lugar'][$i][$key] ?? [],
-                            'centros' => $centrosPrev
+                            'centros' => $centrosPrev,
                         ];
                     }
                 }
-                $fecha = trim($_POST['etapa_fecha_recepcion'][$i] ?? '');
-                $ins->execute([(int)$_POST['task_id'], trim($codigo), trim($_POST['etapa_nombre'][$i] ?? ''), trim($_POST['etapa_descripcion'][$i] ?? ''), $unidades, $resps, json_encode($inv, JSON_UNESCAPED_UNICODE), $fecha !== '' ? $fecha : null, $i + 1]);
+
+                $fecha = trim((string)($_POST['etapa_fecha_recepcion'][$i] ?? ''));
+                $involvedJson = json_encode($inv, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($involvedJson === false) {
+                    $involvedJson = '{}';
+                }
+
+                persistPoaStage(
+                    $db,
+                    $taskId,
+                    $i + 1,
+                    trim((string)$codigo),
+                    trim((string)($_POST['etapa_nombre'][$i] ?? '')),
+                    trim((string)($_POST['etapa_descripcion'][$i] ?? '')),
+                    $unidades,
+                    $resps,
+                    $involvedJson,
+                    $fecha !== '' ? $fecha : null
+                );
             }
         }
-        }
+
         $db->commit();
-        saveActivitySnapshot($db, $taskId, 'configuracion_actividad');
-        if (isset($_POST['autosave_full']) && $_POST['autosave_full'] == '1') {
+
+        if ((string)($_POST['make_snapshot'] ?? '0') === '1') {
+            saveActivitySnapshot($db, $taskId, 'configuracion_actividad');
+        }
+
+        if ($isAutosave) {
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['status'=>'ok','msg'=>'Autoguardado correcto']);
+            echo json_encode(['status' => 'ok', 'msg' => 'Autoguardado correcto'], JSON_UNESCAPED_UNICODE);
             exit;
         }
+
         $msg = "<div class='alert success'><i class='fa-solid fa-check'></i> Configuración guardada correctamente.</div>";
     } catch (Throwable $e) {
-        $db->rollBack();
-        if (isset($_POST['autosave_full']) && $_POST['autosave_full'] == '1') {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        if ($isAutosave) {
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['status'=>'error','msg'=>$e->getMessage()]);
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'msg' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
             exit;
         }
         $msg = "<div class='alert error'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
@@ -599,8 +1112,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 $meses_keys = ['jul'=>'Jul','aug'=>'Ago','sep'=>'Sep','oct'=>'Oct','nov'=>'Nov','dec'=>'Dic','jan'=>'Ene','feb'=>'Feb','mar'=>'Mar','apr'=>'Abr','may'=>'May','jun'=>'Jun'];
-try { $tareas = $db->query("SELECT * FROM {$tabla_poa} WHERE operativo_oculto = 0 ORDER BY id ASC LIMIT 2000")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas = []; }
-try { $tareas_ocultas = $db->query("SELECT id, descripcion_actividad, marco_logico, codigo_maestro FROM {$tabla_poa} WHERE operativo_oculto = 1 ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas_ocultas = []; }
+$taskListColumns = [
+    'id', 'descripcion_actividad', 'marco_logico', 'codigo_maestro', 'ext',
+    'programa', 'sector', 'operativo_tecnico', 'operativo_comunidad',
+    'operativo_periodo', 'operativo_estado', 'tipo_participante',
+    'meta_actividades', 'meta_actividades_alc', 'operativo_meta_obj',
+    'operativo_meta_alc'
+];
+foreach (array_keys($meses_keys) as $month) {
+    $taskListColumns[] = 'op_act_' . $month;
+    $taskListColumns[] = 'op_part_' . $month;
+}
+if (!$isDetailPage) {
+    try {
+        $taskListSql = "SELECT " . implode(', ', $taskListColumns) . "
+                        FROM {$tabla_poa}
+                        WHERE operativo_oculto = 0
+                        ORDER BY id ASC
+                        LIMIT 2000";
+        $tareas = $db->query($taskListSql)->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        $tareas = [];
+    }
+    try { $tareas_ocultas = $db->query("SELECT id, descripcion_actividad, marco_logico, codigo_maestro FROM {$tabla_poa} WHERE operativo_oculto = 1 ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $tareas_ocultas = []; }
+} else {
+    $tareas = [];
+    $tareas_ocultas = [];
+}
 try { $tecnicos_list = $db->query("SELECT nombre FROM ah_tecnicos WHERE activo=1 ORDER BY nombre ASC")->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $e) { $tecnicos_list = []; }
 
 // Técnico multibase robusto: genera una fila por cada relación técnico-base, sin perder técnicos sin base.
@@ -654,8 +1192,8 @@ foreach ($tecnicos_list as $tn) {
 try { $cat_responsables = $db->query("SELECT nombre FROM ah_cat_responsables ORDER BY id ASC")->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $e) { $cat_responsables = []; }
 try { $cat_lugares = $db->query("SELECT nombre FROM ah_cat_lugares ORDER BY id ASC")->fetchAll(PDO::FETCH_COLUMN); } catch (Throwable $e) { $cat_lugares = []; }
 
-// CORRECCIÓN: Traemos TODA LA TABLA ah_centros para evitar perder las columnas pob_total, lideres_f, lideres_m
-try { $centros_catalogo = $db->query("SELECT * FROM ah_centros ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC); } catch (Throwable $e) { $centros_catalogo = []; }
+// El catálogo de centros se carga bajo demanda mediante get_centers_catalog.
+$centros_catalogo = [];
 
 $cat_unidades_raw = [];
 try {
@@ -681,6 +1219,19 @@ $lista_total_responsables = array_values(array_unique(array_merge($cat_responsab
 $mes_actual_php = strtolower(date('M'));
 $map_month_php = ['jan'=>'jan','feb'=>'feb','mar'=>'mar','apr'=>'apr','may'=>'may','jun'=>'jun','jul'=>'jul','aug'=>'aug','sep'=>'sep','oct'=>'oct','nov'=>'nov','dec'=>'dec'];
 $mes_actual = $map_month_php[$mes_actual_php] ?? 'jul';
+$mes_trabajo_inicial = $requestedWorkMonth !== '' ? $requestedWorkMonth : $mes_actual;
+$anio_trabajo_inicial = $requestedWorkYear > 0 ? $requestedWorkYear : (int)date('Y');
+if ($isDetailPage) {
+    try {
+        $stWork = $db->prepare("SELECT * FROM ah_poa WHERE id = ? LIMIT 1");
+        $stWork->execute([$detailTaskId]);
+        if ($poaWork = $stWork->fetch(PDO::FETCH_ASSOC)) {
+            $detectedWork = detectTaskWorkPeriod($poaWork, $MONITOREO_MONTH_KEYS, $requestedWorkMonth, $requestedWorkYear);
+            $mes_trabajo_inicial = $detectedWork['month'];
+            $anio_trabajo_inicial = $detectedWork['year'];
+        }
+    } catch (Throwable $e) {}
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -689,9 +1240,6 @@ $mes_actual = $map_month_php[$mes_actual_php] ?? 'jul';
 <title>Monitoreo Operativo General | Acción Honduras</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://unpkg.com/jquery@3.7.0/dist/jquery.min.js"></script>
-<script src="https://unpkg.com/tinymce@6/tinymce.min.js"></script>
-<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--ah-primary:#34859B;--bg-canvas:#f8fafc;--border:#e2e8f0;--text-main:#1e293b;--text-muted:#64748b;--blue-soft:#e0f2fe;--blue-text:#075985;--green:#16a34a;--red:#dc2626;--yellow:#f59e0b;}
 body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var(--bg-canvas);margin:0;color:var(--text-main)}
@@ -703,8 +1251,8 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px}.modal-content{background:white;width:96%;max-width:1660px;border-radius:16px;display:flex;flex-direction:column;height:95vh;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);overflow:hidden}.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 26px 0;flex-shrink:0}.modal-tabs{display:flex;gap:8px;padding:12px 26px 0;border-bottom:1px solid var(--border);background:white;flex-shrink:0}.modal-tab-btn{background:none;border:0;padding:10px 16px;font-size:.93rem;font-weight:800;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent}.modal-tab-btn.active{color:var(--ah-primary);border-bottom-color:var(--ah-primary)}.modal-body{padding:0;overflow-y:auto;flex-grow:1;background:#f8fafc}.modal-footer{padding:14px 26px;border-top:1px solid var(--border);background:white;text-align:right;flex-shrink:0}.modal-tab-content{display:none;padding:22px 26px}.modal-tab-content.active{display:block}
 .agenda-sticky{position:sticky;top:0;z-index:40;background:rgba(248,250,252,.98);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);padding:12px 26px 10px;box-shadow:0 8px 18px rgba(15,23,42,.06)}.agenda-sticky-inner{display:grid;grid-template-columns:1fr 240px 150px;gap:12px;align-items:center}.agenda-title{font-size:1rem;font-weight:800;margin:0;line-height:1.28}.agenda-status label{font-size:.68rem;text-transform:uppercase;font-weight:900;color:#0284c7;display:block;margin-bottom:3px}.agenda-status select{height:38px;font-weight:800;color:#075985}.agenda-meta{background:white;border:1px solid #bae6fd;border-left:4px solid var(--ah-primary);border-radius:10px;padding:8px 12px;text-align:center}.agenda-meta span{display:block;font-size:.68rem;color:#0284c7;font-weight:900;text-transform:uppercase}.agenda-meta strong{font-size:1.15rem;color:#0f172a}.agenda-meta.month-meta{border-left-color:#16a34a}.agenda-meta.month-meta span{color:#166534}
 .styled-table{width:100%;border-collapse:collapse;background:white;border-radius:8px;border:1px solid var(--border);overflow:hidden}.styled-table th,.styled-table td{padding:11px 12px;text-align:left;border-bottom:1px solid #f1f5f9;vertical-align:middle}.styled-table th{background:#f8fafc;color:#475569;font-weight:800;font-size:.78rem;text-transform:uppercase;letter-spacing:.4px}.table-input{width:100%;padding:8px 10px;border:1px solid var(--border);background:white;border-radius:6px;font-size:.85rem;font-family:inherit;box-sizing:border-box}.table-input:focus{border-color:var(--ah-primary);outline:none;box-shadow:0 0 0 3px rgba(52,133,155,.1)}.stage-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:white;min-height:320px}.stage-main-row td{background:#fff}.stage-info{display:flex;gap:14px;align-items:flex-start}.stage-code{font-weight:900;color:#0f172a;min-width:42px}.stage-name{font-weight:900;color:#075985}.stage-desc{color:#475569;font-size:.88rem;line-height:1.35}.global-date-pill{display:inline-flex;align-items:center;gap:8px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:999px;padding:8px 12px;font-weight:900;font-size:.82rem}.date-input-compact{width:145px!important;padding:6px 8px!important;border-radius:999px!important}
-.custom-multiselect{position:relative;width:100%;min-width:180px}.multiselect-select-box{background:white;border:1px solid #cbd5e1;border-radius:6px;padding:6px 10px;font-size:.85rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:36px;box-sizing:border-box;flex-wrap:wrap;gap:4px}.multiselect-select-box::after{content:'\f107';font-family:'Font Awesome 6 Free';font-weight:900;color:#64748b;margin-left:auto}.multiselect-select-box > span { pointer-events: none; }.multi-tag{display:inline-block;background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-size:.72rem;font-weight:900;border:1px solid #bae6fd}.multiselect-dropdown-panel{display:none;position:fixed;background:white;border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 10px 25px -5px rgba(0,0,0,.2);max-height:250px;overflow-y:auto;z-index:999999;padding:6px;box-sizing:border-box}.multiselect-option{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:.85rem;border-radius:4px;cursor:pointer;color:#334155;user-select:none}.multiselect-option:hover{background:#f1f5f9}.multiselect-add-new-btn{display:block;text-align:center;padding:8px;border-top:1px solid #e2e8f0;color:var(--ah-primary);font-weight:800;font-size:.8rem;text-decoration:none;margin-top:4px}
-.subgrid-wrapper{background:#f8fafc;border-top:2px dashed #cbd5e1;padding:12px 16px 18px}.subgrid-card{background:white;border:1px solid #dbeafe;border-radius:12px;box-shadow:0 4px 16px rgba(15,23,42,.04);overflow:hidden}.subgrid-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f0f9ff;border-bottom:1px solid #dbeafe}.subgrid-header h5{margin:0;font-size:.86rem;color:#075985;text-transform:uppercase;letter-spacing:.3px}.subgrid-table{width:100%;border-collapse:collapse}.subgrid-table th{background:#f8fafc;color:#334155;font-size:.76rem;font-weight:900;padding:9px 10px;text-transform:uppercase}.subgrid-table td{padding:9px 10px;border-top:1px solid #f1f5f9;font-size:.84rem}.inv-row-toggle{background:#eff6ff!important}.detail-centros-row td{padding:0!important;background:#f8fafc!important}.centros-detail-panel{width:100%;box-sizing:border-box;border-top:1px solid #bfdbfe;background:#fff}.centros-detail-toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f0f9ff;border-bottom:1px solid #dbeafe}.centros-detail-toolbar strong{color:#075985}.centros-detail-body{padding:14px;max-height:420px;overflow:auto;position:relative}.centros-table{width:100%;border-collapse:collapse;min-width:980px;table-layout:fixed}.centros-table th{background:#e0f2fe;color:#075985;font-size:.76rem;font-weight:900;padding:10px;text-align:left;position:static;top:auto;z-index:auto}.centros-table td{padding:9px 10px;border-bottom:1px solid #e2e8f0}.center-name{font-weight:900;color:#0f172a}.center-meta{font-size:.76rem;color:#64748b}.pct-badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:.76rem;font-weight:900;min-width:52px;text-align:center}.pct-red{background:#fee2e2;color:#991b1b}.pct-yellow{background:#fef3c7;color:#92400e}.pct-softgreen{background:#dcfce7;color:#166534}.pct-darkgreen{background:#14532d;color:#fff}.pct-gray{background:#f1f5f9;color:#64748b}.score-input{max-width:80px;text-align:center;font-weight:900}.a-lograr-input{max-width:95px;font-weight:900}.d-none{display:none!important}.autosave-indicator{display:none!important}
+.custom-multiselect{position:relative;width:100%;min-width:180px}.multiselect-select-box{background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);border:1px solid #cbd5e1;border-radius:12px;padding:8px 11px;font-size:.84rem;cursor:pointer;display:flex;align-items:center;min-height:44px;box-sizing:border-box;flex-wrap:nowrap;gap:7px;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;overflow:hidden}.multiselect-select-box:hover{border-color:#7dd3fc;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.07)}.multiselect-select-box.is-open{border-color:var(--ah-primary);background:#fff;box-shadow:0 0 0 3px rgba(52,133,155,.13)}.multiselect-select-box::after{content:'\f107';font-family:'Font Awesome 6 Free';font-weight:900;color:#64748b;margin-left:auto;flex:0 0 auto;transition:transform .18s ease,color .18s ease}.multiselect-select-box.is-open::after{transform:rotate(180deg);color:var(--ah-primary)}.multiselect-select-box > span{pointer-events:none}.multi-label{display:flex;align-items:center;gap:5px;min-width:0;flex:1;overflow:hidden;white-space:nowrap;color:#475569;font-weight:700}.multi-tag{display:inline-flex;align-items:center;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#e0f2fe;color:#0369a1;padding:4px 8px;border-radius:999px;font-size:.7rem;font-weight:900;border:1px solid #bae6fd;line-height:1.1}.multiselect-dropdown-panel{display:none;position:fixed;background:#fff;border:1px solid #cbd5e1;border-radius:14px;box-shadow:0 18px 45px rgba(15,23,42,.20);overflow:hidden;z-index:999999;padding:0;box-sizing:border-box;min-width:240px;max-width:min(420px,calc(100vw - 24px))}.multiselect-search-wrap{position:sticky;top:0;z-index:3;padding:10px;background:#fff;border-bottom:1px solid #e2e8f0}.multiselect-search{width:100%;height:38px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px 0 34px;box-sizing:border-box;font:inherit;font-size:.82rem;outline:none;background:#f8fafc}.multiselect-search:focus{border-color:var(--ah-primary);background:#fff;box-shadow:0 0 0 3px rgba(52,133,155,.11)}.multiselect-search-wrap::before{content:'\f002';font-family:'Font Awesome 6 Free';font-weight:900;position:absolute;left:22px;top:21px;color:#94a3b8;font-size:.78rem}.multiselect-options-scroll{overflow-y:auto;overscroll-behavior:contain;padding:7px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}.multiselect-option{display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:.83rem;border-radius:9px;cursor:pointer;color:#334155;user-select:none;line-height:1.25;transition:background .12s ease,color .12s ease}.multiselect-option:hover{background:#f0f9ff;color:#075985}.multiselect-option input[type=checkbox]{appearance:none;width:18px;height:18px;border:1.5px solid #94a3b8;border-radius:5px;background:#fff;display:grid;place-content:center;flex:0 0 auto;margin:0}.multiselect-option input[type=checkbox]::before{content:'';width:9px;height:9px;transform:scale(0);transition:transform .12s ease;clip-path:polygon(14% 44%,0 59%,40% 100%,100% 20%,84% 6%,39% 69%);background:#fff}.multiselect-option input[type=checkbox]:checked{background:var(--ah-primary);border-color:var(--ah-primary)}.multiselect-option input[type=checkbox]:checked::before{transform:scale(1)}.multiselect-add-new-btn{display:block;text-align:center;padding:11px 12px;border-top:1px solid #e2e8f0;background:#f8fafc;color:var(--ah-primary);font-weight:900;font-size:.79rem;text-decoration:none}.multiselect-add-new-btn:hover{background:#e0f2fe}.multiselect-empty{padding:16px;text-align:center;color:#94a3b8;font-size:.8rem}.form-control,select.table-input,select.form-control{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#64748b 50%),linear-gradient(135deg,#64748b 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}.form-control:focus,select.table-input:focus,select.form-control:focus{background-image:linear-gradient(45deg,transparent 50%,var(--ah-primary) 50%),linear-gradient(135deg,var(--ah-primary) 50%,transparent 50%)}
+.subgrid-wrapper{background:#f8fafc;border-top:2px dashed #cbd5e1;padding:12px 16px 18px; content-visibility: auto; contain-intrinsic-size: 400px;}.subgrid-card{background:white;border:1px solid #dbeafe;border-radius:12px;box-shadow:0 4px 16px rgba(15,23,42,.04);overflow:hidden}.subgrid-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f0f9ff;border-bottom:1px solid #dbeafe}.subgrid-header h5{margin:0;font-size:.86rem;color:#075985;text-transform:uppercase;letter-spacing:.3px}.subgrid-table{width:100%;border-collapse:collapse}.subgrid-table th{background:#f8fafc;color:#334155;font-size:.76rem;font-weight:900;padding:9px 10px;text-transform:uppercase}.subgrid-table td{padding:9px 10px;border-top:1px solid #f1f5f9;font-size:.84rem}.inv-row-toggle{background:#eff6ff!important}.detail-centros-row td{padding:0!important;background:#f8fafc!important}.centros-detail-panel{width:100%;box-sizing:border-box;border-top:1px solid #bfdbfe;background:#fff}.centros-detail-toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#f0f9ff;border-bottom:1px solid #dbeafe}.centros-detail-toolbar strong{color:#075985}.centros-detail-body{padding:14px;max-height:420px;overflow:auto;position:relative}.centros-table{width:100%;border-collapse:collapse;min-width:980px;table-layout:fixed}.centros-table th{background:#e0f2fe;color:#075985;font-size:.76rem;font-weight:900;padding:10px;text-align:left;position:static;top:auto;z-index:auto}.centros-table td{padding:9px 10px;border-bottom:1px solid #e2e8f0}.center-name{font-weight:900;color:#0f172a}.center-meta{font-size:.76rem;color:#64748b}.pct-badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:.76rem;font-weight:900;min-width:52px;text-align:center}.pct-red{background:#fee2e2;color:#991b1b}.pct-yellow{background:#fef3c7;color:#92400e}.pct-softgreen{background:#dcfce7;color:#166534}.pct-darkgreen{background:#14532d;color:#fff}.pct-gray{background:#f1f5f9;color:#64748b}.score-input{max-width:80px;text-align:center;font-weight:900}.a-lograr-input{max-width:95px;font-weight:900}.d-none{display:none!important}.autosave-indicator{display:none!important}
 .saved-flash{border-color:#16a34a!important;box-shadow:0 0 0 3px rgba(22,163,74,.16)!important;background:#f0fdf4!important;transition:all .25s ease}.saving-flash{border-color:#0284c7!important;box-shadow:0 0 0 3px rgba(2,132,199,.12)!important}.error-flash{border-color:#dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.16)!important;background:#fef2f2!important}.catalog-mini-modal{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:10500;display:none;align-items:center;justify-content:center}.catalog-mini-box{background:white;border-radius:12px;width:90%;max-width:420px;padding:25px;box-shadow:0 20px 25px -5px rgba(0,0,0,.15)}
 .team-month-col{text-align:center;border-left:1px solid #e2e8f0}.team-month-input{text-align:center;font-weight:900;border-radius:4px;margin:0 auto}.team-month-prog,.team-month-logro{width:55px}.team-total-row td{background:#f8fafc;font-weight:900;border-top:2px solid #94a3b8}.hidden-team-month{display:none!important}.avatar{width:30px;height:30px;border-radius:50%;background:#e0f2fe;color:#0284c7;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.75rem;flex-shrink:0}.base-badge{background:#fffbeb;color:#b45309;border:1px solid #fde68a;padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:800}
 @media(max-width:1100px){.task-card{grid-template-columns:1fr}.agenda-sticky-inner{grid-template-columns:1fr}.metrics-dashboard{grid-template-columns:1fr 1fr}.modal-tabs{overflow-x:auto}.modal-tab-btn{white-space:nowrap}}
@@ -1313,23 +1861,51 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
 .btn-archive-toggle { background:#fff1f2; color:#991b1b; border-color:#fecaca; }
 .btn-archive-toggle:hover { background:#fee2e2; border-color:#fca5a5; }
 
-/* Evita calcular el diseño de subtablas que aún están fuera de pantalla. */
-.modal-overlay{backdrop-filter:none!important}
-.agenda-sticky{backdrop-filter:none!important;background:#f8fafc!important;box-shadow:none!important}
-.modal-body{overscroll-behavior:contain;scrollbar-gutter:stable;transform:none!important}
-#tab-etapas .stage-scroll{contain:none!important;overscroll-behavior:auto}
-#tab-etapas .subgrid-wrapper{content-visibility:visible!important;contain:none!important}
-#tab-etapas .subgrid-card{box-shadow:none!important}
-.subgrid-card{box-shadow:none!important}
-.data-card.filtered-out,.data-card.paged-out{display:none!important}
-.stage-grid-pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px 12px;background:#f8fafc;border-top:1px solid #e2e8f0}.stage-grid-pagination button{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}.stage-grid-pagination button:disabled{opacity:.4;cursor:not-allowed}.stage-grid-pagination span{font-size:.78rem;color:#64748b;font-weight:800}
-.agenda-stage-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:10px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px}.agenda-stage-tabs button{border:1px solid #7dd3fc;background:#fff;color:#075985;border-radius:9px;padding:9px 14px;font-weight:900;cursor:pointer}.agenda-stage-tabs button.active{background:#075985;color:#fff;border-color:#075985}.agenda-stage-hidden{display:none!important}
-.monitor-pagination{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;flex-wrap:wrap}.monitor-pagination button{border:1px solid var(--border);background:#fff;color:#334155;border-radius:8px;padding:8px 13px;font-weight:800;cursor:pointer}.monitor-pagination button:disabled{opacity:.4;cursor:not-allowed}.monitor-pagination button.active{background:var(--ah-primary);color:#fff;border-color:var(--ah-primary)}.monitor-pagination-info{font-size:.84rem;color:#64748b;font-weight:700}
+.monitor-toast{position:fixed;right:24px;bottom:24px;z-index:20000;background:#0f172a;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 12px 30px rgba(15,23,42,.25);font-weight:800;opacity:0;transform:translateY(10px);transition:.2s}.monitor-toast.show{opacity:1;transform:translateY(0)}
+/* Renderizado progresivo de tarjetas: reduce el costo inicial con listas grandes. */
+#task-container{contain:layout style;}
+
+.task-card{content-visibility:auto;contain-intrinsic-size:180px;contain:layout paint style;}
+/* Vista independiente de detalle: no usa overlay/modal. */
+body.detail-page-mode{overflow:hidden;background:#f1f5f9;}
+body.detail-page-mode .main-wrapper{margin:0!important;padding:0!important;max-width:none!important;width:100vw!important;height:100vh!important;}
+body.detail-page-mode #updateModal{position:fixed!important;inset:0!important;display:block!important;background:#f1f5f9!important;backdrop-filter:none!important;padding:0!important;z-index:1000!important;}
+body.detail-page-mode #updateModal .modal-content{width:100vw!important;max-width:none!important;height:100vh!important;min-height:100vh!important;border-radius:0!important;overflow:hidden!important;box-shadow:none!important;display:flex!important;flex-direction:column!important;}
+body.detail-page-mode #updateModal .modal-header{flex:0 0 auto!important;border-radius:0!important;}
+body.detail-page-mode #updateModal .modal-tabs{position:static!important;flex:0 0 auto!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;width:100%!important;z-index:120;}
+body.detail-page-mode #updateModal .modal-tab-btn{width:100%!important;justify-content:center!important;min-height:52px!important;border-radius:0!important;}
+body.detail-page-mode #updateModal .modal-body{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow:hidden!important;padding:0!important;}
+body.detail-page-mode #updateModal .modal-tab-content{display:none!important;width:100%!important;height:100%!important;min-height:0!important;overflow:auto!important;padding:18px!important;box-sizing:border-box!important;}
+body.detail-page-mode #updateModal .modal-tab-content.active{display:block!important;}
+body.detail-page-mode #updateModal .modal-footer{position:static!important;flex:0 0 auto!important;z-index:120;}
+body.detail-page-mode #tab-equipo>div:last-child{max-height:none!important;height:calc(100% - 78px)!important;overflow:auto!important;}
+body.detail-page-mode #tab-etapas .stage-scroll{height:calc(100% - 52px)!important;max-height:none!important;overflow:auto!important;}
+body.detail-page-mode #tab-metas,#tab-notas{overflow:auto!important;}
+@media(max-width:900px){body.detail-page-mode #updateModal .modal-tabs{grid-template-columns:repeat(2,minmax(0,1fr))!important;}}
+/* Modal v18: detalle aislado en iframe para no cargar el panel pesado sobre el listado */
+#detailFrameModal{position:fixed;inset:0;z-index:99999;display:none;background:rgba(15,23,42,.58);backdrop-filter:blur(5px);padding:14px;box-sizing:border-box;}
+#detailFrameModal.open{display:flex;align-items:stretch;justify-content:center;}
+#detailFrameModal .detail-frame-shell{width:100%;height:100%;background:#f8fafc;border-radius:18px;box-shadow:0 24px 70px rgba(15,23,42,.32);overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.55);}
+#detailFrameModal .detail-frame-bar{height:50px;flex:0 0 50px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fff;border-bottom:1px solid #e2e8f0;}
+#detailFrameModal .detail-frame-title{font-weight:800;color:#0f172a;display:flex;align-items:center;gap:9px;min-width:0;}
+#detailFrameModal .detail-frame-title span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#detailFrameModal .detail-frame-close{width:36px;height:36px;border:0;border-radius:10px;background:#f1f5f9;color:#475569;cursor:pointer;font-size:1rem;}
+#detailFrameModal .detail-frame-close:hover{background:#fee2e2;color:#b91c1c;}
+#detailFrameModal iframe{width:100%;height:100%;border:0;background:#f1f5f9;display:block;flex:1 1 auto;min-height:0;}
+body.detail-frame-open{overflow:hidden!important;}
+body.embedded-detail-mode #updateModal .modal-header{display:none!important;}
+body.embedded-detail-mode #updateModal .modal-content{height:100vh!important;min-height:100vh!important;}
+body.embedded-detail-mode #updateModal{z-index:1!important;}
+@media(max-width:700px){#detailFrameModal{padding:0}#detailFrameModal .detail-frame-shell{border-radius:0}.detail-frame-bar{height:46px!important;flex-basis:46px!important;}}
+body.detail-page-mode .detail-page-back{display:inline-flex!important;}
+.detail-page-back{display:none;}
+
 </style>
 </head>
-<body>
-<?php include 'sidebar.php'; ?>
+<body class="<?php echo $isDetailPage ? 'detail-page-mode' : ''; ?><?php echo $isEmbeddedDetail ? ' embedded-detail-mode' : ''; ?>">
+<?php if (!$isDetailPage) include 'sidebar.php'; ?>
 <main class="main-wrapper">
+<?php if (!$isDetailPage): ?>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px;">
         <h1 style="margin:0;color:var(--text-main);font-size:2rem;font-weight:900"><i class="fa-solid fa-compass" style="color:var(--ah-primary)"></i> Monitoreo Operativo General</h1>
         <button class="btn-action" onclick="$('#archiveModal').css('display','flex')"><i class="fa-solid fa-box-archive"></i> Ver Actividades Ocultas (<?php echo count($tareas_ocultas); ?>)</button>
@@ -1376,20 +1952,30 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
             <div class="task-meta"><div style="color:var(--ah-primary)"><i class="fa-solid fa-person"></i> Público: <strong><?php echo htmlspecialchars($t['tipo_participante'] ?? ''); ?></strong></div><div><i class="fa-solid fa-clipboard-check"></i> Actividades: <strong><?php echo (float)($t['meta_actividades_alc'] ?? 0); ?> / <?php echo (float)($t['meta_actividades'] ?? 0); ?></strong></div><div><i class="fa-solid fa-user-check"></i> Alcanzados: <strong><?php echo (float)($t['operativo_meta_alc'] ?? 0); ?> / <?php echo (float)($t['operativo_meta_obj'] ?? 0); ?></strong></div></div>
             <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
                 <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($estado_actual); ?></span>
-                <button class="btn-action" data-task-id="<?php echo (int)$t[$col_id]; ?>" onclick="openUpdateModal(this)"><i class="fa-solid fa-pen-to-square"></i> Detallar</button>
+                <a class="btn-action detail-task-link" href="?detalle=<?php echo (int)$t[$col_id]; ?>&tab=3" data-detail-id="<?php echo (int)$t[$col_id]; ?>"><i class="fa-solid fa-expand"></i> Detallar</a>
                 <button class="btn-action btn-mini btn-archive-toggle" onclick="toggleOcultar(<?php echo $t['id']; ?>, 1)"><i class="fa-solid fa-eye-slash"></i> Ocultar</button>
             </div>
         </div>
     <?php endforeach; endif; ?>
     </div>
-    <div id="monitor-pagination" class="monitor-pagination" aria-label="Paginación de actividades"></div>
+<?php endif; ?>
 </main>
 
+<div id="detailFrameModal" aria-hidden="true">
+    <div class="detail-frame-shell" role="dialog" aria-modal="true" aria-label="Detalle de actividad">
+        <div class="detail-frame-bar">
+            <div class="detail-frame-title"><i class="fa-solid fa-sliders"></i><span id="detailFrameTitle">Panel de Ejecución Programática</span></div>
+            <button type="button" class="detail-frame-close" id="detailFrameClose" aria-label="Cerrar detalle"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <iframe id="detailFrame" title="Detalle de actividad" loading="eager"></iframe>
+    </div>
+</div>
+
 <div id="updateModal" class="modal-overlay"><div class="modal-content">
-    <div class="modal-header"><h2 style="margin:0;font-size:1.35rem"><i class="fa-solid fa-sliders"></i> Panel de Ejecución Programática</h2><button type="button" onclick="closeModal('updateModal')" style="background:none;border:0;font-size:1.45rem;cursor:pointer;color:#64748b"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-header"><h2 style="margin:0;font-size:1.35rem"><i class="fa-solid fa-sliders"></i> Panel de Ejecución Programática</h2><div style="display:flex;gap:8px;align-items:center"><button type="button" class="btn-action btn-mini detail-page-back" onclick="window.close(); setTimeout(()=>history.back(),100)"><i class="fa-solid fa-arrow-left"></i> Volver</button><button type="button" class="modal-close-only" onclick="closeModal('updateModal')" style="background:none;border:0;font-size:1.45rem;cursor:pointer;color:#64748b"><i class="fa-solid fa-xmark"></i></button></div></div>
     <div class="modal-tabs"><button type="button" class="modal-tab-btn active" onclick="switchModalTab('tab-equipo', this)"><i class="fa-solid fa-map-location-dot"></i> Asignar Equipo</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-metas', this)"><i class="fa-solid fa-bullseye"></i> Metas y Meses</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-etapas', this)"><i class="fa-solid fa-diagram-project"></i> Agenda Técnico (Etapas)</button><button type="button" class="modal-tab-btn" onclick="switchModalTab('tab-notas', this)"><i class="fa-solid fa-file-word"></i> Notas y Materiales</button></div>
     <form method="POST" id="formUpdate" style="display:flex;flex-direction:column;overflow:hidden;flex-grow:1">
-        <input type="hidden" name="action" value="update_task"><input type="hidden" name="task_id" id="upd_task_id"><input type="hidden" name="metas_authorized" id="metas_authorized" value="0"><input type="hidden" name="etapas_loaded" id="etapas_loaded" value="0">
+        <input type="hidden" name="action" value="update_task"><input type="hidden" name="csrf" value="<?php echo htmlspecialchars($monitoreoCsrf, ENT_QUOTES, 'UTF-8'); ?>"><input type="hidden" name="task_id" id="upd_task_id"><input type="hidden" name="metas_authorized" id="metas_authorized" value="0">
         <div class="modal-body">
             <div class="agenda-sticky" id="agendaSticky">
                 <div class="agenda-sticky-inner">
@@ -1397,10 +1983,9 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
                         <div class="code-corner" style="margin-bottom:6px">
                             <span class="code-pill ml" id="lbl_codigo_modal" style="display:none"><i class="fa-solid fa-hashtag"></i> <span></span></span>
                             <span class="code-pill ext" id="lbl_ext_modal" style="display:none"><i class="fa-solid fa-code-branch"></i> EXT <span></span></span>
-                            <span class="code-pill month"><i class="fa-solid fa-calendar-days"></i> Mes en registro: <span id="lbl_mes_actual_modal">-</span></span>
+                            <span class="code-pill month"><i class="fa-solid fa-calendar-days"></i> Mes de la actividad: <span id="lbl_mes_actual_modal">-</span></span>
                             <a id="btn-historial-actividad" class="btn-action btn-mini history-link" href="#" target="_blank" rel="noopener"><i class="fa-solid fa-clock-rotate-left"></i> Ver histórico</a>
-                            <!-- NUEVO BOTÓN: Autollenar con mes anterior -->
-                            <button type="button" class="btn-action btn-mini" style="background:#fffbeb;color:#92400e;border-color:#fde68a" onclick="copiarMesAnterior()"><i class="fa-solid fa-clone"></i> Autollenar (mes ant.)</button>
+                            <button type="button" class="btn-action btn-mini" style="background:#fffbeb;color:#92400e;border-color:#fde68a" onclick="copiarMesAnterior()"><i class="fa-solid fa-clock-rotate-left"></i> Cargar mes anterior</button>
                         </div>
                         <p class="agenda-title" id="lbl_actividad"></p>
                     </div>
@@ -1409,7 +1994,7 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
                     <div class="agenda-meta"><span>Meta Global</span><strong id="lbl_meta_global">0</strong></div>
                 </div>
             </div>
-            <div id="tab-equipo" class="modal-tab-content active"><div class="team-global-toolbar"><div class="team-global-place-group"><span class="team-global-place-label"><i class="fa-solid fa-location-dot"></i> Lugar(es) para todo el equipo</span><div id="team-global-location-host"></div><span class="team-global-help">Al seleccionar tipos de centro, el PROG. del mes actual se calcula automáticamente para cada técnico según su base y la matrícula registrada en Gestión de Centros.</span></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn-action btn-xlsx" onclick="exportTableXlsx('#team-assign-table','asignacion_equipo')"><i class="fa-solid fa-file-excel"></i> XLSX</button><button type="button" class="btn-action" onclick="toggleTeamMonths()"><i class="fa-solid fa-calendar-days"></i> Ver todos los meses</button><button type="button" class="btn-action" onclick="toggleNoBaseTechs()"><i class="fa-solid fa-users-slash"></i> Mostrar/Ocultar técnicos sin base</button></div></div><div style="max-height:52vh;overflow:auto;border:1px solid var(--border);border-radius:12px;background:white"><table id="team-assign-table" class="styled-table team-table" style="margin:0;border:none"><thead><tr><th rowspan="2">✓</th><th rowspan="2">Técnico</th><th rowspan="2">Base</th><?php foreach($meses_keys as $k=>$n): ?><th colspan="4" class="team-month-col team-month-<?php echo $k; ?>"><?php echo $n; ?></th><?php endforeach; ?><th colspan="4">Total Anual</th></tr><tr><?php foreach($meses_keys as $k=>$n): ?><th class="team-month-col team-month-<?php echo $k; ?>">Prog.</th><th class="team-month-col team-month-<?php echo $k; ?>">Logr.</th><th class="team-month-col team-month-<?php echo $k; ?>">Dif.</th><th class="team-month-col team-month-<?php echo $k; ?>">%</th><?php endforeach; ?><th>Prog.</th><th>Logr.</th><th>Dif.</th><th>%</th></tr></thead><tbody id="tabla_tecnicos_body"></tbody></table></div></div>
+            <div id="tab-equipo" class="modal-tab-content active"><div class="team-global-toolbar"><div class="team-global-place-group"><span class="team-global-place-label"><i class="fa-solid fa-location-dot"></i> Lugar(es) para todo el equipo</span><div id="team-global-location-host"></div><span class="team-global-help">Al seleccionar tipos de centro, el PROG. del mes de la actividad se calcula automáticamente para cada técnico según su base y la matrícula registrada en Gestión de Centros.</span></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn-action btn-xlsx" onclick="exportTableXlsx('#team-assign-table','asignacion_equipo')"><i class="fa-solid fa-file-excel"></i> XLSX</button><button type="button" class="btn-action" onclick="toggleTeamMonths()"><i class="fa-solid fa-calendar-days"></i> Ver todos los meses</button><button type="button" class="btn-action" onclick="toggleNoBaseTechs()"><i class="fa-solid fa-users-slash"></i> Mostrar/Ocultar técnicos sin base</button></div></div><div style="max-height:52vh;overflow:auto;border:1px solid var(--border);border-radius:12px;background:white"><table id="team-assign-table" class="styled-table team-table" style="margin:0;border:none"><thead><tr><th rowspan="2">✓</th><th rowspan="2">Técnico</th><th rowspan="2">Base</th><?php foreach($meses_keys as $k=>$n): ?><th colspan="4" class="team-month-col team-month-<?php echo $k; ?>"><?php echo $n; ?></th><?php endforeach; ?><th colspan="4">Total Anual</th></tr><tr><?php foreach($meses_keys as $k=>$n): ?><th class="team-month-col team-month-<?php echo $k; ?>">Prog.</th><th class="team-month-col team-month-<?php echo $k; ?>">Logr.</th><th class="team-month-col team-month-<?php echo $k; ?>">Dif.</th><th class="team-month-col team-month-<?php echo $k; ?>">%</th><?php endforeach; ?><th>Prog.</th><th>Logr.</th><th>Dif.</th><th>%</th></tr></thead><tbody id="tabla_tecnicos_body"></tbody></table></div></div>
             <div id="tab-metas" class="modal-tab-content">
 <div class="metas-lock-toolbar"><div><strong><i class="fa-solid fa-shield-halved"></i> Metas provenientes del POA</strong><div class="metas-lock-help">La programación mensual se carga directamente de <code>ah_poa</code>. Para modificarla debe validar la contraseña de su sesión.</div></div><button type="button" id="btn-unlock-metas" class="btn-action" onclick="openMetasPasswordModal()"><i class="fa-solid fa-lock"></i> Habilitar modificación</button><span id="metas-unlocked-badge" class="metas-unlocked-badge" style="display:none"><i class="fa-solid fa-lock-open"></i> Edición habilitada</span></div>
 <fieldset id="metas-fieldset" disabled>
@@ -1432,10 +2017,11 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
                 <div class="centros-drawer-body" id="centrosDrawerBody"></div>
             </div>
         <div class="modal-footer">
-            <button type="button" id="btn-force-save" onclick="autosaveFullForm(true)" style="margin-right:auto;background:transparent;border:none;color:#166534;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;transition:0.2s;">
+            <button type="button" id="btn-force-save" onclick="forceSaveAll()" style="margin-right:auto;background:transparent;border:none;color:#166534;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;transition:0.2s;">
                 <i class="fa-solid fa-cloud-arrow-up" id="save-icon"></i> <span id="save-text">Guardado automático activo</span>
             </button>
-            <button type="button" class="btn-primary" style="background:white;color:var(--text-main);border:1px solid var(--border)" onclick="closeModal('updateModal')">Cerrar</button>
+            <button type="button" class="btn-primary modal-close-only" style="background:white;color:var(--text-main);border:1px solid var(--border)" onclick="closeModal('updateModal')">Cerrar</button>
+            <button type="button" class="btn-primary detail-page-back" style="background:white;color:var(--text-main);border:1px solid var(--border)" onclick="window.close(); setTimeout(()=>history.back(),100)"><i class="fa-solid fa-arrow-left"></i> Volver al listado</button>
         </div>
     </form>
 </div></div>
@@ -1513,40 +2099,126 @@ body{font-family:'Inter',sans-serif;display:flex;min-height:100vh;background:var
     </div>
 </div>
 <div id="autosave-indicator" class="autosave-indicator"></div>
+
+<script src="https://unpkg.com/jquery@3.7.0/dist/jquery.min.js"></script>
 <script>
+// =======================================================
+// OPTIMIZACIÓN EXTREMA DE RENDIMIENTO (MEMOIZACIÓN)
+// =======================================================
+
+// 1. Caché para evitar recalcular textos una y otra vez
 const _normCache = {};
 function normalizarTxt(v){
     if(!v) return '';
-    const str=String(v).trim();
-    if(Object.prototype.hasOwnProperty.call(_normCache,str)) return _normCache[str];
-    return _normCache[str]=str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    let str = String(v).trim();
+    if(_normCache[str]) return _normCache[str];
+    let res = str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    _normCache[str] = res;
+    return res;
 }
-window.savedInvData = {};
-let showAllTeamMonths = false;
-let hideNoBaseRowState = true;
-let currentTaskData = null;
-let currentTaskButton = null;
-let modalEtapasBuilt = false;
-let stageGridPages={};
-const stageGridPageSize=3;
-let stageGridObserver=null;
-const stageRebuildTimers={};
-const stageLazyPending=new Set();
-let autosaveQueue = Promise.resolve();
-function enqueueAutosave(job){
-    autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
-    return autosaveQueue;
-}
+
+const MONITOREO_TAB3_BUILD = 'TAB3-AUTOFILL-CHUNKED-2026-07-22-v6';
 const masterResponsables = <?php echo json_encode($lista_total_responsables, JSON_UNESCAPED_UNICODE); ?>;
 const masterUnidadesRaw = <?php echo json_encode($cat_unidades_raw, JSON_UNESCAPED_UNICODE); ?>;
 const masterVerificacionesRaw = <?php echo json_encode($cat_verificaciones_raw, JSON_UNESCAPED_UNICODE); ?>;
 const masterLugares = <?php echo json_encode($cat_lugares, JSON_UNESCAPED_UNICODE); ?>;
 const etapasDefault = <?php echo json_encode($etapas_default, JSON_UNESCAPED_UNICODE); ?>;
 const tecnicosBases = <?php echo json_encode($tecnicos_bases, JSON_UNESCAPED_UNICODE); ?>;
-const centrosCatalogo = <?php echo json_encode($centros_catalogo, JSON_UNESCAPED_UNICODE); ?>;
+let centrosCatalogo = [];
+const monitoreoCsrfToken = <?php echo json_encode($monitoreoCsrf); ?>;
+const MONITOREO_DETAIL_TASK_ID = <?php echo (int)$detailTaskId; ?>;
+const MONITOREO_IS_DETAIL_PAGE = MONITOREO_DETAIL_TASK_ID > 0;
+const MONITOREO_IS_EMBEDDED_DETAIL = <?php echo $isEmbeddedDetail ? 'true' : 'false'; ?>;
+let centrosCatalogPromise = null;
+let taskRequestSerial = 0;
+const externalScriptPromises = new Map();
+let tinyMceEditorPromise = null;
+
+function loadExternalScriptOnce(src, isReady){
+    if(typeof isReady==='function' && isReady()) return Promise.resolve();
+    if(externalScriptPromises.has(src)) return externalScriptPromises.get(src);
+
+    const promise = new Promise((resolve,reject)=>{
+        const existing = Array.from(document.scripts).find(script=>script.src===src);
+        if(existing){
+            existing.addEventListener('load',resolve,{once:true});
+            existing.addEventListener('error',()=>reject(new Error('No se pudo cargar '+src)),{once:true});
+            return;
+        }
+        const script=document.createElement('script');
+        script.src=src;
+        script.async=true;
+        script.onload=()=>resolve();
+        script.onerror=()=>reject(new Error('No se pudo cargar '+src));
+        document.head.appendChild(script);
+    }).catch(error=>{
+        externalScriptPromises.delete(src);
+        throw error;
+    });
+
+    externalScriptPromises.set(src,promise);
+    return promise;
+}
+
+function ensureXlsxLoaded(){
+    return loadExternalScriptOnce(
+        'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+        ()=>typeof XLSX!=='undefined'
+    );
+}
+
+async function ensureTinyMceEditor(){
+    if(typeof tinymce!=='undefined' && tinymce.get('upd_info_adicional')){
+        return tinymce.get('upd_info_adicional');
+    }
+    if(tinyMceEditorPromise) return tinyMceEditorPromise;
+
+    tinyMceEditorPromise=(async()=>{
+        await loadExternalScriptOnce(
+            'https://unpkg.com/tinymce@6/tinymce.min.js',
+            ()=>typeof tinymce!=='undefined'
+        );
+        if(tinymce.get('upd_info_adicional')) return tinymce.get('upd_info_adicional');
+        const editors=await tinymce.init({
+            selector:'#upd_info_adicional',
+            plugins:'table lists link autolink image code fullscreen advlist',
+            toolbar:'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | table link image | code fullscreen',
+            menubar:true,
+            branding:false,
+            height:420,
+            setup:function(ed){
+                ed.on('change keyup undo redo',()=>{
+                    ed.save();
+                    scheduleFullAutosave(document.getElementById('upd_info_adicional'));
+                });
+            }
+        });
+        return Array.isArray(editors) ? editors[0] : tinymce.get('upd_info_adicional');
+    })().catch(error=>{
+        tinyMceEditorPromise=null;
+        throw error;
+    });
+    return tinyMceEditorPromise;
+}
+const MONITOREO_PREVIOUS_MONTH_BUILD = 'PREVIOUS-MONTH-AUTOSAVE-2026-07-22-v15';
 const mesesEquipo = [{k:'jul',n:'Jul'},{k:'aug',n:'Ago'},{k:'sep',n:'Sep'},{k:'oct',n:'Oct'},{k:'nov',n:'Nov'},{k:'dec',n:'Dic'},{k:'jan',n:'Ene'},{k:'feb',n:'Feb'},{k:'mar',n:'Mar'},{k:'apr',n:'Abr'},{k:'may',n:'May'},{k:'jun',n:'Jun'}];
-const currentTeamMonth = '<?php echo $mes_actual; ?>';
+let currentTeamMonth = <?php echo json_encode($mes_trabajo_inicial); ?>;
+let currentTeamYear = <?php echo (int)$anio_trabajo_inicial; ?>;
 let visibleTeamMonths = new Set([currentTeamMonth]);
+
+window.savedInvData = {};
+let showAllTeamMonths = false;
+let hideNoBaseRowState = true;
+let currentTaskData = null;
+let currentTaskButton = null;
+let modalEtapasBuilt = false;
+let modalEtapasLoading = false;
+let autosaveQueue = Promise.resolve();
+
+function enqueueAutosave(job){
+    autosaveQueue=autosaveQueue.catch(()=>{}).then(job);
+    return autosaveQueue;
+}
 
 function normalizeProg(value) {
     let v = String(value || '').toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -1595,32 +2267,95 @@ function toggleOcultar(id, oculto) {
     });
 }
 
-function copiarMesAnterior() {
-    if (!confirm('¿Autollenar la programación con los datos del mes anterior?\n\nSe copiará lo programado en la pestaña "Asignar Equipo" y en "Metas y Meses" hacia el mes de ' + (mesesEquipo.find(x => x.k === currentTeamMonth)||{}).n + '.')) return;
+async function copiarMesAnterior() {
+    if (!confirm('¿Cargar la programación del mes anterior?\n\nSe copiará lo programado en la pestaña "Asignar Equipo" y en "Metas y Meses" hacia el mes de ' + (mesesEquipo.find(x => x.k === currentTeamMonth)||{}).n + '.')) return;
 
-    let idx = mesesEquipo.findIndex(x => x.k === currentTeamMonth);
-    if (idx <= 0) { alert('No hay un mes anterior definido en el ciclo.'); return; }
-    let prevMonth = mesesEquipo[idx - 1].k;
+    const idx = mesesEquipo.findIndex(x => x.k === currentTeamMonth);
+    if (idx <= 0) {
+        alert('No hay un mes anterior definido en el ciclo.');
+        return;
+    }
 
-    // Metas
-    let m_act_prev = $(`input[name="op_act[${prevMonth}]"]`).val();
-    let m_part_prev = $(`input[name="op_part[${prevMonth}]"]`).val();
-    if(m_act_prev) $(`input[name="op_act[${currentTeamMonth}]"]`).val(m_act_prev).trigger('change');
-    if(m_part_prev) $(`input[name="op_part[${currentTeamMonth}]"]`).val(m_part_prev).trigger('change');
+    const prevMonth = mesesEquipo[idx - 1].k;
+    const button = document.querySelector('button[onclick="copiarMesAnterior()"]');
+    const oldButtonHtml = button ? button.innerHTML : '';
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Aplicando...';
+    }
 
-    // Equipo
-    $('#tabla_tecnicos_body .team-row').each(function(){
-        let row = $(this);
-        let prevProg = parseFloat(row.find(`.team-month-prog[data-mes="${prevMonth}"]`).val()) || 0;
-        if (prevProg > 0) {
-            row.find(`.team-month-prog[data-mes="${currentTeamMonth}"]`).val(prevProg).trigger('change');
-            row.find('.team-selected').prop('checked', true);
+    try {
+        clearPendingTeamAutosaves();
+        clearTimeout(fullAutosaveTimer);
+        fullAutosaveTimer = null;
+
+        const prevActInput = document.querySelector(`input[name="op_act[${prevMonth}]"]`);
+        const prevPartInput = document.querySelector(`input[name="op_part[${prevMonth}]"]`);
+        const currentActInput = document.querySelector(`input[name="op_act[${currentTeamMonth}]"]`);
+        const currentPartInput = document.querySelector(`input[name="op_part[${currentTeamMonth}]"]`);
+        const prevAct = parseFloat(prevActInput?.value) || 0;
+        const prevPart = parseFloat(prevPartInput?.value) || 0;
+
+        if (currentActInput) currentActInput.value = prevAct;
+        if (currentPartInput) currentPartInput.value = prevPart;
+
+        const rows = Array.from(document.querySelectorAll('#tabla_tecnicos_body .team-row'));
+        const changedRows = [];
+        const chunkSize = 20;
+
+        for (let offset = 0; offset < rows.length; offset += chunkSize) {
+            const chunk = rows.slice(offset, offset + chunkSize);
+            for (const row of chunk) {
+                const prevInput = row.querySelector(`.team-month-prog[data-mes="${prevMonth}"]`);
+                const currentInput = row.querySelector(`.team-month-prog[data-mes="${currentTeamMonth}"]`);
+                const checkbox = row.querySelector('.team-selected');
+                const prevProg = parseFloat(prevInput?.value) || 0;
+
+                if (prevProg > 0 && currentInput) {
+                    currentInput.value = prevProg;
+                    if (checkbox) checkbox.checked = true;
+                    row.classList.add('row-selected');
+                    changedRows.push(row);
+                }
+            }
+            // Deja respirar al navegador entre bloques; evita el mensaje "página sin responder".
+            await new Promise(resolve => requestAnimationFrame(resolve));
         }
-    });
 
-    recalcTeamRows();
-    autosaveFullForm(true);
-    showToast('Lógica del mes anterior aplicada.');
+        // Recalcular únicamente las filas modificadas, también por bloques.
+        for (let offset = 0; offset < changedRows.length; offset += chunkSize) {
+            changedRows.slice(offset, offset + chunkSize).forEach(row => {
+                updateCurrentTaskAssignmentFromRow($(row));
+                recalcTeamRow($(row));
+            });
+            await new Promise(resolve => requestAnimationFrame(resolve));
+        }
+
+        document.getElementById('lbl_meta_mes_actual').textContent = formatNum(prevPart);
+
+        // Un solo guardado masivo: asignaciones + metas mensuales del POA.
+        await autosaveTeamTable(button, false, {
+            opMonth: currentTeamMonth,
+            opAct: prevAct,
+            opPart: prevPart
+        });
+
+        if (currentTaskData) {
+            currentTaskData.op_act = currentTaskData.op_act || {};
+            currentTaskData.op_part = currentTaskData.op_part || {};
+            currentTaskData.op_act[currentTeamMonth] = prevAct;
+            currentTaskData.op_part[currentTeamMonth] = prevPart;
+        }
+        showToast(`Mes anterior cargado y guardado para ${changedRows.length} técnico(s).`);
+    } catch (error) {
+        console.error('Cargar mes anterior:', error);
+        alert('No se pudo cargar el mes anterior: ' + (error.message || error));
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = oldButtonHtml;
+        }
+    }
 }
 
 function qualityDataVersion(data){
@@ -1680,8 +2415,14 @@ function cleanTableForExport(table){
     clone.querySelectorAll('[style*="display: none"],[style*="display:none"]').forEach(el=>el.remove());
     return clone;
 }
-function exportTableXlsx(tableRef,fileName='tabla',sheetName='Datos'){
-    if(typeof XLSX==='undefined'){alert('No se pudo cargar el generador XLSX. Recargue la página.');return;}
+async function exportTableXlsx(tableRef,fileName='tabla',sheetName='Datos'){
+    try{
+        await ensureXlsxLoaded();
+    }catch(error){
+        console.error('Carga de XLSX:',error);
+        alert('No se pudo cargar el generador XLSX. Revise la conexión e inténtelo nuevamente.');
+        return;
+    }
     const table=typeof tableRef==='string'?document.querySelector(tableRef):tableRef;
     if(!table){alert('No se encontró la tabla para exportar.');return;}
     const clone=cleanTableForExport(table);
@@ -1738,58 +2479,80 @@ function updateSaveIndicator(state) {
 }
 
 function showAutosave(msg='Guardado'){}
+function showToast(message){
+    let toast=document.getElementById('monitor-toast');
+    if(!toast){
+        toast=document.createElement('div');
+        toast.id='monitor-toast';
+        toast.className='monitor-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent=String(message||'');
+    toast.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer=setTimeout(()=>toast.classList.remove('show'),2600);
+}
 function flashSaved(el, ok=true){ updateSaveIndicator(ok ? 'saved' : 'error'); }
 function flashSaving(el){ updateSaveIndicator('saving'); }
 
-let monitoreoEditorReady=false;
-function initMonitoreoEditor(){
-    if(monitoreoEditorReady||typeof tinymce==='undefined') return;
-    monitoreoEditorReady=true;
-    tinymce.init({
-        selector:'#upd_info_adicional',
-        plugins:'table lists link autolink image code fullscreen advlist',
-        toolbar:'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | table link image | code fullscreen',
-        menubar:true,
-        branding:false,
-        height:420,
-        setup:function(ed){
-            ed.on('change keyup undo redo',()=>{ed.save();scheduleFullAutosave(document.getElementById('upd_info_adicional'));});
-        }
-    }).catch(()=>{monitoreoEditorReady=false;});
-}
-function switchModalTab(tabId, btn){
-    $('.modal-tab-btn').removeClass('active');$('.modal-tab-content').removeClass('active');
-    if(btn)$(btn).addClass('active');else $(`.modal-tab-btn[onclick*="${tabId}"]`).addClass('active');
+async function switchModalTab(tabId, btn){
+    $('.modal-tab-btn').removeClass('active');
+    $('.modal-tab-content').removeClass('active');
+    if(btn) $(btn).addClass('active');
+    else $(`.modal-tab-btn[onclick*="${tabId}"]`).addClass('active');
     $('#'+tabId).addClass('active');
-    if(tabId==='tab-notas')initMonitoreoEditor();
-    if(tabId==='tab-etapas'&&!modalEtapasBuilt&&currentTaskData){
-        modalEtapasBuilt=true;
-        $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:35px"><i class="fa-solid fa-spinner fa-spin"></i> Cargando agenda...</td></tr>');
-        requestAnimationFrame(()=>buildEtapasTable(currentTaskData));
+
+    if(tabId==='tab-notas'){
+        try{
+            const editor=await ensureTinyMceEditor();
+            if(editor&&currentTaskData) editor.setContent(currentTaskData.info_adicional||'');
+        }catch(error){ console.error('TinyMCE:',error); }
+        return;
     }
+
+    if(tabId!=='tab-etapas'||modalEtapasBuilt||modalEtapasLoading||!currentTaskData) return;
+    modalEtapasLoading=true;
+    $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:40px"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--ah-primary)"></i><br><br>Cargando únicamente las etapas...</td></tr>');
+    try{
+        currentTaskData.etapas=await fetchTaskStages(currentTaskData.id);
+        await new Promise(resolve=>requestAnimationFrame(resolve));
+        buildEtapasTable(currentTaskData);
+
+        // En la vista independiente se cargan y muestran todas las etapas automáticamente.
+        // Se hace de forma secuencial para conservar la respuesta de la interfaz.
+        if(MONITOREO_IS_DETAIL_PAGE){
+            for(let i=0;i<currentTaskData.etapas.length;i++){
+                await openStageProgramming(i,null,true);
+                await new Promise(resolve=>requestAnimationFrame(resolve));
+            }
+        }
+        modalEtapasBuilt=true;
+    }catch(error){
+        console.error('Agenda técnica:',error);
+        $('#tabla_etapas_body').html(`<tr><td colspan="4" style="text-align:center;padding:35px;color:#991b1b">${escHtml(error.message||'No se pudo cargar la agenda técnica.')}</td></tr>`);
+    }finally{ modalEtapasLoading=false; }
 }
 
 async function closeModal(id){
-    if(id==='updateModal'){
-        document.getElementById(id).style.display='none';
-
-        const drawer=$('#centrosDrawer');
+    if(id === 'updateModal'){
+        const drawer = $('#centrosDrawer');
         if(drawer.hasClass('open')){
-            const index=Number(drawer.data('index'));
-            const key=String(drawer.data('key')||'');
+            const index = Number(drawer.data('index'));
+            const key = String(drawer.data('key') || '');
             updateHiddenCentrosJsonFromDrawer();
-            if(key!==''){
+            if(key !== ''){
                 clearTimeout(centerRowAutosaveTimers[`${index}|${key}`]);
-                autosaveCenterRow(index,key);
+                try{ await autosaveCenterRow(index, key); }catch(error){}
             }
             closeCentrosDrawer(false);
         }
-
-        autosaveFullForm(true);
-    } else {
-        document.getElementById(id).style.display='none';
+        await forceSaveAll();
+        document.getElementById(id).style.display = 'none';
+        return;
     }
+    document.getElementById(id).style.display = 'none';
 }
+
 
 function updateCardVisuals() {
     if (!currentTaskButton || !currentTaskData) return;
@@ -1813,15 +2576,9 @@ function updateCardVisuals() {
     updateDynamicMetrics();
 }
 
-function updateDynamicMetrics(metrics){
-    if(!metrics){metrics={total:0,comp:0,proc:0,sum:0,count:0};document.querySelectorAll('.data-card:not(.filtered-out)').forEach(card=>{const est=card.dataset.est||'',mo=parseFloat(card.dataset.metap)||0,ma=parseFloat(card.dataset.alcp)||0;metrics.total++;if(est==='Completado')metrics.comp++;if(est==='En Proceso')metrics.proc++;if(mo>0){metrics.sum+=Math.min((ma/mo)*100,100);metrics.count++;}});}
-    $('#count-total').text(metrics.total);$('#count-comp').text(metrics.comp);$('#count-proc').text(metrics.proc);$('#count-rend').text(metrics.count?(metrics.sum/metrics.count).toFixed(1)+'%':'0%');
-}
+function updateDynamicMetrics(){let total=0,comp=0,proc=0,sum=0,c=0;$('.data-card:visible').each(function(){total++;let est=$(this).data('est');let mo=parseFloat($(this).data('metap'))||0;let ma=parseFloat($(this).data('alcp'))||0;if(est==='Completado')comp++;if(est==='En Proceso')proc++;if(mo>0){sum+=Math.min((ma/mo)*100,100);c++;}});$('#count-total').text(total);$('#count-comp').text(comp);$('#count-proc').text(proc);$('#count-rend').text(c?(sum/c).toFixed(1)+'%':'0%');}
 function normalizeFilterText(v){return String(v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_');}
 let monitorSearchTouched = false;
-let monitorPage=1;
-const monitorPageSize=20;
-let monitorMatchedCards=[];
 function getSafeMonitorSearch(){
     const $search = $('#filter-search');
     let value = String($search.val() || '').trim();
@@ -1831,68 +2588,106 @@ function getSafeMonitorSearch(){
     }
     return value.toLowerCase();
 }
-function renderMonitorPage(){
-    const total=monitorMatchedCards.length,pages=Math.max(1,Math.ceil(total/monitorPageSize));
-    monitorPage=Math.min(Math.max(1,monitorPage),pages);
-    const start=(monitorPage-1)*monitorPageSize,end=start+monitorPageSize;
-    monitorMatchedCards.forEach((card,index)=>card.classList.toggle('paged-out',index<start||index>=end));
-    const host=document.getElementById('monitor-pagination');
-    if(!host)return;
-    if(total<=monitorPageSize){host.innerHTML=total?`<span class="monitor-pagination-info">Mostrando ${total} actividad${total===1?'':'es'}</span>`:'';return;}
-    let html=`<button type="button" data-page="${monitorPage-1}" ${monitorPage===1?'disabled':''}>‹ Anterior</button>`;
-    const from=Math.max(1,monitorPage-2),to=Math.min(pages,monitorPage+2);
-    for(let p=from;p<=to;p++)html+=`<button type="button" data-page="${p}" class="${p===monitorPage?'active':''}">${p}</button>`;
-    html+=`<button type="button" data-page="${monitorPage+1}" ${monitorPage===pages?'disabled':''}>Siguiente ›</button><span class="monitor-pagination-info">${start+1}-${Math.min(end,total)} de ${total}</span>`;
-    host.innerHTML=html;
+
+let monitorSelectedWorkMonth = '';
+$(document).on('change', '.toggle-month', function(){
+    if (this.checked) monitorSelectedWorkMonth = String(this.value || '');
+    else if (monitorSelectedWorkMonth === String(this.value || '')) {
+        monitorSelectedWorkMonth = String($('.toggle-month:checked').last().val() || '');
+    }
+});
+
+function closeDetailFrameModal(){
+    const modal=document.getElementById('detailFrameModal');
+    const frame=document.getElementById('detailFrame');
+    if(!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('detail-frame-open');
+    // Descargar la página interna para liberar tablas, listeners y memoria.
+    if(frame) frame.src='about:blank';
 }
-function applySmartFilters(resetPage=true){
-    const search=getSafeMonitorSearch(),filterRaw=$('#filter-prog').val()||'',tec=$('#filter-tec').val(),estFilter=$('#filter-est').val(),hideAdmin=$('#toggle-admin').is(':checked'),hideZero=$('#toggle-zero').is(':checked'),onlyMain=$('#toggle-main-progs').is(':checked');
-    const months=Array.from(document.querySelectorAll('.toggle-month:checked'),el=>el.value),parts=filterRaw.split(':'),filterType=parts.length>1?parts[0]:'',filterValue=normalizeFilterText(parts.length>1?parts.slice(1).join(':'):filterRaw),metrics={total:0,comp:0,proc:0,sum:0,count:0};
-    monitorMatchedCards=[];
-    document.querySelectorAll('.data-card').forEach(card=>{const d=card.dataset,prog=normalizeFilterText(d.prog||''),sec=normalizeFilterText(d.sec||''),meta=parseFloat(d.metap)||0,meses=String(d.meses||'').split(',').filter(Boolean),text=card.dataset.search||card.textContent.toLowerCase();if(!card.dataset.search)card.dataset.search=text;let matchCategory=true;if(filterType==='programa')matchCategory=prog.includes(filterValue);else if(filterType==='sector')matchCategory=sec.includes(filterValue);else if(filterValue)matchCategory=prog.includes(filterValue)||sec.includes(filterValue);const ok=(search===''||text.includes(search))&&matchCategory&&(tec===''||d.tec===tec)&&(estFilter===''||d.est===estFilter)&&(filterType==='sector'||!hideAdmin||(!sec.includes('z_administracion')&&!sec.includes('z_gastos')&&!sec.includes('administra')))&&(!hideZero||meta>0)&&(!(onlyMain&&!filterRaw)||prog.includes('crecer')||prog.includes('redes')||prog.includes('tejiendo'))&&(months.length===0||months.some(m=>meses.includes(m)));card.classList.toggle('filtered-out',!ok);if(ok){monitorMatchedCards.push(card);metrics.total++;if(d.est==='Completado')metrics.comp++;if(d.est==='En Proceso')metrics.proc++;if(meta>0){metrics.sum+=Math.min(((parseFloat(d.alcp)||0)/meta)*100,100);metrics.count++;}}});
-    if(resetPage)monitorPage=1;
-    renderMonitorPage();
-    updateDynamicMetrics(metrics);
+
+function openDetailFrameModal(id, workMonth, workYear){
+    const modal=document.getElementById('detailFrameModal');
+    const frame=document.getElementById('detailFrame');
+    if(!modal||!frame||!id) return;
+    const url=new URL(window.location.href);
+    url.search='';
+    url.searchParams.set('detalle',String(id));
+    url.searchParams.set('tab','3');
+    url.searchParams.set('embedded','1');
+    url.searchParams.set('mes',workMonth||currentTeamMonth);
+    url.searchParams.set('anio',String(workYear||currentTeamYear||new Date().getFullYear()));
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('detail-frame-open');
+    frame.src=url.toString();
 }
+
+$(document).on('click', '.detail-task-link', function(event){
+    const id = Number($(this).data('detail-id')) || 0;
+    if (!id) return;
+    event.preventDefault();
+    const selectedMonths = $('.toggle-month:checked').map(function(){ return String(this.value || ''); }).get().filter(Boolean);
+    const workMonth = monitorSelectedWorkMonth || (selectedMonths.length === 1 ? selectedMonths[0] : (selectedMonths[selectedMonths.length - 1] || currentTeamMonth));
+    openDetailFrameModal(id,workMonth,currentTeamYear||new Date().getFullYear());
+});
+
+$(document).on('click','#detailFrameClose',closeDetailFrameModal);
+$(document).on('click','#detailFrameModal',function(event){if(event.target===this) closeDetailFrameModal();});
+
+function applySmartFilters(){let search=getSafeMonitorSearch(),filterRaw=$('#filter-prog').val()||'',tec=$('#filter-tec').val(),estFilter=$('#filter-est').val(),hideAdmin=$('#toggle-admin').is(':checked'),hideZero=$('#toggle-zero').is(':checked'),onlyMain=$('#toggle-main-progs').is(':checked'),months=[];$('.toggle-month:checked').each(function(){months.push($(this).val())});let parts=filterRaw.split(':'),filterType=parts.length>1?parts[0]:'',filterValue=normalizeFilterText(parts.length>1?parts.slice(1).join(':'):filterRaw);$('.data-card').each(function(){let card=$(this),prog=normalizeFilterText(card.attr('data-prog')||''),sec=normalizeFilterText(card.attr('data-sec')||''),tecCard=card.attr('data-tec')||'',est=card.attr('data-est')||'',meta=parseFloat(card.attr('data-metap'))||0,meses=String(card.attr('data-meses')||'').split(',').map(x=>x.trim()).filter(Boolean),text=card.find('.searchable-text').text().toLowerCase();let matchCategory=true;if(filterType==='programa')matchCategory=prog.includes(filterValue);else if(filterType==='sector')matchCategory=sec.includes(filterValue);else if(filterValue)matchCategory=prog.includes(filterValue)||sec.includes(filterValue);let specificSector=filterType==='sector';let mainMatch=!(onlyMain&&!filterRaw)||prog.includes('crecer')||prog.includes('redes')||prog.includes('tejiendo');let adminMatch=specificSector||!hideAdmin||(!sec.includes('z_administracion')&&!sec.includes('z_gastos')&&!sec.includes('administra'));let ok=(search===''||text.includes(search))&&matchCategory&&(tec===''||tecCard===tec)&&(estFilter===''||est===estFilter)&&adminMatch&&(!hideZero||meta>0)&&mainMatch&&(months.length===0||months.some(m=>meses.includes(m)));card.toggle(ok);});updateDynamicMetrics();}
 $(document).ready(function(){const monthKeys=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];const currentMonthKey=monthKeys[new Date().getMonth()];const $search=$('#filter-search');
     $search.val('').attr({'autocomplete':'new-password','readonly':'readonly'});
     $search.on('pointerdown focus',function(){this.removeAttribute('readonly');});
     $search.on('keydown paste',function(){monitorSearchTouched=true;});
-    let searchTimer=null;
-    $search.on('input',function(e){if(e.originalEvent&&e.originalEvent.isTrusted)monitorSearchTouched=true;clearTimeout(searchTimer);searchTimer=setTimeout(()=>applySmartFilters(true),180);});
+    $search.on('input',function(e){if(e.originalEvent && e.originalEvent.isTrusted){monitorSearchTouched=true;} applySmartFilters();});
     $('#filter-prog').val('programa:crecer');$('#filter-tec,#filter-est').val('');
     $('.toggle-month').prop('checked',false).closest('label').removeClass('active');
     $(`.toggle-month[value="${currentMonthKey}"]`).prop('checked',true).closest('label').addClass('active');
-    requestAnimationFrame(function(){if(!monitorSearchTouched)$search.val('');applySmartFilters();});
+    [0,150,500,1200].forEach(function(ms){setTimeout(function(){if(!monitorSearchTouched){$search.val('');}$('#filter-prog').val('programa:crecer');applySmartFilters();},ms);});
     window.addEventListener('pageshow',function(){if(!monitorSearchTouched){$search.val('');}applySmartFilters();});
     $('#filter-prog,#filter-tec,#filter-est').on('change',applySmartFilters);
     $('#toggle-admin,#toggle-zero,#toggle-main-progs').on('change',function(){$(this).closest('label').toggleClass('active-toggle',$(this).is(':checked'));applySmartFilters();});
     $('.toggle-month').on('change',function(){$(this).closest('label').toggleClass('active',$(this).is(':checked'));applySmartFilters();});
     $('#btn-show-all').on('click',function(){monitorSearchTouched=false;$('#toggle-admin,#toggle-zero,#toggle-main-progs').prop('checked',false).closest('label').removeClass('active-toggle');$('.toggle-month').prop('checked',false).closest('label').removeClass('active');$search.val('');$('#filter-prog,#filter-tec,#filter-est').val('');applySmartFilters();});
-    $('#monitor-pagination').on('click','button[data-page]',function(){if(this.disabled)return;monitorPage=parseInt(this.dataset.page,10)||1;renderMonitorPage();document.getElementById('task-container').scrollIntoView({behavior:'smooth',block:'start'});});
     applySmartFilters();
 });
-function getFechaMaximaEtapa(index){let d=new Date(),y=d.getFullYear(),m=d.getMonth();if(index===0)return `${y}-${String(m+1).padStart(2,'0')}-03`;if(index===1)return `${y}-${String(m+1).padStart(2,'0')}-06`;if(index===2)return `${y}-${String(m+1).padStart(2,'0')}-20`;let last=new Date(y,m+1,0).getDate();return `${y}-${String(m+1).padStart(2,'0')}-${String(last).padStart(2,'0')}`;}
+function getFechaMaximaEtapa(index){const monthIndex=Math.max(0,mesesEquipo.findIndex(x=>x.k===currentTeamMonth));const calendarMonth={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11}[currentTeamMonth] ?? monthIndex;const y=currentTeamYear;const m=calendarMonth;if(index===0)return `${y}-${String(m+1).padStart(2,'0')}-03`;if(index===1)return `${y}-${String(m+1).padStart(2,'0')}-06`;if(index===2)return `${y}-${String(m+1).padStart(2,'0')}-20`;let last=new Date(y,m+1,0).getDate();return `${y}-${String(m+1).padStart(2,'0')}-${String(last).padStart(2,'0')}`;}
 
-let _centrosIndex=null;
-function preprocesarCentros(){
-    if(_centrosIndex) return;
-    _centrosIndex={};
-    centrosCatalogo.forEach(c=>{
-        const base=normalizarTxt(c.comunidad_base),tipo=normalizarTxt(c.tipo);
-        let cat='otro';
-        if(tipo.includes('preescolar')) cat='preescolar';
-        else if(tipo.includes('adn')) cat='adn';
-        else if(tipo.includes('uaps')||tipo.includes('cis')) cat='uaps/cis';
-        else if(tipo.includes('basica')||tipo.includes('media')||tipo.includes('educativo')) cat='basica';
-        const key=base+'|'+cat;
-        (_centrosIndex[key]||(_centrosIndex[key]=[])).push(c);
+
+// 2. Preprocesamos el catálogo masivo de centros UNA SOLA VEZ
+let _centrosPreprocesados = false;
+let _centrosIndex = null;
+function preprocesarCentros() {
+    if (_centrosIndex) return;
+    _centrosIndex = {};
+    centrosCatalogo.forEach(c => {
+        let base = normalizarTxt(c.comunidad_base);
+        let t = normalizarTxt(c.tipo);
+        let cat = 'otro';
+        if(t.includes('preescolar')) cat = 'preescolar';
+        else if(t.includes('adn')) cat = 'adn';
+        else if(t.includes('uaps')||t.includes('cis')) cat = 'uaps/cis';
+        else if(t.includes('basica')||t.includes('media')||t.includes('educativo')) cat = 'basica';
+
+        c._cat = cat;
+        c._n_com = base;
+
+        let key = base + '|' + cat;
+        if(!_centrosIndex[key]) _centrosIndex[key] = [];
+        _centrosIndex[key].push(c);
     });
-    Object.values(_centrosIndex).forEach(rows=>rows.sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||''),'es',{sensitivity:'base'})));
+    // Sort once
+    for(let key in _centrosIndex) {
+        _centrosIndex[key].sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||''),'es',{sensitivity:'base'}));
+    }
+    _centrosPreprocesados = true;
 }
 
 function lugarToTipo(lugar){
-    const l=normalizarTxt(Array.isArray(lugar)?lugar[0]:lugar);
+    const l = normalizarTxt(Array.isArray(lugar)?lugar[0]:lugar);
     if(!l) return '';
     if(l.includes('preescolar')) return 'preescolar';
     if(l.includes('adn')) return 'adn';
@@ -1903,18 +2698,25 @@ function lugarToTipo(lugar){
 
 function isCenterLugar(lugar){return lugarToTipo(lugar)!=='';}
 
-function getBasesByTecnico(tecnico){let bases=tecnicosBases.filter(x=>x.nombre===tecnico&&(x.nombre_base||'').trim()!=='').map(x=>x.nombre_base);bases=[...new Set(bases)];return bases.length?bases:[''];}
-function getBaseByTecnico(tecnico){let bases=getBasesByTecnico(tecnico).filter(Boolean);return bases.length?bases[0]:'';}
-
-function getCentrosPorTecnicoYLugar(baseTecnico,lugarRaw){
-    preprocesarCentros();
-    const base=normalizarTxt(baseTecnico);
-    const tipoReq=lugarToTipo(lugarRaw);
-    if(!base || !tipoReq) return [];
-    return _centrosIndex[base+'|'+tipoReq]||[];
+function getBasesByTecnico(tecnico){
+    let bases=tecnicosBases.filter(x=>x.nombre===tecnico&&(x.nombre_base||'').trim()!=='').map(x=>x.nombre_base);
+    bases=[...new Set(bases)];
+    return bases.length?bases:[''];
 }
 
-// FUNCION DE POBLACION INTELIGENTE SEGÚN LA UNIDAD DE LA ETAPA 3
+function getBaseByTecnico(tecnico){
+    let bases=getBasesByTecnico(tecnico).filter(Boolean);
+    return bases.length?bases[0]:'';
+}
+
+function getCentrosPorTecnicoYLugar(baseTecnico,lugarRaw){
+    if(!_centrosIndex) preprocesarCentros();
+    const base = normalizarTxt(baseTecnico);
+    const tipoReq = lugarToTipo(lugarRaw);
+    if(!base || !tipoReq) return [];
+    return _centrosIndex[base + '|' + tipoReq] || [];
+}
+
 // FUNCION DE POBLACION INTELIGENTE SEGÚN LA UNIDAD DE LA ETAPA 3
 function getUnidadTargetPopulation(c, unidad) {
     let tipo = normalizarTxt(String(c.tipo || ''));
@@ -1967,51 +2769,105 @@ function getUnidadTargetPopulation(c, unidad) {
 // PARAMETRO KEY EN OPTIONSCHECKBOXES
 function optionsCheckboxes(options,selected,name,index,type,isMain=false, key=''){
     let panelClass=`panel-${type}-box`,selectedArr=Array.isArray(selected)?selected:(selected?[selected]:[]);
-    const lazyOptions=isMain||type==='verific_sub'||type==='lugar_sub';
-    const renderedOptions=lazyOptions?selectedArr:options;
-    let html=`<div class="custom-multiselect ${panelClass}" data-index="${index}" data-type="${type}" data-name="${escHtml(name)}"><div class="multiselect-select-box" draggable="true" ondragstart="dragFillStart(event,this)" ondragenter="dragFillOver(event,this)" ondragover="dragFillOver(event,this)" ondragleave="dragFillLeave(this)" ondrop="dragFillDrop(event,this)" onclick="event.stopPropagation();toggleDropdownPanel(this)"><span class="multi-label">Seleccione...</span><span class="fill-drag-handle" title="Arrastrar este valor hacia otro combo"><i class="fa-solid fa-grip-vertical"></i></span></div><div class="multiselect-dropdown-panel" data-lazy-options="${lazyOptions?'1':'0'}" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()">`;
-    renderedOptions.forEach(v=>{
+    const lazy=!isMain&&(type==='verific_sub'||type==='lugar_sub');
+    let html=`<div class="custom-multiselect ${panelClass}" data-index="${index}" data-type="${type}" data-name="${escHtml(name)}" data-key="${escHtml(key)}" data-lazy-options="${lazy?'1':'0'}"><div class="multiselect-select-box" draggable="true" ondragstart="dragFillStart(event,this)" ondragenter="dragFillOver(event,this)" ondragover="dragFillOver(event,this)" ondragleave="dragFillLeave(this)" ondrop="dragFillDrop(event,this)" onclick="event.stopPropagation();toggleDropdownPanel(this)"><span class="multi-label">Seleccione...</span><span class="fill-drag-handle" title="Arrastrar este valor hacia otro combo"><i class="fa-solid fa-grip-vertical"></i></span></div><div class="multiselect-dropdown-panel" onclick="event.stopPropagation()" onmousedown="event.stopPropagation()">`;
+    const initialOptions=lazy?selectedArr:options;
+    initialOptions.forEach(v=>{
         let chk=selectedArr.includes(v)?'checked':'';
         html+=`<label class="multiselect-option" onclick="event.stopPropagation()"><input type="checkbox" name="${name}" value="${escHtml(v)}" ${chk}> ${escHtml(v)}</label>`;
     });
+    if(lazy) html+=`<div class="lazy-options-placeholder" style="padding:10px;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando opciones...</div>`;
     html+=`<a href="#" class="multiselect-add-new-btn" onclick="event.stopPropagation();openCatalogModal('${type}', ${index}, '${type}', '${key}');return false;"><i class="fa-solid fa-plus"></i> Crear nuevo...</a></div></div>`;
     return html;
 }
 
-function hydrateLazyOptions(panel){
-    if(panel.attr('data-lazy-options')!=='1')return;
-    panel.attr('data-lazy-options','0');
-    const ms=panel.closest('.custom-multiselect'),type=ms.data('type'),index=Number(ms.data('index'));
-    const currentProg=currentTaskData?`${currentTaskData.programa||''} ${currentTaskData.sector||''}`:'';
+function ensureLazyMultiselectOptions(ms){
+    const el=ms.jquery?ms:$(ms);
+    if(el.attr('data-lazy-options')!=='1'||el.data('options-ready')===1) return;
+    const type=String(el.data('type')||'');
+    const index=Number(el.data('index'))||0;
+    const panel=el.find('.multiselect-dropdown-panel');
+    const checked=new Set(panel.find('input:checked').map(function(){return String(this.value)}).get());
     let options=[];
-    if(type==='verific_sub')options=getFilteredCatalog(masterVerificacionesRaw,currentProg,`E-${index+1}`);
-    else if(type==='lugar_sub')options=masterLugares;
-    else if(type==='responsable')options=masterResponsables;
-    else if(type==='unidad')options=getFilteredCatalog(masterUnidadesRaw,currentProg,`E-${index+1}`);
-    const existing=new Set(panel.find('input[type="checkbox"]').map(function(){return this.value;}).get());
-    let html='';
-    options.forEach(v=>{if(!existing.has(String(v)))html+=`<label class="multiselect-option" onclick="event.stopPropagation()"><input type="checkbox" name="${escHtml(ms.data('name')||'')}" value="${escHtml(v)}"> ${escHtml(v)}</label>`;});
-    panel.find('.multiselect-add-new-btn').before(html);
+    if(type==='lugar_sub') options=masterLugares||[];
+    else if(type==='verific_sub'){
+        const prog=currentTaskData?((currentTaskData.programa||'')+' '+(currentTaskData.sector||'')):'';
+        options=getFilteredCatalog(masterVerificacionesRaw,prog,`E-${index+1}`)||[];
+    }
+    checked.forEach(v=>{if(!options.includes(v)) options.push(v)});
+    const name=String(el.data('name')||'');
+    const frag=document.createDocumentFragment();
+    options.forEach(v=>{
+        const label=document.createElement('label');
+        label.className='multiselect-option';
+        label.onclick=function(ev){ev.stopPropagation();};
+        const input=document.createElement('input');
+        input.type='checkbox'; input.name=name; input.value=String(v); input.checked=checked.has(String(v));
+        label.appendChild(input); label.appendChild(document.createTextNode(' '+String(v)));
+        frag.appendChild(label);
+    });
+    panel.find('.multiselect-option,.lazy-options-placeholder').remove();
+    const scroll=panel.find('.multiselect-options-scroll')[0];
+    const add=panel.find('.multiselect-add-new-btn')[0];
+    if(scroll) scroll.appendChild(frag); else if(add) panel[0].insertBefore(frag,add); else panel[0].appendChild(frag);
+    el.data('options-ready',1);
+}
+
+function closeAllMultiselects(){
+    $('.multiselect-dropdown-panel').hide().css({visibility:'hidden'});
+    $('.multiselect-select-box').removeClass('is-open');
+}
+
+function prepareDropdownPanel(panel){
+    if(panel.find('.multiselect-search-wrap').length) return;
+    const movable=panel.children('.multiselect-option,.lazy-options-placeholder');
+    const scroll=$('<div class="multiselect-options-scroll"></div>');
+    movable.appendTo(scroll);
+    panel.prepend('<div class="multiselect-search-wrap"><input type="search" class="multiselect-search" placeholder="Buscar opción..." autocomplete="off"></div>');
+    const add=panel.children('.multiselect-add-new-btn');
+    if(add.length) scroll.insertBefore(add); else panel.append(scroll);
+}
+
+function positionDropdownPanel(box,panel){
+    const rect=box.getBoundingClientRect();
+    const margin=10;
+    const width=Math.min(Math.max(rect.width,260),Math.min(420,window.innerWidth-(margin*2)));
+    const below=Math.max(0,window.innerHeight-rect.bottom-margin);
+    const above=Math.max(0,rect.top-margin);
+    const openAbove=below<220 && above>below;
+    const available=Math.max(150,Math.min(360,openAbove?above:below));
+    panel.css({position:'fixed',visibility:'hidden',display:'block',width:width+'px',zIndex:999999});
+    panel.find('.multiselect-options-scroll').css('max-height',Math.max(90,available-104)+'px');
+    const measured=Math.min(panel.outerHeight()||available,available);
+    let top=openAbove?rect.top-measured-7:rect.bottom+7;
+    top=Math.max(margin,Math.min(top,window.innerHeight-measured-margin));
+    let left=Math.max(margin,Math.min(rect.left,window.innerWidth-width-margin));
+    panel.css({top:Math.round(top)+'px',left:Math.round(left)+'px',visibility:'visible',display:'block'});
 }
 
 function toggleDropdownPanel(box){
-    let panel=$(box).next('.multiselect-dropdown-panel');
-    hydrateLazyOptions(panel);
-    let isVisible=panel.is(':visible');
-    $('.multiselect-dropdown-panel').hide();
-    if(!isVisible){
-        let rect=box.getBoundingClientRect();
-        let width=Math.max(rect.width, 240);
-        panel.css({position:'fixed',visibility:'hidden',display:'block',width:width+'px',zIndex:999999});
-        let panelH=panel.outerHeight()||250;
-        let spaceBelow=window.innerHeight-rect.bottom;
-        let top=(spaceBelow < Math.min(panelH,250)+20) ? Math.max(10, rect.top-Math.min(panelH,250)-8) : rect.bottom+6;
-        let left=Math.min(rect.left, window.innerWidth-width-12);
-        panel.css({top:top+'px',left:Math.max(10,left)+'px',visibility:'visible',display:'block'});
-    }
+    const ms=$(box).closest('.custom-multiselect');
+    ensureLazyMultiselectOptions(ms);
+    const panel=$(box).next('.multiselect-dropdown-panel');
+    const wasVisible=panel.is(':visible');
+    closeAllMultiselects();
+    if(wasVisible) return;
+    prepareDropdownPanel(panel);
+    panel.find('.multiselect-search').val('');
+    panel.find('.multiselect-option').show();
+    panel.find('.multiselect-empty').remove();
+    $(box).addClass('is-open');
+    positionDropdownPanel(box,panel);
+    setTimeout(()=>panel.find('.multiselect-search').trigger('focus'),0);
 }
 
-function updateMultiselectText(panelDOM){let panel=$(panelDOM),box=panel.prev('.multiselect-select-box'),checked=panel.find('input:checked').map(function(){return $(this).val();}).get();let content=checked.length?checked.slice(0,4).map(v=>`<span class="multi-tag">${escHtml(v)}</span>`).join('')+(checked.length>4?`<span class="multi-tag">+${checked.length-4}</span>`:''):'Seleccione...';box.find('.multi-label').html(content);}
+function updateMultiselectText(panelDOM){
+    const panel=$(panelDOM),box=panel.prev('.multiselect-select-box');
+    const checked=panel.find('input:checked').map(function(){return $(this).val();}).get();
+    const visible=checked.slice(0,2).map(v=>`<span class="multi-tag" title="${escHtml(v)}">${escHtml(v)}</span>`).join('');
+    const content=checked.length?visible+(checked.length>2?`<span class="multi-tag">+${checked.length-2}</span>`:''):'<span style="color:#94a3b8;font-weight:700">Seleccione...</span>';
+    box.attr('title',checked.join(', ')).find('.multi-label').html(content);
+}
 let dragFillPayload=null;
 function dragFillStart(ev,box){let panel=$(box).next('.multiselect-dropdown-panel');dragFillPayload={type:$(box).closest('.custom-multiselect').data('type'),values:panel.find('input:checked').map(function(){return $(this).val();}).get()};ev.dataTransfer.setData('text/plain',JSON.stringify(dragFillPayload));}
 function dragFillOver(ev,box){
@@ -2095,27 +2951,26 @@ function dragFillDrop(ev,box){
     updateMultiselectText(panel[0]);
 
     setTimeout(() => {
-    if(payload.type==='responsable'||payload.type==='unidad'){
-        triggerAgendaRebuild(idx);
-    }else if(payload.type==='lugar_sub'){
-        const msBox = target;
-        const row = msBox.closest('.inv-row');
-        const rowIdx = Number(row.data('index'));
-        if(rowIdx === 2){
-            refreshStage3RowFromPlaces(row, true);
-        }else if(rowIdx === 1){
-            refreshStage1RowFromPlaces(row);
+        if(payload.type==='responsable'||payload.type==='unidad'){
+            triggerAgendaRebuild(idx);
+        }else if(payload.type==='lugar_sub'){
+            const msBox = target;
+            const row = msBox.closest('.inv-row');
+            const rowIdx = Number(row.data('index'));
+            if(rowIdx === 2){
+                refreshStage3RowFromPlaces(row, true);
+            }else if(rowIdx === 1){
+                refreshStage1RowFromPlaces(row);
+            }else{
+                captureCurrentInvData(idx);
+            }
+        }else if(payload.type==='team_global_lugar'||payload.type==='team_lugar'){
+            applyGlobalTeamPlaces(true, target.find('.multiselect-select-box')[0]);
         }else{
             captureCurrentInvData(idx);
         }
-    }else if(payload.type==='team_global_lugar'||payload.type==='team_lugar'){
-        applyGlobalTeamPlaces(true, target.find('.multiselect-select-box')[0]);
-        return;
-    }else{
-        captureCurrentInvData(idx);
-    }
-
-    scheduleFullAutosave();
+        if(payload.type==='responsable'||payload.type==='unidad'||payload.type==='verific_sub'||payload.type==='lugar_sub') scheduleStageAutosave(Number(idx),target[0],900);
+        else markTab3Dirty(target[0] || document.getElementById('tab-etapas'));
     }, 10);
 }
 $(document).on('mousedown click','.custom-multiselect,.multiselect-dropdown-panel,.multiselect-option,.multiselect-add-new-btn',function(e){e.stopPropagation();});
@@ -2127,8 +2982,9 @@ $(document).on('change','.multiselect-dropdown-panel input',function(e){
     const ms=panel.closest('.custom-multiselect');
     const type=ms.data('type');
     const idx=ms.data('index');
+    const isChecked = this.checked;
 
-    if (this.checked) {
+    if (isChecked) {
         let val = $(this).val();
 
         if (type === 'responsable') {
@@ -2153,58 +3009,75 @@ $(document).on('change','.multiselect-dropdown-panel input',function(e){
         }
     }
 
+    // Desacoplamos la recarga pesada de la interfaz para que no congele el navegador
     setTimeout(() => {
-    if(type==='responsable' || type==='unidad'){
-        try{ triggerAgendaRebuild(idx); }catch(ex){}
-    }else if(type==='lugar_sub'){
-        const row=ms.closest('.inv-row');
-        const rowIdx = Number(row.data('index'));
-        if(rowIdx===2){
-            refreshStage3RowFromPlaces(row,true);
-        }else if(rowIdx === 1){
-            refreshStage1RowFromPlaces(row);
+        if(type==='responsable' || type==='unidad'){
+            try{ triggerAgendaRebuild(idx); }catch(ex){}
+        }else if(type==='lugar_sub'){
+            const row=ms.closest('.inv-row');
+            const rowIdx = Number(row.data('index'));
+            if(rowIdx===2){
+                refreshStage3RowFromPlaces(row,true);
+            }else if(rowIdx === 1){
+                refreshStage1RowFromPlaces(row);
+            }else{
+                captureCurrentInvData(idx);
+            }
+        }else if(type==='team_global_lugar' || type==='team_lugar'){
+            applyGlobalTeamPlaces(true, ms.find('.multiselect-select-box')[0]);
         }else{
             captureCurrentInvData(idx);
         }
-    }else if(type==='team_global_lugar' || type==='team_lugar'){
-        applyGlobalTeamPlaces(true, ms.find('.multiselect-select-box')[0]);
-        return;
-    }else{
-        captureCurrentInvData(idx);
-    }
-    scheduleFullAutosave();
+        if(type==='responsable'||type==='unidad'||type==='verific_sub'||type==='lugar_sub') scheduleStageAutosave(Number(idx),ms[0],900);
+        else markTab3Dirty(ms[0] || document.getElementById('tab-etapas'));
     }, 10);
 });
-$(document).on('mousedown',function(e){if(!$(e.target).closest('.custom-multiselect,.multiselect-dropdown-panel').length)$('.multiselect-dropdown-panel').hide();});
+$(document).on('input','.multiselect-search',function(e){
+    e.stopPropagation();
+    const q=String(this.value||'').trim().toLowerCase();
+    const panel=$(this).closest('.multiselect-dropdown-panel');
+    let visible=0;
+    panel.find('.multiselect-option').each(function(){
+        const show=!q||$(this).text().toLowerCase().includes(q);
+        $(this).toggle(show); if(show) visible++;
+    });
+    panel.find('.multiselect-empty').remove();
+    if(!visible) panel.find('.multiselect-options-scroll').append('<div class="multiselect-empty">No hay coincidencias</div>');
+});
+$(document).on('mousedown',function(e){if(!$(e.target).closest('.custom-multiselect,.multiselect-dropdown-panel').length)closeAllMultiselects();});
+$(window).on('resize scroll',function(){closeAllMultiselects();});
 function selectedFromPanel(selector){return $(selector).find('input:checked').map(function(){return $(this).val();}).get();}
 
 function captureCurrentInvData(index){
     if(!window.savedInvData[index]) window.savedInvData[index]={};
 
-    // 1. Capturar las líneas visibles
+    // 1. Capturar las líneas visibles (Optimizado para no leer JSONs ocultos a menos que sea necesario)
     $(`#subgrid-${index} tr.inv-row`).each(function(){
-        let row=$(this),key=row.data('key');
+        let row=$(this);
+        let key=row.attr('data-key');
         if(!key) return;
+
         let prev=window.savedInvData[index][key]||{};
-        window.savedInvData[index][key]={...prev,
+        window.savedInvData[index][key]={
+            ...prev,
             persona:row.find(`input[name^="inv_persona"]`).val()||prev.persona||'',
             base:row.find(`input[name^="inv_base"]`).val()||prev.base||'',
             unidad:row.find(`input[name^="inv_unidad"]`).val()||prev.unidad||'',
             mes:row.find(`input[name^="inv_mes"]`).val()||prev.mes||currentTeamMonth,
-            a_lograr:row.find(`input[name^="inv_alograr"]`).val()||0,
-            cumplido:row.find(`input[name^="inv_cumplido"]`).val()||0,
+            a_lograr:parseFloat(row.find(`input[name^="inv_alograr"]`).val())||0,
+            cumplido:parseFloat(row.find(`input[name^="inv_cumplido"]`).val())||0,
             deleted:row.find(`input[name^="inv_deleted"]`).val()==='1',
-            a_tiempo:row.find(`input[name^="inv_a_tiempo"]`).val()||100,
-            en_forma:row.find(`input[name^="inv_en_forma"]`).val()||100,
+            a_tiempo:parseFloat(row.find(`input[name^="inv_a_tiempo"]`).val())||100,
+            en_forma:parseFloat(row.find(`input[name^="inv_en_forma"]`).val())||100,
             quality_initialized:true,
             quality_version:2,
-            verifics:row.find(`.panel-verific_sub-box input:checked`).map(function(){return $(this).val();}).get(),
-            lugar:row.find(`.panel-lugar_sub-box input:checked`).map(function(){return $(this).val();}).get(),
-            centros:readHiddenCenters(index,key)
+            verifics:row.find(`.panel-verific_sub-box input:checked`).map(function(){return this.value;}).get(),
+            lugar:row.find(`.panel-lugar_sub-box input:checked`).map(function(){return this.value;}).get(),
+            centros: prev.centros && Object.keys(prev.centros).length > 0 ? prev.centros : readHiddenCenters(index,key)
         };
     });
 
-    // 2. Capturar las líneas eliminadas para que la BD recuerde que se borraron
+    // 2. Capturar las líneas eliminadas
     $(`#subgrid-${index} .deleted-inv-holder`).each(function(){
         let holder=$(this);
         let nameAttr = holder.find(`input[name^="inv_persona"]`).attr('name');
@@ -2224,20 +3097,20 @@ function captureCurrentInvData(index){
             }
         }
     });
-    $(`input[data-etapa-json="${index}"]`).val(JSON.stringify(window.savedInvData[index]||{}));
 }
 
+const agendaRebuildTimers={};
 function triggerAgendaRebuild(index){
-    captureCurrentInvData(index);
-    const cont=$(`#subgrid-${index}`);
-    if(cont.attr('data-built')!=='1')return;
-    clearTimeout(stageRebuildTimers[index]);
-    stageRebuildTimers[index]=setTimeout(()=>{
-        if(!modalEtapasBuilt||!document.getElementById(`subgrid-${index}`))return;
+    const host=$(`#subgrid-${index}`);
+    if(host.data('loaded')!==1)return;
+    clearTimeout(agendaRebuildTimers[index]);
+    agendaRebuildTimers[index]=setTimeout(()=>{
+        captureCurrentInvData(index);
         const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
         const unidades=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
         buildSubgrid(index,resps,unidades);
-    },80);
+        host.data('loaded',1);
+    },180);
 }
 function rowKey(persona,unidad){return btoa(unescape(encodeURIComponent(persona+'|'+unidad))).replace(/=/g,'');}
 function getSaved(index,key){return (window.savedInvData[index]&&window.savedInvData[index][key])?window.savedInvData[index][key]:{};}
@@ -2268,8 +3141,26 @@ function combineSavedForBases(index, persona, bases, unidad){
     }
     return has?combined:{};
 }
-function centrosByBasesYLugares(bases,lugares){let centros=[],seen=new Set();(lugares||[]).forEach(l=>{(bases||['']).forEach(base=>{getCentrosPorTecnicoYLugar(base,l).forEach(c=>{if(!seen.has(c.id)){seen.add(c.id);centros.push(c);}});});});return centros;}
-function sumMatriculaCentros(centros){return (centros||[]).reduce((acc,c)=>acc+(parseFloat(c.pob_total)||0),0);}
+
+function centrosByBasesYLugares(bases, lugares) {
+    let centros = [];
+    let seen = new Set();
+    (lugares || []).forEach(l => {
+        (bases || ['']).forEach(base => {
+            let lista = getCentrosPorTecnicoYLugar(base, l);
+            lista.forEach(c => {
+                if (!seen.has(c.id)) {
+                    seen.add(c.id);
+                    centros.push(c);
+                }
+            });
+        });
+    });
+    return centros;
+}
+function sumMatriculaCentros(centros){
+    return (centros||[]).reduce((acc,c)=>acc+(parseFloat(c.pob_total)||0),0);
+}
 
 function readHiddenCenters(index,key){
     const row=$(`tr.inv-row[data-index="${index}"][data-key="${key}"]`);
@@ -2295,9 +3186,6 @@ function updateCurrentTaskStageRow(index,key,rowData){
 
     inv[key]=rowData;
     currentTaskData.etapas[index].involucrados_json=JSON.stringify(inv);
-
-    if(currentTaskButton){
-    }
 }
 
 function collectStageRowData(index,key){
@@ -2316,8 +3204,8 @@ function collectStageRowData(index,key){
         en_forma:Math.max(0,Math.min(100,parseFloat(row.find('input[name^="inv_en_forma"]').val())||0)),
         quality_initialized:true,
         quality_version:2,
-        verifics:row.find('.panel-verific_sub-box input:checked').map(function(){return $(this).val();}).get(),
-        lugar:row.find('.panel-lugar_sub-box input:checked').map(function(){return $(this).val();}).get(),
+        verifics:row.find('.panel-verific_sub-box input:checked').map(function(){return this.value;}).get(),
+        lugar:row.find('.panel-lugar_sub-box input:checked').map(function(){return this.value;}).get(),
         centros:readHiddenCenters(index,key)
     };
 
@@ -2437,7 +3325,9 @@ function autosaveCenterRow(index,key,target=null){
     if(!rowData) return Promise.resolve();
     const fd=new FormData();
     fd.append('action','autosave_centros_etapa3');
+    fd.append('csrf',monitoreoCsrfToken);
     fd.append('id_poa',$('#upd_task_id').val());
+    fd.append('estado',$('#upd_estado').val()||'0%');
     fd.append('row_key',key);
     fd.append('row_json',JSON.stringify(rowData));
     updateSaveIndicator('saving');
@@ -2466,86 +3356,109 @@ function splitResponsibleNameHtml(name){
 }
 
 function buildEtapasTable(taskData){
-    $('#etapas_loaded').val('1');
     window.savedInvData={};
-    let etapas=Array.isArray(taskData.etapas)&&taskData.etapas.length?taskData.etapas:etapasDefault.map((e,i)=>({codigo_etapa:e.codigo,nombre_etapa:e.nombre,descripcion_etapa:e.descripcion,unidad_medida:'[]',responsable:'[]',involucrados_json:'{}',fecha_recepcion:getFechaMaximaEtapa(i)}));
+    const etapas=Array.isArray(taskData.etapas)&&taskData.etapas.length?taskData.etapas:etapasDefault.map((e,i)=>({codigo_etapa:e.codigo,nombre_etapa:e.nombre,descripcion_etapa:e.descripcion,unidad_medida:'[]',responsable:'[]',involucrados_json:'{}',fecha_recepcion:getFechaMaximaEtapa(i)}));
     let html='';
-    let currentProg = (taskData.programa || '') + ' ' + (taskData.sector || '');
-
     etapas.forEach((e,i)=>{
         let resps=[],unis=[];
         try{resps=JSON.parse(e.responsable||'[]')}catch(ex){if(e.responsable)resps=[e.responsable]}
         try{unis=JSON.parse(e.unidad_medida||'[]')}catch(ex){if(e.unidad_medida)unis=[e.unidad_medida]}
-        try{window.savedInvData[i]=JSON.parse(e.involucrados_json||'{}')}catch(ex){window.savedInvData[i]={}}
-
-        let fecha=e.fecha_recepcion||getFechaMaximaEtapa(i);
-        let filteredUnis = getFilteredCatalog(masterUnidadesRaw, currentProg, `E-${i+1}`);
-        let rowUnis = [...new Set([...filteredUnis, ...unis])];
-
-        const savedJson=JSON.stringify(window.savedInvData[i]||{});
-        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"><input type="hidden" name="etapa_involucrados_json[]" data-etapa-json="${i}" value="${escHtml(savedJson)}"></div></div></td><td>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${i}][]`,i,'unidad',true,'')}</td><td>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${i}][]`,i,'responsable',true,'')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" data-built="0" data-stage-lazy="${i}"><div class="stage-lazy-placeholder" style="padding:16px;text-align:center;color:#64748b"><i class="fa-solid fa-gauge-high"></i> La programación se cargará al acercarse a esta etapa. <button type="button" class="btn-action btn-mini" onclick="loadStageSubgrid(${i})">Cargar ahora</button></div></div></td></tr>`;
+        // El detalle pesado se solicita únicamente al abrir esta etapa.
+        window.savedInvData[i]={};
+        const fecha=e.fecha_recepcion||getFechaMaximaEtapa(i);
+        const savedCount=parseInt(e.involucrados_count||0,10)||0;
+        html+=`<tr class="stage-main-row"><td><div class="stage-info"><div class="stage-code">${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}</div><div><div class="stage-name">${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}</div><div class="stage-desc">${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}</div><input type="hidden" name="etapa_codigo[]" value="${escHtml(e.codigo_etapa||etapasDefault[i]?.codigo||'')}"><input type="hidden" name="etapa_nombre[]" value="${escHtml(e.nombre_etapa||etapasDefault[i]?.nombre||'')}"><input type="hidden" name="etapa_descripcion[]" value="${escHtml(e.descripcion_etapa||etapasDefault[i]?.descripcion||'')}"></div></div></td><td><span class="prog-badge">${unis.length} unidad(es)</span>${unis.map(v=>`<input type="hidden" name="etapa_unidades[${i}][]" value="${escHtml(v)}">`).join('')}</td><td><span class="prog-badge">${resps.length} responsable(s)</span>${resps.map(v=>`<input type="hidden" name="etapa_resps[${i}][]" value="${escHtml(v)}">`).join('')}</td><td><span class="global-date-pill"><i class="fa-solid fa-calendar-check"></i><input type="date" name="etapa_fecha_recepcion[${i}]" value="${escHtml(fecha)}" class="table-input date-input-compact"></span></td></tr><tr><td colspan="4"><div id="subgrid-${i}" class="stage-lazy-host"><div style="padding:14px 16px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="color:#64748b;font-weight:700">${savedCount?savedCount+' registros guardados':'Programación sin registros'}</div>${MONITOREO_IS_DETAIL_PAGE?'<span style="color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Cargando programación...</span>':`<button type="button" class="btn-action btn-mini" onclick="openStageProgramming(${i},this)"><i class="fa-solid fa-sliders"></i> Configurar etapa</button>`}</div></div></td></tr>`;
     });
-
     $('#tabla_etapas_body').html(html);
-    $('#tabla_etapas_body').children('tr').each(function(position){
-        $(this).attr('data-agenda-stage',Math.floor(position/2));
-    });
-    $('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
-    stageGridPages={};
-    $('#agenda-stage-tabs').remove();
-    scheduleStageSubgrids(etapas.length);
 }
 
-function loadStageSubgrid(index){
-    const cont=$(`#subgrid-${index}`);
-    if(cont.attr('data-built')==='1')return;
-    cont.attr('data-built','1');
-    if(stageGridObserver&&cont[0])stageGridObserver.unobserve(cont[0]);
-    cont.html('<div style="padding:16px;text-align:center;color:#64748b"><i class="fa-solid fa-spinner fa-spin"></i> Preparando programación...</div>');
-    const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
-    const unis=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
-    requestAnimationFrame(()=>buildSubgrid(index,resps,unis));
+async function fetchTaskStageDetail(taskId,index){
+    const fd=new FormData();
+    fd.append('action','get_task_stage_detail');
+    fd.append('id_poa',String(taskId));
+    fd.append('stage_order',String(index+1));
+    fd.append('csrf',monitoreoCsrfToken);
+    const response=await fetch(window.location.pathname,{method:'POST',body:fd});
+    const result=await response.json();
+    if(!response.ok||result.status!=='ok') throw new Error(result.msg||'No se pudo cargar la etapa.');
+    return result.etapa||{};
 }
 
-function activateAgendaStage(index){
-    const rows=$('#tabla_etapas_body').children('tr');
-    rows.addClass('agenda-stage-hidden');
-    rows.filter(`[data-agenda-stage="${index}"]`).removeClass('agenda-stage-hidden');
-    $('#agenda-stage-tabs button').removeClass('active').filter(`[data-stage="${index}"]`).addClass('active');
-    loadStageSubgrid(index);
-    const modalBody=document.querySelector('#updateModal .modal-body');
-    if(modalBody)modalBody.scrollTop=Math.min(modalBody.scrollTop,document.getElementById('tab-etapas')?.offsetTop||0);
+async function openStageProgramming(index,btn,autoRender=false){
+    const host=$(`#subgrid-${index}`);
+    if(host.data('loaded')===1){
+        host.find('.subgrid-wrapper').toggle();
+        return;
+    }
+    if(host.data('loading')===1) return;
+    host.data('loading',1);
+    if(btn) $(btn).prop('disabled',true).html('<i class="fa-solid fa-spinner fa-spin"></i> Cargando etapa...');
+
+    try{
+        // Solo aquí viaja involucrados_json de UNA etapa.
+        const etapa=await fetchTaskStageDetail(currentTaskData.id,index);
+        if(!Array.isArray(currentTaskData.etapas)) currentTaskData.etapas=[];
+        currentTaskData.etapas[index]={...(currentTaskData.etapas[index]||{}),...etapa};
+
+        let resps=[],unis=[];
+        try{resps=JSON.parse(etapa.responsable||'[]')}catch(ex){if(etapa.responsable)resps=[etapa.responsable]}
+        try{unis=JSON.parse(etapa.unidad_medida||'[]')}catch(ex){if(etapa.unidad_medida)unis=[etapa.unidad_medida]}
+        try{window.savedInvData[index]=JSON.parse(etapa.involucrados_json||'{}')}catch(ex){window.savedInvData[index]={}}
+
+        // Entregar un frame al navegador antes de crear el subgrid.
+        await new Promise(resolve=>requestAnimationFrame(resolve));
+        const currentProg=(currentTaskData.programa||'')+' '+(currentTaskData.sector||'');
+        const rowUnis=[...new Set([...getFilteredCatalog(masterUnidadesRaw,currentProg,`E-${index+1}`),...unis])];
+        host.html(`<div class="subgrid-wrapper"><div class="subgrid-card"><div class="subgrid-header"><h5>Configuración de etapa</h5></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px"><div><label style="font-weight:900;display:block;margin-bottom:6px">Unidades</label>${optionsCheckboxes(rowUnis,unis,`etapa_unidades[${index}][]`,index,'unidad',true,'')}</div><div><label style="font-weight:900;display:block;margin-bottom:6px">Responsables</label>${optionsCheckboxes(masterResponsables,resps,`etapa_resps[${index}][]`,index,'responsable',true,'')}</div></div><div id="stage-grid-inner-${index}"></div></div></div>`).data('loaded',1);
+        host.find('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
+
+        const totalCruces = resps.length * unis.length;
+        if(autoRender){
+            buildSubgrid(index,resps,unis);
+        }else{
+            $('#stage-grid-inner-'+index).html(`<div class="stage-grid-gate" style="padding:18px;background:#fff7ed;border-top:1px solid #fed7aa;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap"><div><div style="font-weight:900;color:#9a3412">Programación aún no renderizada</div><div style="color:#7c2d12;margin-top:4px">Se crearán ${totalCruces} cruces (${resps.length} responsables × ${unis.length} unidades).</div></div><button type="button" class="btn-action btn-mini" onclick="renderStageGrid(${index},this)"><i class="fa-solid fa-table-cells"></i> Cargar tabla</button></div>`);
+        }
+        if(btn) $(btn).html('<i class="fa-solid fa-chevron-up"></i> Ocultar etapa');
+    }catch(error){
+        console.error('Carga de etapa:',error);
+        host.html(`<div style="padding:16px;color:#991b1b;background:#fef2f2;border-top:1px solid #fecaca">${escHtml(error.message||'No se pudo cargar la etapa.')}</div>`);
+    }finally{
+        host.data('loading',0);
+        if(btn) $(btn).prop('disabled',false);
+    }
 }
 
-function scheduleStageSubgrids(total){
-    if(stageGridObserver){stageGridObserver.disconnect();stageGridObserver=null;}
-    if(total<1)return;
-    const labels=Array.from({length:total},(_,index)=>`<button type="button" data-stage="${index}" onclick="activateAgendaStage(${index})">E-${index+1}</button>`).join('');
-    $('#tab-etapas .stage-scroll').before(`<div id="agenda-stage-tabs" class="agenda-stage-tabs"><strong>Etapa:</strong>${labels}</div>`);
-    activateAgendaStage(0);
+
+async function renderStageGrid(index,btn){
+    const etapa=(currentTaskData&&Array.isArray(currentTaskData.etapas))?currentTaskData.etapas[index]:null;
+    if(!etapa) return;
+    let resps=[],unis=[];
+    try{resps=JSON.parse(etapa.responsable||'[]')}catch(ex){if(etapa.responsable)resps=[etapa.responsable]}
+    try{unis=JSON.parse(etapa.unidad_medida||'[]')}catch(ex){if(etapa.unidad_medida)unis=[etapa.unidad_medida]}
+    const total=resps.length*unis.length;
+    if(total>120 && !confirm(`Esta etapa generará ${total} filas y puede tardar. ¿Continuar?`)) return;
+    $(btn).prop('disabled',true).html('<i class="fa-solid fa-spinner fa-spin"></i> Generando...');
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    buildSubgrid(index,resps,unis);
 }
 
+const MONITOREO_TAB3_GRID_BUILD = 'TAB3-SIN-PAGINADO-2026-07-23-v19';
 function buildSubgrid(index,resps,unidades){
-    let cont=$(`#subgrid-${index}`);
-    if(!resps.length||!unidades.length){cont.hide().html('');return;}
+    let cont=$(`#stage-grid-inner-${index}`);
+    if(!cont.length) cont=$(`#subgrid-${index}`);
+    if(!resps.length||!unidades.length){cont.html('<div style="padding:14px;color:#64748b;font-weight:700">Seleccione al menos un responsable y una unidad.</div>');return;}
+    const visibleResps=[...resps];
     let currentProg = currentTaskData ? ((currentTaskData.programa || '') + ' ' + (currentTaskData.sector || '')) : '';
     let filteredVerifs = getFilteredCatalog(masterVerificacionesRaw, currentProg, `E-${index+1}`);
 
-
-    let html=`<div class="subgrid-wrapper"><div class="subgrid-card"><div class="subgrid-header subgrid-toolbar"><h5><i class="fa-solid fa-users-viewfinder"></i> Programación por responsable y unidad</h5><div style="display:flex;align-items:center;gap:8px"><span class="sticky-mini-note"><i class="fa-solid fa-calendar-days"></i> Mes actual: <b>${escHtml((mesesEquipo.find(x=>x.k===currentTeamMonth)||{}).n||currentTeamMonth)}</b></span><button type="button" class="btn-action btn-mini btn-xlsx" onclick="exportClosestTable(this,'etapa_${index+1}_responsables')"><i class="fa-solid fa-file-excel"></i></button></div></div><table class="subgrid-table"><thead><tr><th style="width:22%">Responsable</th><th style="width:10%">Unidad</th><th style="width:9%">PROG.</th><th style="width:9%">CUMPL.</th><th style="width:9%">A tiempo (%)</th><th style="width:9%">En forma (%)</th><th style="width:8%">%</th><th style="width:15%">Medios verificación</th><th style="width:11%">Lugar</th><th style="width:86px">Acción</th>${index===2?'<th style="width:92px">Detalle</th>':''}</tr></thead><tbody>`;
+    let html=`<div class="subgrid-wrapper"><div class="subgrid-card"><div class="subgrid-header subgrid-toolbar"><h5><i class="fa-solid fa-users-viewfinder"></i> Programación por responsable y unidad</h5><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="sticky-mini-note"><i class="fa-solid fa-calendar-days"></i> Mes de la actividad: <b>${escHtml((mesesEquipo.find(x=>x.k===currentTeamMonth)||{}).n||currentTeamMonth)}</b></span><span class="sticky-mini-note"><b>${visibleResps.length}</b> responsable${visibleResps.length===1?'':'s'} visible${visibleResps.length===1?'':'s'}</span><button type="button" class="btn-action btn-mini btn-xlsx" onclick="exportClosestTable(this,'etapa_${index+1}_responsables')"><i class="fa-solid fa-file-excel"></i></button></div></div><table class="subgrid-table"><thead><tr><th style="width:22%">Responsable</th><th style="width:10%">Unidad</th><th style="width:9%">PROG.</th><th style="width:9%">CUMPL.</th><th style="width:9%">A tiempo (%)</th><th style="width:9%">En forma (%)</th><th style="width:8%">%</th><th style="width:15%">Medios verificación</th><th style="width:11%">Lugar</th><th style="width:86px">Acción</th>${index===2?'<th style="width:92px">Detalle</th>':''}</tr></thead><tbody>`;
 
     let hiddenHoldersHtml = '';
-    const totalCombinations=resps.length*unidades.length,totalPages=Math.max(1,Math.ceil(totalCombinations/stageGridPageSize));
-    const currentPage=Math.min(Math.max(1,stageGridPages[index]||1),totalPages),start=(currentPage-1)*stageGridPageSize,end=start+stageGridPageSize;
-    stageGridPages[index]=currentPage;
-    let combinationIndex=0;
 
-    resps.forEach(p=>{
+    visibleResps.forEach(p=>{
         let bases=getBasesByTecnico(p);
         let basesVisibles=bases.filter(b=>String(b||'').trim()!=='');
         unidades.forEach(u=>{
-            const position=combinationIndex++;
-            if(position<start||position>=end)return;
             let key=rowKey(p+'|__ALLBASES',u);
             let d=getSaved(index,key);
 
@@ -2557,7 +3470,6 @@ function buildSubgrid(index,resps,unidades){
                 if(d && d.deleted === true) isDeleted = true;
             }
 
-            // Si está borrado, lo agregamos como input oculto pero NO dibujamos la fila
             if (isDeleted) {
                 hiddenHoldersHtml += `<div class="deleted-inv-holder" style="display:none"><input type="hidden" name="inv_persona[${index}][${key}]" value="${escHtml(p)}"><input type="hidden" name="inv_base[${index}][${key}]" value="${escHtml(bases.join('|'))}"><input type="hidden" name="inv_unidad[${index}][${key}]" value="${escHtml(u)}"><input type="hidden" name="inv_mes[${index}][${key}]" value="${escHtml(currentTeamMonth)}"><input type="hidden" name="inv_deleted[${index}][${key}]" value="1"><input type="hidden" name="inv_alograr[${index}][${key}]" value="0"></div>`;
                 return;
@@ -2589,22 +3501,14 @@ function buildSubgrid(index,resps,unidades){
             let baseLabels=basesVisibles.length?`<div class="base-labels-wrap">${basesVisibles.map(b=>`<span class="base-badge">${escHtml(b)}</span>`).join('')}</div>`:'<br><span style="color:#94a3b8;font-size:.76rem">Sin base asignada</span>';
             let rowVerifs = [...new Set([...filteredVerifs, ...(Array.isArray(d.verifics)?d.verifics:[])])];
 
-            html+=`<tr class="inv-row" data-index="${index}" data-key="${key}" data-persona="${escHtml(p)}" data-base="${escHtml(bases.join('|'))}"><td><input type="hidden" name="inv_centros_json[${index}][${key}]" value="${escHtml(JSON.stringify(d.centros||{}))}"><input type="hidden" name="inv_persona[${index}][${key}]" value="${escHtml(p)}"><input type="hidden" name="inv_base[${index}][${key}]" value="${escHtml(bases.join('|'))}"><input type="hidden" name="inv_deleted[${index}][${key}]" value="0"><input type="hidden" name="inv_mes[${index}][${key}]" value="${escHtml(currentTeamMonth)}"><input type="hidden" name="inv_quality_initialized[${index}][${key}]" value="1"><input type="hidden" name="inv_quality_version[${index}][${key}]" value="2"><div class="resp-cell"><i class="fa-solid fa-user-check resp-icon"></i>${splitResponsibleNameHtml(p)}</div>${baseLabels}</td><td><span class="code-pill ext">${escHtml(u)}</span><input type="hidden" name="inv_unidad[${index}][${key}]" value="${escHtml(u)}"></td><td><input type="number" step="0.01" name="inv_alograr[${index}][${key}]" value="${escHtml(programadoDefault)}" class="table-input a-lograr-input auto-full-save"></td><td><input type="number" step="0.01" name="inv_cumplido[${index}][${key}]" value="${escHtml(cumplidoDefault)}" class="table-input cumplido-input auto-full-save"></td><td><input type="number" min="0" max="100" step="1" name="inv_a_tiempo[${index}][${key}]" value="${escHtml(aTiempoDefault)}" class="table-input score-input inv-score auto-full-save"></td><td><input type="number" min="0" max="100" step="1" name="inv_en_forma[${index}][${key}]" value="${escHtml(enFormaDefault)}" class="table-input score-input inv-score auto-full-save"></td><td class="pct-cell">${badgePct(pct)}</td><td>${optionsCheckboxes(rowVerifs,Array.isArray(d.verifics)?d.verifics:[],`inv_verifics[${index}][${key}][]`,index,'verific_sub',false,key)}</td><td>${optionsCheckboxes(masterLugares,lugar,`inv_lugar[${index}][${key}][]`,index,'lugar_sub',false,key)}</td><td><button type="button" class="btn-action btn-mini btn-delete-row" onclick="deleteInvRow(${index}, '${key}')"><i class="fa-solid fa-trash"></i></button></td>${index===2?`<td><button type="button" class="btn-action btn-mini btn-eye" onclick="toggleDetalleCentros(${index}, '${key}', this)"><i class="fa-solid fa-eye"></i> Ver</button></td>`:''}</tr><tr id="detalle-centros-${index}-${key}" class="detail-centros-row d-none"><td colspan="${index===2?11:10}"></td></tr>`;
+            html+=`<tr class="inv-row" data-index="${index}" data-key="${key}" data-persona="${escHtml(p)}" data-base="${escHtml(bases.join('|'))}"><td><input type="hidden" name="inv_centros_json[${index}][${key}]" class="hidden-centros-json" value="${escHtml(JSON.stringify(d.centros||{}))}"><input type="hidden" name="inv_persona[${index}][${key}]" value="${escHtml(p)}"><input type="hidden" name="inv_base[${index}][${key}]" value="${escHtml(bases.join('|'))}"><input type="hidden" name="inv_deleted[${index}][${key}]" value="0"><input type="hidden" name="inv_mes[${index}][${key}]" value="${escHtml(currentTeamMonth)}"><input type="hidden" name="inv_quality_initialized[${index}][${key}]" value="1"><input type="hidden" name="inv_quality_version[${index}][${key}]" value="2"><div class="resp-cell"><i class="fa-solid fa-user-check resp-icon"></i>${splitResponsibleNameHtml(p)}</div>${baseLabels}</td><td><span class="code-pill ext">${escHtml(u)}</span><input type="hidden" name="inv_unidad[${index}][${key}]" value="${escHtml(u)}"></td><td><input type="number" step="0.01" name="inv_alograr[${index}][${key}]" value="${escHtml(programadoDefault)}" class="table-input a-lograr-input auto-full-save"></td><td><input type="number" step="0.01" name="inv_cumplido[${index}][${key}]" value="${escHtml(cumplidoDefault)}" class="table-input cumplido-input auto-full-save"></td><td><input type="number" min="0" max="100" step="1" name="inv_a_tiempo[${index}][${key}]" value="${escHtml(aTiempoDefault)}" class="table-input score-input inv-score auto-full-save"></td><td><input type="number" min="0" max="100" step="1" name="inv_en_forma[${index}][${key}]" value="${escHtml(enFormaDefault)}" class="table-input score-input inv-score auto-full-save"></td><td class="pct-cell">${badgePct(pct)}</td><td>${optionsCheckboxes(rowVerifs,Array.isArray(d.verifics)?d.verifics:[],`inv_verifics[${index}][${key}][]`,index,'verific_sub',false,key)}</td><td>${optionsCheckboxes(masterLugares,lugar,`inv_lugar[${index}][${key}][]`,index,'lugar_sub',false,key)}</td><td><button type="button" class="btn-action btn-mini btn-delete-row" onclick="deleteInvRow(${index}, '${key}')"><i class="fa-solid fa-trash"></i></button></td>${index===2?`<td><button type="button" class="btn-action btn-mini btn-eye" onclick="toggleDetalleCentros(${index}, '${key}', this)"><i class="fa-solid fa-eye"></i> Ver</button></td>`:''}</tr><tr id="detalle-centros-${index}-${key}" class="detail-centros-row d-none"><td colspan="${index===2?11:10}"></td></tr>`;
         });
     });
 
-    html+='</tbody></table>' + hiddenHoldersHtml;
-    if(totalPages>1)html+=`<div class="stage-grid-pagination"><button type="button" onclick="changeStageGridPage(${index},${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button><span>${start+1}-${Math.min(end,totalCombinations)} de ${totalCombinations}</span><button type="button" onclick="changeStageGridPage(${index},${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button></div>`;
-    html+='</div></div>';
-    cont.html(html).show();
+    html+='</tbody></table>' + hiddenHoldersHtml + '</div></div>';
+    cont.html(html);
     cont.find('.multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
-    updateActivityProgress();
-}
-function changeStageGridPage(index,page){
-    captureCurrentInvData(index);
-    stageGridPages[index]=page;
-    const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`),unidades=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
-    buildSubgrid(index,resps,unidades);
+    scheduleAgendaProgress();
 }
 function deleteInvRow(index,key){
     if(!window.savedInvData[index]) window.savedInvData[index]={};
@@ -2614,26 +3518,20 @@ function deleteInvRow(index,key){
     let unidad = row.find(`input[name^="inv_unidad"]`).val() || '';
     let base = row.find(`input[name^="inv_base"]`).val() || '';
 
-    // Lo guardamos explícitamente en memoria como deleted
     window.savedInvData[index][key] = {
         ...(window.savedInvData[index][key]||{}),
         persona, base, unidad, deleted:true, mes:currentTeamMonth
     };
 
-    // Agregar el holder invisible de respaldo antes de borrar
     $(`#subgrid-${index}`).append(`<div class="deleted-inv-holder" style="display:none"><input type="hidden" name="inv_persona[${index}][${key}]" value="${escHtml(persona)}"><input type="hidden" name="inv_base[${index}][${key}]" value="${escHtml(base)}"><input type="hidden" name="inv_unidad[${index}][${key}]" value="${escHtml(unidad)}"><input type="hidden" name="inv_mes[${index}][${key}]" value="${escHtml(currentTeamMonth)}"><input type="hidden" name="inv_deleted[${index}][${key}]" value="1"><input type="hidden" name="inv_alograr[${index}][${key}]" value="0"></div>`);
 
-    // Lo borramos del DOM visual
     row.next('.detail-centros-row').remove();
     row.remove();
 
-    // Evaluar si le quedan otras unidades activas a esa persona en esta etapa
     if (persona !== '') {
         let activeForPersona = $(`#subgrid-${index} tr.inv-row`).filter(function() {
             return $(this).find(`input[name^="inv_persona"]`).val() === persona;
         }).length;
-
-        // Si no quedan unidades, desmarcamos a la persona del Dropdown original
         if (activeForPersona === 0) {
             let respPanel = $(`.panel-responsable-box[data-index="${index}"] .multiselect-dropdown-panel`);
             let checkbox = respPanel.find(`input[value="${escHtml(persona).replace(/"/g,'\\"')}"]`);
@@ -2644,13 +3542,10 @@ function deleteInvRow(index,key){
         }
     }
 
-    // Evaluar si le quedan otros responsables a esa unidad en esta etapa
     if (unidad !== '') {
         let activeForUnidad = $(`#subgrid-${index} tr.inv-row`).filter(function() {
             return $(this).find(`input[name^="inv_unidad"]`).val() === unidad;
         }).length;
-
-        // Si no quedan responsables para esta unidad, la desmarcamos del Dropdown
         if (activeForUnidad === 0) {
             let uniPanel = $(`.panel-unidad-box[data-index="${index}"] .multiselect-dropdown-panel`);
             let checkbox = uniPanel.find(`input[value="${escHtml(unidad).replace(/"/g,'\\"')}"]`);
@@ -2662,7 +3557,7 @@ function deleteInvRow(index,key){
     }
 
     updateActivityProgress();
-    scheduleFullAutosave();
+    markTab3Dirty(document.getElementById('tab-etapas'));
 }
 
 function closeCentrosDrawer(save=true){
@@ -2748,13 +3643,24 @@ function renderCenterTable(index,key,centros,savedCentros,showAges){
     return html+'</tbody></table></div>';
 }
 
-function toggleDetalleCentros(index,key,btn){
+async function toggleDetalleCentros(index,key,btn){
     const drawer=$('#centrosDrawer');
     if(drawer.hasClass('open')&&String(drawer.data('key'))===String(key)&&String(drawer.data('index'))===String(index)){
         closeCentrosDrawer();return;
     }
     updateHiddenCentrosJsonFromDrawer();
     $('.btn-eye').removeClass('active').html('<i class="fa-solid fa-eye"></i> Ver');
+
+    const originalBtnHtml = $(btn).html();
+    $(btn).prop('disabled',true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+    try{
+        await ensureCentersCatalogLoaded();
+    }catch(error){
+        $(btn).prop('disabled',false).html(originalBtnHtml);
+        showToast(error.message || 'No se pudo cargar el catálogo de centros.');
+        return;
+    }
+    $(btn).prop('disabled',false).html(originalBtnHtml);
 
     const invRow=$(`tr.inv-row[data-key="${key}"][data-index="${index}"]`);
     const persona=invRow.data('persona');
@@ -2811,9 +3717,7 @@ $(document).on('input change','.centro-score,.centro-cumplido',function(){
     const key=String(drawer.data('key')||'');
     updateActivityProgress();
     if(key!=='') scheduleCenterRowAutosave(index,key,input);
-    scheduleFullAutosave();
 });
-$(document).on('blur change','.table-input,select,textarea,input[type=number],input[type=date]',function(){ if($(this).closest('#tabla_tecnicos_body,#centrosDrawer').length) return; scheduleFullAutosave(); });
 
 function syncAgendaStickyMini(taskData){
     $('#agenda_codigo_mini').html('<i class="fa-solid fa-hashtag"></i> '+escHtml(taskData.codigo||''));
@@ -2853,56 +3757,150 @@ function updateActivityProgress(){
     return total;
 }
 
+async function fetchTaskStages(taskId){
+    const fd=new FormData();
+    fd.append('action','get_task_stages');
+    fd.append('id_poa',String(taskId));
+    fd.append('csrf',monitoreoCsrfToken);
+    const response=await fetch(window.location.pathname,{method:'POST',body:fd});
+    const result=await response.json();
+    if(!response.ok||result.status!=='ok') throw new Error(result.msg||'No se pudieron cargar las etapas.');
+    return Array.isArray(result.etapas)?result.etapas:[];
+}
+
+async function fetchTaskDetail(taskId){
+    const fd = new FormData();
+    fd.append('action', 'get_task_detail');
+    fd.append('id_poa', String(taskId));
+    fd.append('mes', currentTeamMonth);
+    fd.append('anio', String(currentTeamYear));
+    fd.append('csrf', monitoreoCsrfToken);
+    const response = await fetch(window.location.pathname, {method:'POST', body:fd});
+    const result = await response.json();
+    if(!response.ok || result.status !== 'ok'){
+        throw new Error(result.msg || 'No se pudo cargar la actividad.');
+    }
+    return result.task;
+}
+
+async function ensureCentersCatalogLoaded(){
+    if(Array.isArray(centrosCatalogo) && centrosCatalogo.length){
+        return centrosCatalogo;
+    }
+    if(centrosCatalogPromise){
+        return centrosCatalogPromise;
+    }
+
+    centrosCatalogPromise = (async()=>{
+        const fd = new FormData();
+        fd.append('action', 'get_centers_catalog');
+        fd.append('csrf', monitoreoCsrfToken);
+        const response = await fetch(window.location.pathname, {method:'POST', body:fd});
+        const result = await response.json();
+        if(!response.ok || result.status !== 'ok'){
+            throw new Error(result.msg || 'No se pudo cargar el catálogo de centros.');
+        }
+        centrosCatalogo = Array.isArray(result.centros) ? result.centros : [];
+        _centrosIndex = null;
+        _centrosPreprocesados = false;
+        preprocesarCentros();
+        return centrosCatalogo;
+    })().catch(error=>{
+        centrosCatalogPromise = null;
+        throw error;
+    });
+
+    return centrosCatalogPromise;
+}
+
+function hydrateTaskModal(task){
+    if (task && task.mes_trabajo && mesesEquipo.some(x=>x.k===task.mes_trabajo)) currentTeamMonth = task.mes_trabajo;
+    if (task && Number(task.anio_trabajo) >= 2000) currentTeamYear = Number(task.anio_trabajo);
+    currentTaskData = task;
+    modalEtapasBuilt = false;
+    modalEtapasLoading = false;
+
+    $('#upd_task_id').val(task.id);
+    $('#btn-historial-actividad').attr('href',`historial_actividad.php?id=${encodeURIComponent(task.id)}`);
+    $('#lbl_actividad').text(task.actividad || 'Actividad');
+    $('#lbl_meta_global').text(formatNum(task.m_part_obj || 0));
+    $('#lbl_meta_mes_actual').text(formatNum((task.op_part && task.op_part[currentTeamMonth]) ? task.op_part[currentTeamMonth] : 0));
+    $('#upd_estado').val(task.estado || '0%');
+    $('#lbl_mes_actual_modal').text((mesesEquipo.find(x => x.k === currentTeamMonth) || {}).n || currentTeamMonth);
+    $('#upd_m_act_obj').val(task.m_act_obj || 0);
+    $('#upd_m_act_alc').val(task.m_act_alc || 0);
+    $('#upd_m_part_obj').val(task.m_part_obj || 0);
+    $('#upd_m_part_alc').val(task.m_part_alc || 0);
+
+    if(task.codigo){
+        $('#lbl_codigo_modal').show().find('span').text(task.codigo);
+    }else{
+        $('#lbl_codigo_modal').hide();
+    }
+    if(task.extension){
+        $('#lbl_ext_modal').show().find('span').text(task.extension);
+    }else{
+        $('#lbl_ext_modal').hide();
+    }
+
+    fillMonths(task);
+    $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:40px;color:#64748b"><i class="fa-solid fa-diagram-project fa-2x"></i><br><br>Abra esta pestaña para cargar la agenda técnica.</td></tr>');
+    $('#upd_info_adicional').val(task.info_adicional || '');
+
+    // En la vista independiente, Agenda Técnico (tab 3) es la pestaña predeterminada.
+    // El parámetro ?tab=1|2|3|4 permite abrir directamente cualquier pestaña.
+    const requestedTab = MONITOREO_IS_DETAIL_PAGE
+        ? (new URLSearchParams(window.location.search).get('tab') || '3')
+        : '1';
+    const tabMap = {
+        '1': 'tab-equipo',
+        '2': 'tab-metas',
+        '3': 'tab-etapas',
+        '4': 'tab-notas'
+    };
+    switchModalTab(tabMap[requestedTab] || 'tab-etapas');
+
+    requestAnimationFrame(()=>{
+        buildTeamTable(task);
+        requestAnimationFrame(()=>updateActivityProgress());
+    });
+}
+
 async function openUpdateModal(btn){
-    try {
-        const taskId=parseInt(btn.getAttribute('data-task-id'),10)||0;
-        if(!taskId)throw new Error('Actividad no válida.');
-        document.getElementById('updateModal').style.display='flex';
-        $('#lbl_actividad').html('<i class="fa-solid fa-spinner fa-spin"></i> Cargando actividad...');
-        $('#tabla_tecnicos_body,#tabla_etapas_body').empty();
-        const response=await fetch(`monitoreo_api.php?action=task_detail&id=${encodeURIComponent(taskId)}`,{headers:{'Accept':'application/json'}});
-        const payload=await response.json();
-        if(!response.ok||payload.status!=='ok'||!payload.task)throw new Error(payload.msg||'No se pudo cargar la actividad.');
-        const task=payload.task;
-        currentTaskData = task;
-        currentTaskButton = btn;
-        modalEtapasBuilt = false;
-        $('#etapas_loaded').val('0');
+    const taskId = parseInt(btn.getAttribute('data-task-id') || '0', 10);
+    if(!taskId){
+        alert('La actividad no tiene un identificador válido.');
+        return;
+    }
 
-        $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:40px"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--ah-primary)"></i><br><br>Cargando programación...</td></tr>');
+    const requestSerial = ++taskRequestSerial;
+    currentTaskButton = btn;
+    document.getElementById('updateModal').style.display = 'flex';
+    $('#tabla_tecnicos_body').html('<tr><td colspan="55" style="text-align:center;padding:40px"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--ah-primary)"></i><br><br>Cargando equipo...</td></tr>');
+    $('#tabla_etapas_body').html('<tr><td colspan="4" style="text-align:center;padding:40px;color:#64748b"><i class="fa-solid fa-diagram-project fa-2x"></i><br><br>Abra esta pestaña para cargar la agenda técnica.</td></tr>');
 
-        $('#upd_task_id').val(task.id);
-        $('#btn-historial-actividad').attr('href',`historial_actividad.php?id=${encodeURIComponent(task.id)}`);
-        $('#lbl_actividad').text(task.actividad || 'Actividad');
-        $('#lbl_meta_global').text(formatNum(task.m_part_obj || 0));
-        $('#lbl_meta_mes_actual').text(formatNum((task.op_part && task.op_part[currentTeamMonth]) ? task.op_part[currentTeamMonth] : 0));
-        $('#upd_estado').val(task.estado || '0%');
-        $('#lbl_mes_actual_modal').text((mesesEquipo.find(x => x.k === currentTeamMonth) || {}).n || currentTeamMonth);
-        $('#upd_m_act_obj').val(task.m_act_obj || 0);
-        $('#upd_m_act_alc').val(task.m_act_alc || 0);
-        $('#upd_m_part_obj').val(task.m_part_obj || 0);
-        $('#upd_m_part_alc').val(task.m_part_alc || 0);
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cargando';
 
-        if (task.codigo) { $('#lbl_codigo_modal').show().find('span').text(task.codigo); }
-        else { $('#lbl_codigo_modal').hide(); }
+    try{
+        const task = await fetchTaskDetail(taskId);
 
-        if (task.extension) { $('#lbl_ext_modal').show().find('span').text(task.extension); }
-        else { $('#lbl_ext_modal').hide(); }
-
-        setTimeout(()=>{
-            fillMonths(task);
-            buildTeamTable(task);
-            $('#tabla_etapas_body').empty();
-            updateActivityProgress();
-            if(typeof tinymce!=='undefined'&&tinymce.get('upd_info_adicional')) tinymce.get('upd_info_adicional').setContent(task.info_adicional||'');
-            else $('#upd_info_adicional').val(task.info_adicional||'');
-            switchModalTab('tab-equipo');
-        },50);
-    } catch (err) {
-        console.error('Error al abrir modal de monitoreo:', err);
-        alert('No se pudo abrir el panel. Error: ' + err.message);
+        if(requestSerial !== taskRequestSerial){
+            return;
+        }
+        await new Promise(resolve=>requestAnimationFrame(resolve));
+        hydrateTaskModal(task);
+    }catch(error){
+        console.error('Error al abrir modal de monitoreo:', error);
+        document.getElementById('updateModal').style.display = 'none';
+        alert('No se pudo abrir el panel. Error: ' + error.message);
+    }finally{
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
     }
 }
+
 
 function monthValue(source,m){if(!source)return 0;if(Object.prototype.hasOwnProperty.call(source,m))return parseFloat(source[m])||0;return 0;}
 function fillMonths(task){let m1=['jul','aug','sep','oct','nov','dec'],m2=['jan','feb','mar','apr','may','jun'];let cell=(kind,m,val)=>`<td><input type="number" step="0.01" name="${kind}[${m}]" value="${val}" class="table-input metas-edit-field"></td>`;$('#tabla_act_body_1').html('<tr>'+m1.map(m=>cell('op_act',m,monthValue(task.op_act,m))).join('')+'</tr>');$('#tabla_act_body_2').html('<tr>'+m2.map(m=>cell('op_act',m,monthValue(task.op_act,m))).join('')+'</tr>');$('#tabla_part_body_1').html('<tr>'+m1.map(m=>cell('op_part',m,monthValue(task.op_part,m))).join('')+'</tr>');$('#tabla_part_body_2').html('<tr>'+m2.map(m=>cell('op_part',m,monthValue(task.op_part,m))).join('')+'</tr>');setMetasLocked(true);}
@@ -2910,7 +3908,7 @@ let metasUnlocked=false;
 function setMetasLocked(locked){metasUnlocked=!locked;$('#metas_authorized').val(locked?'0':'1');$('#metas-fieldset').prop('disabled',locked);$('#btn-unlock-metas').toggle(locked);$('#metas-unlocked-badge').toggle(!locked);}
 function openMetasPasswordModal(){$('#metas-password-error').hide().text('');$('#metas-password-input').val('');$('#metasPasswordModal').css('display','flex');setTimeout(()=>$('#metas-password-input').trigger('focus'),80);}
 function closeMetasPasswordModal(){$('#metasPasswordModal').hide();}
-async function verifyMetasPassword(){let password=$('#metas-password-input').val(),error=$('#metas-password-error');error.hide();try{let fd=new FormData();fd.append('action','verify_metas_password');fd.append('password',password);let response=await fetch(window.location.pathname,{method:'POST',body:fd});let res=await response.json();if(!response.ok||res.status!=='ok')throw new Error(res.msg||'No fue posible validar la contraseña.');setMetasLocked(false);closeMetasPasswordModal();$('#metas-fieldset input:first').trigger('focus');}catch(err){error.text(err.message).show();}}
+async function verifyMetasPassword(){let password=$('#metas-password-input').val(),error=$('#metas-password-error');error.hide();try{let fd=new FormData();fd.append('action','verify_metas_password');fd.append('csrf',monitoreoCsrfToken);fd.append('password',password);let response=await fetch(window.location.pathname,{method:'POST',body:fd});let res=await response.json();if(!response.ok||res.status!=='ok')throw new Error(res.msg||'No fue posible validar la contraseña.');setMetasLocked(false);closeMetasPasswordModal();$('#metas-fieldset input:first').trigger('focus');}catch(err){error.text(err.message).show();}}
 $(document).on('keydown','#metas-password-input',function(e){if(e.key==='Enter'){e.preventDefault();verifyMetasPassword();}});
 
 function parseArrayValue(value){
@@ -3010,123 +4008,255 @@ function applyGlobalTeamPlaces(autosave=true, target=null){
     captureCurrentInvData(1);
     updateActivityProgress();
 
-    if(autosave) autosaveTeamTable(target || $('#team-global-location-host .multiselect-select-box')[0]);
+    if(autosave) scheduleTeamBulkAutosave(target || $('#team-global-location-host .multiselect-select-box')[0]);
 }
 
 function buildTeamTable(task){
-    let html='',asig=task.asignaciones||[];
-    let globalPlaces=parseArrayValue(task.team_lugares);
+    let html = '';
+    const assignments = Array.isArray(task.asignaciones) ? task.asignaciones : [];
+    let globalPlaces = parseArrayValue(task.team_lugares);
     if(!globalPlaces.length){
-        asig.forEach(a=>{globalPlaces=mergeUniqueArrays(globalPlaces,parseArrayValue(a.lugares_json));});
+        assignments.forEach(a=>{
+            globalPlaces = mergeUniqueArrays(globalPlaces, parseArrayValue(a.lugares_json));
+        });
     }
-    $('#team-global-location-host').html(teamGlobalLocationControl(globalPlaces));
-    $('#team-global-location-host .multiselect-dropdown-panel').each(function(){updateMultiselectText(this);});
-    lastGlobalCenterPlaces=globalPlaces.filter(isCenterLugar);
 
-    tecnicosBases.forEach((tb,rowIndex)=>{
-        const tecnico=tb.nombre,base=tb.nombre_base||'';
-        const a=asig.find(x=>x.tecnico===tecnico&&(x.base_asignada||'')===base);
-        if(hideNoBaseRowState&&!base&&!a) return;
-        const sel=a?'checked':'',cls=a?'row-selected':'';
-        const rowId=`team_${rowIndex}`;
-        html+=`<tr class="team-row ${cls} ${base?'':'no-base-row'}" data-row-id="${rowId}"><td><input type="checkbox" class="team-selected" ${sel}></td><td><div style="display:flex;gap:10px;align-items:center"><div class="avatar">${initials(tecnico)}</div><strong>${escHtml(tecnico)}</strong></div></td><td>${base?`<span class="base-badge">${escHtml(base)}</span>`:'<span style="color:#94a3b8">Sin base</span>'}<input type="hidden" class="team-tecnico" value="${escHtml(tecnico)}"><input type="hidden" class="team-base" value="${escHtml(base)}"></td>`;
-        mesesEquipo.forEach(m=>{html+=`<td class="team-month-col team-month-${m.k}"><input type="number" class="table-input team-month-input team-month-prog" data-mes="${m.k}" value="${a?parseFloat(a['meta_'+m.k]||0):0}"></td><td class="team-month-col team-month-${m.k}"><input type="number" class="table-input team-month-input team-month-logro" data-mes="${m.k}" value="${a?parseFloat(a['logro_'+m.k]||0):0}"></td><td class="team-month-col team-month-${m.k} team-dif">0</td><td class="team-month-col team-month-${m.k} team-pct">${badgePct(0)}</td>`;});
-        html+=`<td class="team-total-meta">0</td><td class="team-total-logro">0</td><td class="team-total-dif">0</td><td class="team-total-pct">${badgePct(0)}</td></tr>`;
+    $('#team-global-location-host').html(teamGlobalLocationControl(globalPlaces));
+    $('#team-global-location-host .multiselect-dropdown-panel').each(function(){
+        updateMultiselectText(this);
     });
+    window.lastGlobalCenterPlaces = globalPlaces.filter(isCenterLugar);
+
+    tecnicosBases.forEach((tb, rowIndex)=>{
+        const tecnico = tb.nombre;
+        const base = tb.nombre_base || '';
+        const assignment = assignments.find(x=>x.tecnico === tecnico && (x.base_asignada || '') === base);
+        const selected = assignment ? 'checked' : '';
+        const selectedClass = assignment ? 'row-selected' : '';
+        const rowId = `team_${rowIndex}`;
+
+        html += `<tr class="team-row ${selectedClass} ${base?'':'no-base-row'}" data-row-id="${rowId}">`;
+        html += `<td><input type="checkbox" class="team-selected" ${selected}></td>`;
+        html += `<td><div style="display:flex;gap:10px;align-items:center"><div class="avatar">${initials(tecnico)}</div><strong>${escHtml(tecnico)}</strong></div></td>`;
+        html += `<td>${base?`<span class="base-badge">${escHtml(base)}</span>`:'<span style="color:#94a3b8">Sin base</span>'}<input type="hidden" class="team-tecnico" value="${escHtml(tecnico)}"><input type="hidden" class="team-base" value="${escHtml(base)}"></td>`;
+
+        mesesEquipo.forEach(month=>{
+            const meta = assignment ? parseFloat(assignment['meta_' + month.k] || 0) : 0;
+            const logro = assignment ? parseFloat(assignment['logro_' + month.k] || 0) : 0;
+            html += `<td class="team-month-col team-month-${month.k}"><input type="number" class="table-input team-month-input team-month-prog" data-mes="${month.k}" value="${meta}"></td>`;
+            html += `<td class="team-month-col team-month-${month.k}"><input type="number" class="table-input team-month-input team-month-logro" data-mes="${month.k}" value="${logro}"></td>`;
+            html += `<td class="team-month-col team-month-${month.k} team-dif">0</td>`;
+            html += `<td class="team-month-col team-month-${month.k} team-pct">${badgePct(0)}</td>`;
+        });
+        html += `<td class="team-total-meta">0</td><td class="team-total-logro">0</td><td class="team-total-dif">0</td><td class="team-total-pct">${badgePct(0)}</td></tr>`;
+    });
+
     $('#tabla_tecnicos_body').html(html);
     applyTeamMonthVisibility();
-    if(lastGlobalCenterPlaces.length) applyGlobalTeamPlaces(false);
+    if(window.lastGlobalCenterPlaces.length){
+        applyGlobalTeamPlaces(false);
+    }
     recalcTeamRows();
-    $('.team-month-input,.team-selected').on('change input',function(){let r=$(this).closest('tr');r.toggleClass('row-selected',r.find('.team-selected').is(':checked'));updateCurrentTaskAssignmentFromRow(r);autosaveTeamTable(this);recalcTeamRows();});
+    bindTeamAssignmentEvents();
 }
 
 function applyTeamMonthVisibility(){
-    mesesEquipo.forEach(m=>{
-        $(`.team-month-${m.k}`).toggleClass('hidden-team-month',!showAllTeamMonths&&m.k!==currentTeamMonth);
+    mesesEquipo.forEach(month=>{
+        $(`.team-month-${month.k}`).toggleClass('hidden-team-month', !showAllTeamMonths && month.k !== currentTeamMonth);
     });
-    $('#team-assign-table').toggleClass('show-all-months',showAllTeamMonths);
-    $('.no-base-row').toggleClass('d-none',hideNoBaseRowState);
+    $('#team-assign-table').toggleClass('show-all-months', showAllTeamMonths);
+    $('.no-base-row').toggleClass('d-none', hideNoBaseRowState);
 }
 
 function toggleTeamMonths(){
-    showAllTeamMonths=!showAllTeamMonths;
+    showAllTeamMonths = !showAllTeamMonths;
     applyTeamMonthVisibility();
 }
 
 function toggleNoBaseTechs(){
-    hideNoBaseRowState=!hideNoBaseRowState;
-    if(!hideNoBaseRowState&&currentTaskData) buildTeamTable(currentTaskData);
-    else applyTeamMonthVisibility();
+    hideNoBaseRowState = !hideNoBaseRowState;
+    applyTeamMonthVisibility();
+}
+
+function recalcTeamRow(row){
+    row = row instanceof jQuery ? row : $(row);
+    let totalMeta = 0;
+    let totalLogro = 0;
+
+    row.find('.team-month-prog').each(function(){
+        const month = $(this).data('mes');
+        const meta = parseFloat($(this).val()) || 0;
+        const logro = parseFloat(row.find(`.team-month-logro[data-mes="${month}"]`).val()) || 0;
+        const difference = meta - logro;
+        const percentage = meta > 0 ? (logro / meta) * 100 : 0;
+        totalMeta += meta;
+        totalLogro += logro;
+
+        const cells = row.find(`.team-month-${month}`);
+        cells.eq(2).text(formatNum(difference));
+        cells.eq(3).html(badgePct(percentage));
+    });
+
+    const totalPercentage = totalMeta > 0 ? (totalLogro / totalMeta) * 100 : 0;
+    row.find('.team-total-meta').text(formatNum(totalMeta));
+    row.find('.team-total-logro').text(formatNum(totalLogro));
+    row.find('.team-total-dif').text(formatNum(totalMeta - totalLogro));
+    row.find('.team-total-pct').html(badgePct(totalPercentage));
 }
 
 function recalcTeamRows(){
-    $('.team-row').each(function(){
-        let tm=0,tl=0;
-        $(this).find('.team-month-prog').each(function(){
-            let mes=$(this).data('mes'),
-                meta=parseFloat($(this).val())||0,
-                logro=parseFloat($(this).closest('tr').find(`.team-month-logro[data-mes="${mes}"]`).val())||0,
-                dif=meta-logro,
-                p=meta>0?(logro/meta)*100:0;
-            tm+=meta;
-            tl+=logro;
-            let cells=$(this).closest('tr').find(`.team-month-${mes}`);
-            cells.eq(2).text(formatNum(dif));
-            cells.eq(3).html(badgePct(p));
-        });
-        let p=tm>0?(tl/tm)*100:0;
-        $(this).find('.team-total-meta').text(formatNum(tm));
-        $(this).find('.team-total-logro').text(formatNum(tl));
-        $(this).find('.team-total-dif').text(formatNum(tm-tl));
-        $(this).find('.team-total-pct').html(badgePct(p));
+    $('#tabla_tecnicos_body .team-row').each(function(){
+        recalcTeamRow($(this));
     });
 }
 
-function autosaveTeamTable(editedEl = null, silent = false) {
-    let rows = [];
-    $('#tabla_tecnicos_body .team-row').each(function() {
-        let row = $(this);
-        let rowData = {
-            tecnico: row.find('.team-tecnico').val(),
-            base_asignada: row.find('.team-base').val(),
-            selected: row.find('.team-selected').is(':checked') ? 1 : 0,
-            metas: {},
-            logros: {}
-        };
-        mesesEquipo.forEach(m => {
-            rowData.metas[m.k] = parseFloat(row.find(`.team-month-prog[data-mes="${m.k}"]`).val()) || 0;
-            rowData.logros[m.k] = parseFloat(row.find(`.team-month-logro[data-mes="${m.k}"]`).val()) || 0;
+function collectTeamRowPayload(row){
+    row = row instanceof jQuery ? row : $(row);
+    const payload = {
+        tecnico: row.find('.team-tecnico').val() || '',
+        base_asignada: row.find('.team-base').val() || '',
+        selected: row.find('.team-selected').is(':checked') ? 1 : 0,
+        metas: {},
+        logros: {}
+    };
+    mesesEquipo.forEach(month=>{
+        payload.metas[month.k] = parseFloat(row.find(`.team-month-prog[data-mes="${month.k}"]`).val()) || 0;
+        payload.logros[month.k] = parseFloat(row.find(`.team-month-logro[data-mes="${month.k}"]`).val()) || 0;
+    });
+    return payload;
+}
+
+const teamRowAutosaveTimers = new Map();
+let teamBulkAutosaveTimer = null;
+
+function scheduleTeamRowAutosave(row, target=null){
+    row = row instanceof jQuery ? row : $(row);
+    const rowId = String(row.data('row-id') || row.index());
+    if(teamRowAutosaveTimers.has(rowId)){
+        clearTimeout(teamRowAutosaveTimers.get(rowId));
+    }
+    teamRowAutosaveTimers.set(rowId, setTimeout(()=>{
+        teamRowAutosaveTimers.delete(rowId);
+        autosaveTeamRow(row, target, false);
+    }, 900));
+}
+
+function scheduleTeamBulkAutosave(target=null){
+    clearTimeout(teamBulkAutosaveTimer);
+    teamBulkAutosaveTimer = setTimeout(()=>{
+        teamBulkAutosaveTimer = null;
+        autosaveTeamTable(target, false);
+    }, 700);
+}
+
+function clearPendingTeamAutosaves(){
+    teamRowAutosaveTimers.forEach(timer=>clearTimeout(timer));
+    teamRowAutosaveTimers.clear();
+    clearTimeout(teamBulkAutosaveTimer);
+    teamBulkAutosaveTimer = null;
+}
+
+function bindTeamAssignmentEvents(){
+    $(document)
+        .off('.teamAssignment')
+        .on('input.teamAssignment', '#tabla_tecnicos_body .team-month-input', function(){
+            const row = $(this).closest('.team-row');
+            row.toggleClass('row-selected', row.find('.team-selected').is(':checked'));
+            updateCurrentTaskAssignmentFromRow(row);
+            recalcTeamRow(row);
+            scheduleTeamRowAutosave(row, this);
+        })
+        .on('change.teamAssignment', '#tabla_tecnicos_body .team-selected', function(){
+            const row = $(this).closest('.team-row');
+            row.toggleClass('row-selected', this.checked);
+            updateCurrentTaskAssignmentFromRow(row);
+            recalcTeamRow(row);
+            scheduleTeamRowAutosave(row, this);
         });
-        rows.push(rowData);
+}
+
+function autosaveTeamRow(row, editedEl=null, silent=false){
+    row = row instanceof jQuery ? row : $(row);
+    if(!row.length || !$('#upd_task_id').val()) return Promise.resolve();
+
+    const payload = collectTeamRowPayload(row);
+    updateCurrentTaskAssignmentFromRow(row);
+
+    const fd = new FormData();
+    fd.append('action', 'autosave_team_assignment_row');
+    fd.append('csrf', monitoreoCsrfToken);
+    fd.append('id_poa', $('#upd_task_id').val());
+    fd.append('row', JSON.stringify(payload));
+    selectedGlobalTeamPlaces().forEach(place=>fd.append('lugares[]', place));
+
+    const target = editedEl || row.find('.team-selected')[0];
+    if(!silent) flashSaving(target);
+
+    return enqueueAutosave(async()=>{
+        const response = await fetch(window.location.pathname, {method:'POST', body:fd});
+        const result = await response.json();
+        if(!response.ok || result.status !== 'ok'){
+            throw new Error(result.msg || 'No se pudo guardar la fila del equipo.');
+        }
+        if(!silent) flashSaved(target, true);
+        return result;
+    }).catch(error=>{
+        if(!silent) flashSaved(target, false);
+        console.error('Autoguardado de fila de equipo:', error);
+        return false;
+    });
+}
+
+function autosaveTeamTable(editedEl=null, silent=false, extra={}){
+    if(!$('#upd_task_id').val()) return Promise.resolve();
+    const rows = [];
+    $('#tabla_tecnicos_body .team-row').each(function(){
+        const row = $(this);
+        rows.push(collectTeamRowPayload(row));
         updateCurrentTaskAssignmentFromRow(row);
     });
+    updateCurrentTaskGlobalPlaces();
 
-    let fd = new FormData();
+    const fd = new FormData();
     fd.append('action', 'autosave_team_assignment_bulk');
+    fd.append('csrf', monitoreoCsrfToken);
     fd.append('id_poa', $('#upd_task_id').val());
     fd.append('rows', JSON.stringify(rows));
-    selectedGlobalTeamPlaces().forEach(l => fd.append('lugares[]', l));
+    selectedGlobalTeamPlaces().forEach(place=>fd.append('lugares[]', place));
+    if(extra && extra.opMonth){
+        fd.append('op_month', extra.opMonth);
+        fd.append('op_act', String(parseFloat(extra.opAct)||0));
+        fd.append('op_part', String(parseFloat(extra.opPart)||0));
+    }
 
     const target = editedEl || $('#team-global-location-host .multiselect-select-box')[0];
-    if (!silent) flashSaving(target);
+    if(!silent) flashSaving(target);
 
-    return enqueueAutosave(async () => {
-        const r = await fetch(window.location.pathname, { method: 'POST', body: fd });
-        const res = await r.json();
-        if (!r.ok || res.status === 'error') throw new Error(res.msg || 'No se pudo guardar la asignación.');
-        if (!silent) flashSaved(target, true);
-        return res;
-    }).catch(err => {
-        if (!silent) flashSaved(target, false);
-        console.error(err);
+    return enqueueAutosave(async()=>{
+        const response = await fetch(window.location.pathname, {method:'POST', body:fd});
+        const result = await response.json();
+        if(!response.ok || result.status !== 'ok'){
+            throw new Error(result.msg || 'No se pudo guardar la asignación del equipo.');
+        }
+        if(!silent) flashSaved(target, true);
+        return result;
+    }).catch(error=>{
+        if(!silent) flashSaved(target, false);
+        console.error('Autoguardado masivo de equipo:', error);
+        return false;
     });
 }
 
-function autosaveTeamRow(row, editedEl=null, silent=false) { return autosaveTeamTable(editedEl, silent); }
-function autosaveGlobalTeamPlaces(target=null) { return autosaveTeamTable(target, false); }
+function autosaveGlobalTeamPlaces(target=null){
+    scheduleTeamBulkAutosave(target);
+    return Promise.resolve();
+}
 
 let fullAutosaveTimer=null;
 let pendingFullSaveTarget=null;
+let tab3Dirty=false;
+const MONITOREO_TAB3_AUTOSAVE_BUILD='TAB3-LAZY-ROW-OPTIONS-2026-07-22-v10';
+const MONITOREO_DETAIL_PAGE_BUILD='POLISHED-RESPONSIVE-DROPDOWNS-2026-07-22-v13';
 
 function snapshotCurrentTaskFromForm(){
     if(!currentTaskData) return;
@@ -3158,24 +4288,66 @@ function snapshotCurrentTaskFromForm(){
         });
     });
 
-    if(modalEtapasBuilt) currentTaskData.etapas=etapas;
+    currentTaskData.etapas=etapas;
 
     updateCardVisuals();
 }
 
+function isTab3Target(target){
+    if(!target) return false;
+    const node = target.jquery ? target[0] : target;
+    return !!(node && node.closest && node.closest('#tab-etapas'));
+}
+
+function markTab3Dirty(target=null){
+    tab3Dirty=true;
+    if(target) pendingFullSaveTarget=target.jquery ? target[0] : target;
+    const btn=document.getElementById('btn-force-save');
+    if(btn){
+        btn.dataset.tab3Dirty='1';
+        btn.title='Hay cambios pendientes en Agenda Técnico';
+    }
+}
+
 function scheduleFullAutosave(target=null){
+    // Protección fuerte: algunas acciones del tab 3 llaman esta función sin target.
+    // Si Agenda Técnico es la pestaña activa, nunca iniciar el guardado completo diferido.
+    const tab3Active = document.getElementById('tab-etapas')?.classList.contains('active');
+    if(isTab3Target(target) || (!target && tab3Active)){
+        clearTimeout(fullAutosaveTimer);
+        fullAutosaveTimer=null;
+        markTab3Dirty(target || document.getElementById('tab-etapas'));
+        return;
+    }
     if(target) pendingFullSaveTarget=target;
     clearTimeout(fullAutosaveTimer);
-    fullAutosaveTimer=setTimeout(()=>autosaveFullForm(false),550);
+    fullAutosaveTimer=setTimeout(()=>autosaveFullForm(false),2500);
+}
+
+// Inyecta el JSON temporal en el DOM justo antes de enviarlo por POST para aligerar la memoria
+function injectCentrosJsonToDom() {
+    $('.hidden-centros-json').each(function() {
+        let row = $(this).closest('.inv-row');
+        let idx = row.data('index');
+        let k = row.data('key');
+        if (window.savedInvData[idx] && window.savedInvData[idx][k]) {
+            $(this).val(JSON.stringify(window.savedInvData[idx][k].centros || {}));
+        }
+    });
 }
 
 function autosaveFullForm(force=false){
     const form=document.getElementById('formUpdate');
     if(!form||(!force&&!$('#updateModal').is(':visible'))) return Promise.resolve();
     snapshotCurrentTaskFromForm();
+    injectCentrosJsonToDom();
     const fd=new FormData(form);
+    // La tabla está paginada: enviar todas las etapas desde el estado JS, no solo la página visible.
+    fd.set('etapas_payload', JSON.stringify((currentTaskData&&currentTaskData.etapas)||[]));
     fd.set('action','update_task');
     fd.set('autosave_full','1');
+    fd.set('make_snapshot', force ? '1' : '0');
+    fd.set('csrf', monitoreoCsrfToken);
     const active=pendingFullSaveTarget||document.activeElement;
     pendingFullSaveTarget=null;
     if(active&&$('#updateModal').is(':visible')) flashSaving(active);
@@ -3185,6 +4357,9 @@ function autosaveFullForm(force=false){
         let res;
         try{res=JSON.parse(text);}catch(e){throw new Error(text||'Respuesta inválida del servidor.');}
         if(!r.ok||res.status!=='ok')throw new Error(res.msg||'No se pudo autoguardar.');
+        tab3Dirty=false;
+        const saveBtn=document.getElementById('btn-force-save');
+        if(saveBtn){ delete saveBtn.dataset.tab3Dirty; saveBtn.title=''; }
         if(active&&$('#updateModal').is(':visible')) flashSaved(active,true);
         return res;
     }).catch(err=>{
@@ -3194,53 +4369,158 @@ function autosaveFullForm(force=false){
     });
 }
 
+async function forceSaveAll(){
+    clearTimeout(fullAutosaveTimer);
+    fullAutosaveTimer=null;
+    clearPendingTeamAutosaves();
+    await flushStageAutosaves();
+    await autosaveTeamTable(null,true);
+    return autosaveFullForm(true);
+}
+
 $('#formUpdate').on('submit',function(e){
     e.preventDefault();
-    autosaveFullForm(true);
+    forceSaveAll();
 });
 
-$(document).on('input change','#formUpdate input,#formUpdate textarea,#formUpdate select',function(e){
-    const field=$(this);
 
-    if(field.closest('#tabla_tecnicos_body').length) return;
-    if(field.closest('#tab-metas').length && !metasUnlocked) return;
+// Autoguardado incremental de Agenda Técnico: una etapa por petición.
+const stageAutosaveTimers = new Map();
+const stageAutosaveVersions = new Map();
 
-    const currentPartInput=$(`input[name="op_part[${currentTeamMonth}]"]`);
-    if(currentPartInput.length){
-        $('#lbl_meta_mes_actual').text(formatNum(currentPartInput.val()||0));
-    }
+function stageMetaValue(index, name, fallback=''){
+    const el=document.querySelector(`#tabla_etapas_body input[name="${name}[${index}]"]`)
+        || document.querySelector(`#tabla_etapas_body input[name="${name}[]"]:nth-of-type(${index+1})`);
+    return el ? String(el.value||'') : fallback;
+}
 
-    if(field.is('.centro-score,.centro-cumplido')){
-        return;
-    }
+function collectStageAutosavePayload(index){
+    captureCurrentInvData(index);
+    const etapa=(currentTaskData && Array.isArray(currentTaskData.etapas) && currentTaskData.etapas[index]) || {};
+    const units=selectedFromPanel(`.panel-unidad-box[data-index="${index}"]`);
+    const resps=selectedFromPanel(`.panel-responsable-box[data-index="${index}"]`);
+    const row=document.querySelectorAll('#tabla_etapas_body tr.stage-main-row')[index];
+    const fecha=row?.querySelector(`input[name="etapa_fecha_recepcion[${index}]"]`)?.value || etapa.fecha_recepcion || '';
+    const codigo=row?.querySelector('input[name="etapa_codigo[]"]')?.value || etapa.codigo_etapa || `E-${index+1}`;
+    const nombre=row?.querySelector('input[name="etapa_nombre[]"]')?.value || etapa.nombre_etapa || '';
+    const descripcion=row?.querySelector('input[name="etapa_descripcion[]"]')?.value || etapa.descripcion_etapa || '';
+    return {codigo,nombre,descripcion,fecha,units,resps,involucrados:window.savedInvData[index]||{}};
+}
 
-    const row=field.closest('.inv-row');
-    if(row.length){
-        const index=Number(row.data('index'));
-        const key=String(row.data('key')||'');
+function scheduleStageAutosave(index,target=null,delay=1200){
+    index=Number(index);
+    if(!Number.isFinite(index)||index<0) return;
+    markTab3Dirty(target || document.getElementById('tab-etapas'));
+    clearTimeout(stageAutosaveTimers.get(index));
+    const version=(stageAutosaveVersions.get(index)||0)+1;
+    stageAutosaveVersions.set(index,version);
+    stageAutosaveTimers.set(index,setTimeout(()=>autosaveStageIncremental(index,version,target),delay));
+}
 
-        if(index===2 && field.closest('.panel-lugar_sub-box').length){
-            refreshStage3RowFromPlaces(row,true);
-        }else if(index === 1 && field.closest('.panel-lugar_sub-box').length){
-            refreshStage1RowFromPlaces(row);
-        }else{
-            const prog=parseFloat(row.find('input[name^="inv_alograr"]').val())||0;
-            const cum=parseFloat(row.find('input[name^="inv_cumplido"]').val())||0;
-            const at=parseFloat(row.find('input[name^="inv_a_tiempo"]').val())||0;
-            const ef=parseFloat(row.find('input[name^="inv_en_forma"]').val())||0;
-
-            row.find('.pct-cell').html(badgePct(calcRowPct(prog,cum,at,ef)));
-            collectStageRowData(index,key);
-            updateActivityProgress();
-
-            if(index===2){
-                scheduleCenterRowAutosave(index,key,this);
-            }
+async function autosaveStageIncremental(index,version,target=null){
+    if(version!==stageAutosaveVersions.get(index)) return false;
+    const payload=collectStageAutosavePayload(index);
+    const fd=new FormData();
+    fd.append('action','autosave_stage_incremental');
+    fd.append('csrf',monitoreoCsrfToken);
+    fd.append('id_poa',String(currentTaskData?.id||MONITOREO_DETAIL_TASK_ID||0));
+    fd.append('stage_order',String(index+1));
+    fd.append('codigo_etapa',payload.codigo);
+    fd.append('nombre_etapa',payload.nombre);
+    fd.append('descripcion_etapa',payload.descripcion);
+    fd.append('fecha_recepcion',payload.fecha);
+    fd.append('unidad_medida',JSON.stringify(payload.units));
+    fd.append('responsable',JSON.stringify(payload.resps));
+    fd.append('involucrados_json',JSON.stringify(payload.involucrados));
+    const active=target?.jquery?target[0]:target;
+    if(active) flashSaving(active);
+    try{
+        const response=await fetch(window.location.pathname,{method:'POST',body:fd});
+        const text=await response.text();
+        let result; try{result=JSON.parse(text)}catch(e){throw new Error(text||'Respuesta inválida');}
+        if(!response.ok||result.status!=='ok') throw new Error(result.msg||'No se pudo autoguardar la etapa.');
+        if(version===stageAutosaveVersions.get(index)){
+            stageAutosaveTimers.delete(index);
+            if(active) flashSaved(active,true);
         }
+        return true;
+    }catch(error){
+        console.error('Autoguardado de etapa:',error);
+        if(active) flashSaved(active,false);
+        return false;
     }
+}
 
-    scheduleFullAutosave(this);
+async function flushStageAutosaves(){
+    const indexes=[...stageAutosaveTimers.keys()];
+    indexes.forEach(i=>{clearTimeout(stageAutosaveTimers.get(i));stageAutosaveTimers.delete(i);});
+    for(const i of indexes){
+        const version=(stageAutosaveVersions.get(i)||0)+1;
+        stageAutosaveVersions.set(i,version);
+        await autosaveStageIncremental(i,version,null);
+    }
+}
+
+// Actualización local del tab 3: solo toca la fila editada y difiere el cálculo global.
+let agendaProgressTimer=null;
+function captureSingleInvRow(row){
+    row=row.jquery?row:$(row);
+    const index=Number(row.data('index'));
+    const key=String(row.data('key')||'');
+    if(!Number.isFinite(index)||!key)return;
+    if(!window.savedInvData[index])window.savedInvData[index]={};
+    const prev=window.savedInvData[index][key]||{};
+    window.savedInvData[index][key]={...prev,
+        persona:row.find('input[name^="inv_persona"]').val()||'',
+        base:row.find('input[name^="inv_base"]').val()||'',
+        unidad:row.find('input[name^="inv_unidad"]').val()||'',
+        mes:row.find('input[name^="inv_mes"]').val()||currentTeamMonth,
+        a_lograr:parseFloat(row.find('input[name^="inv_alograr"]').val())||0,
+        cumplido:parseFloat(row.find('input[name^="inv_cumplido"]').val())||0,
+        a_tiempo:parseFloat(row.find('input[name^="inv_a_tiempo"]').val())||0,
+        en_forma:parseFloat(row.find('input[name^="inv_en_forma"]').val())||0,
+        deleted:false,quality_initialized:true,quality_version:2,
+        verifics:row.find('.panel-verific_sub-box input:checked').map(function(){return this.value}).get(),
+        lugar:row.find('.panel-lugar_sub-box input:checked').map(function(){return this.value}).get(),
+        centros:prev.centros||readHiddenCenters(index,key)
+    };
+}
+function scheduleAgendaProgress(){
+    clearTimeout(agendaProgressTimer);
+    agendaProgressTimer=setTimeout(()=>{try{updateActivityProgress()}catch(e){}},350);
+}
+$(document).on('input', '.inv-row input.auto-full-save', function(){
+    const row=$(this).closest('.inv-row');
+    const prog=parseFloat(row.find('input[name^="inv_alograr"]').val())||0;
+    const cum=parseFloat(row.find('input[name^="inv_cumplido"]').val())||0;
+    const at=parseFloat(row.find('input[name^="inv_a_tiempo"]').val())||0;
+    const ef=parseFloat(row.find('input[name^="inv_en_forma"]').val())||0;
+    row.find('.pct-cell').html(badgePct(calcRowPct(prog,cum,at,ef)));
+    captureSingleInvRow(row);
+    scheduleAgendaProgress();
+    scheduleStageAutosave(Number(row.data('index')),this);
 });
+
+// Fecha de recepción de cada etapa
+$(document).on('change', '#tabla_etapas_body input[name^="etapa_fecha_recepcion"]', function(){
+    const rows=[...document.querySelectorAll('#tabla_etapas_body tr.stage-main-row')];
+    const index=rows.indexOf(this.closest('tr.stage-main-row'));
+    if(index>=0) scheduleStageAutosave(index,this,500);
+});
+
+// Cambios regulares (como selectores, campos de otras pestañas)
+$(document)
+    .off('.fullFormAutosave')
+    .on('change.fullFormAutosave blur.fullFormAutosave', '#formUpdate input:not(.searchable-text):not(.auto-full-save), #formUpdate select, #formUpdate textarea', function(){
+        if($(this).closest('#tabla_tecnicos_body,#centrosDrawer,#tab-etapas').length) return;
+        if($(this).closest('#tab-metas').length && !metasUnlocked) return;
+
+        const currentPartInput=$(`input[name="op_part[${currentTeamMonth}]"]`);
+        if(currentPartInput.length && $(this).is(currentPartInput)){
+            $('#lbl_meta_mes_actual').text(formatNum(currentPartInput.val()||0));
+        }
+        scheduleFullAutosave(this);
+    });
 
 function openCatalogModal(type,index,label,key=''){
     $('#mini-modal-type').val(type);
@@ -3277,7 +4557,8 @@ function submitNewCatalogItem(){
     let reqData = new URLSearchParams({
         action: 'add_to_catalog',
         catalog_type: catalogTypePHP,
-        catalog_value: val
+        catalog_value: val,
+        csrf: monitoreoCsrfToken
     });
 
     if(type==='responsable'||type==='lugar_sub'){
@@ -3335,25 +4616,60 @@ function submitNewCatalogItem(){
             chk.prop('checked', true);
             updateMultiselectText(originPanel[0]);
 
-            if (type === 'responsable' || type === 'unidad') {
-                triggerAgendaRebuild(index);
-            } else if (type === 'lugar_sub') {
-                let row = originPanel.closest('.inv-row');
-                const rowIdx = Number(row.data('index'));
-                if(rowIdx === 2) refreshStage3RowFromPlaces(row, true);
-                else if(rowIdx === 1) refreshStage1RowFromPlaces(row);
-                else captureCurrentInvData(index);
-            } else {
-                captureCurrentInvData(index);
-            }
+            setTimeout(() => {
+                if (type === 'responsable' || type === 'unidad') {
+                    triggerAgendaRebuild(index);
+                } else if (type === 'lugar_sub') {
+                    let row = originPanel.closest('.inv-row');
+                    const rowIdx = Number(row.data('index'));
+                    if(rowIdx === 2) refreshStage3RowFromPlaces(row, true);
+                    else if(rowIdx === 1) refreshStage1RowFromPlaces(row);
+                    else captureCurrentInvData(index);
+                } else {
+                    captureCurrentInvData(index);
+                }
+                markTab3Dirty(originPanel[0] || document.getElementById('tab-etapas'));
+            }, 10);
         }
     }
 
-    scheduleFullAutosave();
     fetch(window.location.pathname,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:reqData});
 }
 
-window.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal('updateModal')});
+
+
+async function initStandaloneDetailPage(){
+    if(!MONITOREO_IS_DETAIL_PAGE) return;
+    document.querySelectorAll('.modal-close-only').forEach(el=>el.style.display='none');
+    const modal=document.getElementById('updateModal');
+    if(modal) modal.style.display='block';
+    $('#tabla_tecnicos_body').html('<tr><td colspan="55" style="text-align:center;padding:40px"><i class="fa-solid fa-spinner fa-spin fa-2x" style="color:var(--ah-primary)"></i><br><br>Cargando actividad...</td></tr>');
+    try{
+        // La pestaña 1 necesita el catálogo de centros antes de calcular lo programado
+        // según tipo de centro, base y matrícula.
+        const [task]=await Promise.all([
+            fetchTaskDetail(MONITOREO_DETAIL_TASK_ID),
+            ensureCentersCatalogLoaded()
+        ]);
+        hydrateTaskModal(task);
+        document.title=(task.codigo ? task.codigo+' · ' : '')+(task.actividad || 'Detalle de actividad');
+    }catch(error){
+        console.error('Error al cargar detalle independiente:',error);
+        $('#tabla_tecnicos_body').html('<tr><td colspan="55" style="text-align:center;padding:40px;color:#b91c1c">No se pudo cargar la actividad: '+escHtml(error.message)+'</td></tr>');
+    }
+}
+
+document.addEventListener('DOMContentLoaded',initStandaloneDetailPage);
+
+window.addEventListener('beforeunload',function(e){
+    if(!tab3Dirty) return;
+    e.preventDefault();
+    e.returnValue='';
+});
+
+// TinyMCE y XLSX se cargan bajo demanda para no bloquear la carga inicial.
+
+window.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const frameModal=document.getElementById('detailFrameModal');if(frameModal?.classList.contains('open')){closeDetailFrameModal();return;}if(!MONITOREO_IS_DETAIL_PAGE)closeModal('updateModal');});
 </script>
 </body>
 </html>
