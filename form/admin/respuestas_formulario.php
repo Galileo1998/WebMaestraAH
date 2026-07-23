@@ -22,6 +22,22 @@ function rf_date(?string $value, string $format='d/m/Y H:i'): string {
     return $ts === false ? rf_h($value) : date($format, $ts);
 }
 function rf_lower(string $value): string { return mb_strtolower(trim($value), 'UTF-8'); }
+/**
+ * Algunos formularios antiguos guardan la ubicación en listas separadas
+ * ("Municipio", "Caserío — ...", "Centro educativo — ...") en vez de usar
+ * los campos geo_cascade/center_selector. Conserva ambos formatos para que
+ * los filtros, tarjetas y exportación geográfica no queden vacíos.
+ *
+ * @return string[]
+ */
+function rf_geo_levels_from_question(array $question): array {
+    $title=rf_lower((string)($question['titulo']??''));
+    if ($title==='') return [];
+    if (preg_match('/\bmunicipio\b/u',$title)) return ['municipio'];
+    if (preg_match('/\b(caserío|caserio|comunidad base)\b/u',$title)) return ['base','caserio'];
+    if (preg_match('/\bcentro(?: educativo)?\b/u',$title)) return ['centro'];
+    return [];
+}
 function rf_median(array $values): float {
     if (!$values) return 0.0;
     sort($values, SORT_NUMERIC);
@@ -101,10 +117,16 @@ $geoByResponse=[];$municipalityOptions=[];$centerOptions=[];
 foreach($responsesAll as $r){
     $geo=['municipio'=>'','base'=>'','caserio'=>'','centro'=>'','centro_nombre'=>''];
     foreach($questions as $qid=>$q){
-        if(!in_array($q['tipo']??'',['geo_cascade','center_selector'],true))continue;
-        $a=$r['answers'][$qid]??null;$j=$a['json']??null;
-        if(!is_array($j))continue;
-        foreach(['municipio','base','caserio','centro'] as $level)if($geo[$level]===''&&!empty($j[$level]))$geo[$level]=(string)$j[$level];
+        $a=$r['answers'][$qid]??null;
+        if(in_array($q['tipo']??'',['geo_cascade','center_selector'],true)){
+            $j=$a['json']??null;
+            if(is_array($j))foreach(['municipio','base','caserio','centro'] as $level)if($geo[$level]===''&&!empty($j[$level]))$geo[$level]=(string)$j[$level];
+        }
+        $legacyLevels=rf_geo_levels_from_question($q);
+        if($legacyLevels){
+            $value=rf_answer_text($a,$centerMap);
+            foreach($legacyLevels as $level)if($geo[$level]===''&&$value!=='')$geo[$level]=$value;
+        }
     }
     if($geo['centro']!=='' && isset($centerMap[$geo['centro']]))$geo['centro_nombre']=$centerMap[$geo['centro']];
     elseif($geo['centro']!=='')$geo['centro_nombre']=$geo['centro'];
